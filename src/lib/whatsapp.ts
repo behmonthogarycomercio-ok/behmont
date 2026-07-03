@@ -50,5 +50,5 @@ export function buildWhatsAppLink(phoneNumber: string, message: string): string 
 
 /** Mensaje corto y profesional para los botones de "Consultar" — identifica que viene del sitio. */
 export function buildQuickInquiryMessage(): string {
-  return 'Hola Lucas! quiero hacer una consulta.';
+  return '¡Hola Lucas! 👋 Me comunico desde la página web porque quiero hacer una consulta sobre un producto. Muchas gracias.';
 }
