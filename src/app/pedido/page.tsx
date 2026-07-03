@@ -22,6 +22,7 @@ export default async function PedidoPage() {
         contactPhone={settings.contactPhone}
         contactAddress={settings.contactAddress}
         instagramUrl={settings.instagramUrl}
+        facebookUrl={settings.facebookUrl}
         mlStoreUrl={settings.mlStoreUrl}
       />
     </>

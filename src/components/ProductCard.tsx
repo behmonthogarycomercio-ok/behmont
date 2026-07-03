@@ -22,7 +22,7 @@ export default function ProductCard({
 
   const inquiryLink = buildWhatsAppLink(
     whatsappNumber,
-    buildQuickInquiryMessage(product.name, product.sku)
+    buildQuickInquiryMessage()
   );
 
   return (

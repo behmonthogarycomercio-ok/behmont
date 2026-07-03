@@ -1,4 +1,5 @@
 import { MapPin, MessageCircle, Clock } from 'lucide-react';
+import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 
 export default function LocationSection({
   address,
@@ -13,6 +14,9 @@ export default function LocationSection({
 
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
   const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const whatsappLink = whatsappNumber
+    ? buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage())
+    : '';
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
@@ -42,7 +46,7 @@ export default function LocationSection({
             </a>
             {whatsappNumber && (
               <a
-                href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
+                href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"

@@ -105,6 +105,10 @@ export default async function MarcasPage({
             <SettingField settingKey="instagram_url" defaultValue={settings.instagram_url || ''} placeholder="https://www.instagram.com/behmont_comercio/" />
           </div>
           <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Facebook (URL completa)</label>
+            <SettingField settingKey="facebook_url" defaultValue={settings.facebook_url || ''} placeholder="https://www.facebook.com/behmont.equipamientoscomerciales/" />
+          </div>
+          <div>
             <label className="block text-xs font-semibold text-steel-500 mb-1">Tienda en MercadoLibre (URL)</label>
             <SettingField settingKey="ml_store_url" defaultValue={settings.ml_store_url || ''} placeholder="https://listado.mercadolibre.com.ar/_CustId_..." />
           </div>

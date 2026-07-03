@@ -1,4 +1,4 @@
-import { Instagram, MessageCircle, MapPin, Mail, ExternalLink } from 'lucide-react';
+import { Instagram, Facebook, MessageCircle, MapPin, Mail, ExternalLink } from 'lucide-react';
 
 type FooterProps = {
   whatsappNumber: string;
@@ -6,6 +6,7 @@ type FooterProps = {
   contactPhone?: string;
   contactAddress?: string;
   instagramUrl?: string;
+  facebookUrl?: string;
   mlStoreUrl?: string;
 };
 
@@ -15,6 +16,7 @@ export default function Footer({
   contactPhone,
   contactAddress,
   instagramUrl,
+  facebookUrl,
   mlStoreUrl,
 }: FooterProps) {
   return (
@@ -73,6 +75,18 @@ export default function Footer({
                 </a>
               </li>
             )}
+            {facebookUrl && (
+              <li>
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-amber-400"
+                >
+                  Facebook <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+            )}
           </ul>
         </div>
         <div>
@@ -94,17 +108,30 @@ export default function Footer({
               </li>
             )}
           </ul>
-          {instagramUrl && (
+          {(instagramUrl || facebookUrl) && (
             <div className="flex gap-3 mt-4">
-              <a
-                href={instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-amber-500"
-              >
-                <Instagram className="h-4 w-4" />
-              </a>
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-amber-500"
+                >
+                  <Instagram className="h-4 w-4" />
+                </a>
+              )}
+              {facebookUrl && (
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-amber-500"
+                >
+                  <Facebook className="h-4 w-4" />
+                </a>
+              )}
             </div>
           )}
         </div>

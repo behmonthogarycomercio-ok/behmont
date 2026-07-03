@@ -32,6 +32,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
         contactPhone={settings.contactPhone}
         contactAddress={settings.contactAddress}
         instagramUrl={settings.instagramUrl}
+        facebookUrl={settings.facebookUrl}
         mlStoreUrl={settings.mlStoreUrl}
       />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />

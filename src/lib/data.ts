@@ -13,6 +13,7 @@ export async function getSiteSettings() {
     contactPhone: settings.contact_phone || '',
     contactAddress: settings.contact_address || '',
     instagramUrl: settings.instagram_url || '',
+    facebookUrl: settings.facebook_url || '',
     businessHours: settings.business_hours || '',
   };
 }

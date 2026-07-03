@@ -1,11 +1,8 @@
 import { MessageCircle } from 'lucide-react';
-import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 
 export default function WhatsAppFloatButton({ whatsappNumber }: { whatsappNumber: string }) {
-  const link = buildWhatsAppLink(
-    whatsappNumber,
-    'Hola BEHMONT-IMP 👋, quiero hacer una consulta.'
-  );
+  const link = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
   return (
     <a
       href={link}

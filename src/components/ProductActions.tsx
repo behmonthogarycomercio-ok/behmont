@@ -19,7 +19,7 @@ export default function ProductActions({
 
   const inquiryLink = buildWhatsAppLink(
     whatsappNumber,
-    buildQuickInquiryMessage(product.name, product.sku)
+    buildQuickInquiryMessage()
   );
 
   return (

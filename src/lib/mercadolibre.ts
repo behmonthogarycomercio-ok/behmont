@@ -61,9 +61,64 @@ export type MLItem = {
   available_quantity: number;
   permalink: string;
   thumbnail: string;
+  seller_custom_field?: string | null;
   pictures?: { secure_url: string }[];
   attributes?: { id: string; value_name: string | null }[];
 };
+
+/**
+ * Devuelve un access_token válido, refrescándolo si hace falta, y persiste
+ * los tokens nuevos en site_settings. Centraliza esta lógica para que la
+ * usen tanto el sync (ML → web) como el push (web → ML).
+ */
+export async function getValidMLAccessToken(): Promise<{
+  accessToken: string;
+  sellerId: string;
+} | null> {
+  // Import diferido para evitar dependencia circular con supabase/server.
+  const { createServiceSupabase } = await import('./supabase/server');
+  const supabase = createServiceSupabase();
+
+  const { data: rows } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .in('key', ['ml_seller_id', 'ml_refresh_token']);
+
+  const settings = Object.fromEntries(
+    (rows || []).map((r: { key: string; value: string }) => [r.key, r.value])
+  );
+  if (!settings.ml_seller_id || !settings.ml_refresh_token) return null;
+
+  const refreshed = await refreshMLToken(settings.ml_refresh_token);
+  await supabase.from('site_settings').upsert([
+    { key: 'ml_access_token', value: refreshed.access_token },
+    { key: 'ml_refresh_token', value: refreshed.refresh_token },
+  ]);
+
+  return { accessToken: refreshed.access_token, sellerId: settings.ml_seller_id };
+}
+
+/** Empuja precio y/o stock hacia una publicación de MercadoLibre (web → ML). */
+export async function updateMLItemPriceStock(
+  itemId: string,
+  accessToken: string,
+  changes: { price?: number; availableQuantity?: number }
+): Promise<void> {
+  const body: Record<string, number> = {};
+  if (changes.price !== undefined) body.price = changes.price;
+  if (changes.availableQuantity !== undefined) body.available_quantity = changes.availableQuantity;
+  if (Object.keys(body).length === 0) return;
+
+  const res = await fetch(`${ML_API}/items/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`ML item update failed (${itemId}): ${await res.text()}`);
+}
 
 /** Trae todos los item IDs publicados por el vendedor (paginado de a 50). */
 async function fetchSellerItemIds(sellerId: string, accessToken: string): Promise<string[]> {

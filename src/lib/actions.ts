@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
+import { getValidMLAccessToken, updateMLItemPriceStock } from './mercadolibre';
 
 function slugify(text: string): string {
   return text
@@ -10,6 +11,36 @@ function slugify(text: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+/**
+ * Empuja precio/stock hacia MercadoLibre cuando el producto editado en el panel
+ * viene de una publicación sincronizada (tiene ml_item_id). "Best effort": si falla,
+ * lo deja registrado en ml_sync_log pero NO bloquea el guardado local del admin.
+ */
+async function pushToMLIfLinked(mlItemId: string | null, changes: { price?: number; stock?: number }) {
+  if (!mlItemId) return;
+  const supabase = createServerSupabase();
+  try {
+    const auth = await getValidMLAccessToken();
+    if (!auth) return;
+    await updateMLItemPriceStock(mlItemId, auth.accessToken, {
+      price: changes.price,
+      availableQuantity: changes.stock,
+    });
+    await supabase.from('ml_sync_log').insert({
+      status: 'ok',
+      items_synced: 1,
+      detail: `Push web → ML (${mlItemId})`,
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : 'Error desconocido';
+    await supabase.from('ml_sync_log').insert({
+      status: 'error',
+      items_synced: 0,
+      detail: `Push web → ML falló (${mlItemId}): ${detail}`,
+    });
+  }
 }
 
 // ── PRODUCTOS ────────────────────────────────────────────
@@ -36,10 +67,21 @@ export async function upsertProduct(formData: FormData) {
     featured: formData.get('featured') === 'on',
   };
 
+  let mlItemId: string | null = null;
   if (id) {
+    const { data: existing } = await supabase
+      .from('products')
+      .select('ml_item_id')
+      .eq('id', id)
+      .maybeSingle();
+    mlItemId = existing?.ml_item_id || null;
     await supabase.from('products').update(payload).eq('id', id);
   } else {
     await supabase.from('products').insert(payload);
+  }
+
+  if (mlItemId) {
+    await pushToMLIfLinked(mlItemId, { price: payload.price, stock: payload.stock });
   }
 
   revalidatePath('/admin/productos');
@@ -55,7 +97,18 @@ export async function deleteProduct(id: string) {
 
 export async function updateStockAndPrice(id: string, stock: number, price: number) {
   const supabase = createServerSupabase();
+  const { data: existing } = await supabase
+    .from('products')
+    .select('ml_item_id')
+    .eq('id', id)
+    .maybeSingle();
+
   await supabase.from('products').update({ stock, price }).eq('id', id);
+
+  if (existing?.ml_item_id) {
+    await pushToMLIfLinked(existing.ml_item_id, { price, stock });
+  }
+
   revalidatePath('/admin/stock');
   revalidatePath('/');
 }

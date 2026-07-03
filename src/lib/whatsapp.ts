@@ -48,7 +48,7 @@ export function buildWhatsAppLink(phoneNumber: string, message: string): string 
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 }
 
-/** Mensaje rápido de "Consultar por WhatsApp" para un solo producto, sin pasar por el carrito. */
-export function buildQuickInquiryMessage(productName: string, sku: string): string {
-  return `Hola BEHMONT-IMP 👋, quiero consultar por *${productName}* (código ${sku}). ¿Me pasan precio y disponibilidad?`;
+/** Mensaje corto y profesional para los botones de "Consultar" — identifica que viene del sitio. */
+export function buildQuickInquiryMessage(): string {
+  return 'Hola Lucas! quiero hacer una consulta.';
 }

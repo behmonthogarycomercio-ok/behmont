@@ -33,6 +33,7 @@ export default async function SearchPage({
         contactPhone={settings.contactPhone}
         contactAddress={settings.contactAddress}
         instagramUrl={settings.instagramUrl}
+        facebookUrl={settings.facebookUrl}
         mlStoreUrl={settings.mlStoreUrl}
       />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />

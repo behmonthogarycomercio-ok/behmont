@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase, createServerSupabase } from '@/lib/supabase/server';
 import { fetchAllSellerItems, refreshMLToken } from '@/lib/mercadolibre';
+import { guessCategorySlug } from '@/lib/categorize';
 
 /**
  * Sincroniza precio, stock y datos básicos de todas las publicaciones activas
@@ -63,14 +64,21 @@ async function runSync(request: Request, fromCron: boolean) {
 
     const items = await fetchAllSellerItems(settings.ml_seller_id, refreshed.access_token);
 
+    // Categorías del sitio, para poder mapear slug -> id al categorizar automáticamente
+    const { data: categoryRows } = await supabase.from('categories').select('id, slug');
+    const categoryIdBySlug = Object.fromEntries(
+      (categoryRows || []).map((c: { id: string; slug: string }) => [c.slug, c.id])
+    );
+
     let synced = 0;
     for (const item of items) {
       const image = item.pictures?.[0]?.secure_url || item.thumbnail;
+      const sku = item.seller_custom_field?.trim() || item.id;
       const { error } = await supabase
         .from('products')
         .upsert(
           {
-            sku: item.id,
+            sku,
             ml_item_id: item.id,
             ml_permalink: item.permalink,
             ml_last_synced_at: new Date().toISOString(),
@@ -84,6 +92,18 @@ async function runSync(request: Request, fromCron: boolean) {
           { onConflict: 'ml_item_id', ignoreDuplicates: false }
         );
       if (!error) synced++;
+
+      // Categorización automática por palabra clave — SOLO si el producto todavía
+      // no tiene categoría asignada (no pisa una categoría puesta a mano en el admin).
+      const guessedSlug = guessCategorySlug(item.title);
+      const categoryId = guessedSlug ? categoryIdBySlug[guessedSlug] : null;
+      if (categoryId) {
+        await supabase
+          .from('products')
+          .update({ category_id: categoryId })
+          .eq('ml_item_id', item.id)
+          .is('category_id', null);
+      }
     }
 
     await supabase.from('ml_sync_log').insert({
