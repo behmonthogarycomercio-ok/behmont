@@ -4,20 +4,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // BEHMONT-IMP brand tokens — steel + signal-amber industrial identity
+        // BEHMONT — Comercio y Hogar — colores reales de marca (extraídos del logo)
         steel: {
-          950: '#0B1220',
-          900: '#111A2E',
-          800: '#182545',
-          700: '#223160', // primary brand navy-steel
-          600: '#2E4380',
-          100: '#E7EAF1',
-          50: '#F4F5F8',
+          950: '#0A1226',
+          900: '#111C38', // navy de marca
+          800: '#182548',
+          700: '#213262',
+          600: '#2D4380',
+          100: '#E8EAF1',
+          50: '#F5F6F9',
         },
         amber: {
-          600: '#C2540A', // signal amber (deep) — CTAs
-          500: '#E8590C', // signal amber — primary accent
-          400: '#F2792F',
+          600: '#D62A2F',
+          500: '#ED3237', // rojo de marca
+          400: '#F15458',
         },
         plate: {
           50: '#F6F7F8',

@@ -16,9 +16,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BEHMONT-IMP · Equipamiento profesional para gastronomía y comercio',
+  title: 'BEHMONT — Comercio y Hogar | Equipamiento comercial, hogar y electrónica',
   description:
-    'Hornos, frío, balanzas, cortadoras y equipamiento profesional para gastronomía, panadería, carnicería y almacén. Consultá stock y precio por WhatsApp.',
+    'Equipamientos comerciales, mueblería, hogar, electrónica y barbería en Concordia, Entre Ríos. Financiación diaria y semanal. Consultá stock y precio por WhatsApp.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

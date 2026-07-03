@@ -8,7 +8,11 @@ export async function getSiteSettings() {
   return {
     whatsappNumber: settings.whatsapp_number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
     mlStoreUrl: settings.ml_store_url || '',
-    siteName: settings.site_name || 'BEHMONT-IMP',
+    siteName: settings.site_name || 'BEHMONT — Comercio y Hogar',
+    contactEmail: settings.contact_email || '',
+    contactPhone: settings.contact_phone || '',
+    contactAddress: settings.contact_address || '',
+    instagramUrl: settings.instagram_url || '',
   };
 }
 

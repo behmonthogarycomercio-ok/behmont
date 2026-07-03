@@ -122,7 +122,11 @@ insert into site_settings (key, value) values
   ('whatsapp_number', ''),
   ('ml_store_url', ''),
   ('ml_seller_id', ''),
-  ('site_name', 'BEHMONT-IMP')
+  ('site_name', 'BEHMONT — Comercio y Hogar'),
+  ('contact_email', ''),
+  ('contact_phone', ''),
+  ('contact_address', ''),
+  ('instagram_url', '')
 on conflict (key) do nothing;
 
 -- ── updated_at automático en products ─────────────────────

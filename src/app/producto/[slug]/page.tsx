@@ -91,7 +91,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
           )}
         </div>
       </main>
-      <Footer whatsappNumber={settings.whatsappNumber} />
+      <Footer
+        whatsappNumber={settings.whatsappNumber}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        contactAddress={settings.contactAddress}
+        instagramUrl={settings.instagramUrl}
+        mlStoreUrl={settings.mlStoreUrl}
+      />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </>
   );

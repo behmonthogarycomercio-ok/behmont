@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
@@ -33,13 +34,12 @@ export default function AdminLoginPage() {
         className="w-full max-w-sm rounded-xl2 bg-white p-8 shadow-card"
       >
         <div className="mb-6 text-center">
-          <span className="inline-grid h-12 w-12 place-items-center rounded-xl bg-steel-700 text-white font-display font-bold">
-            BI
-          </span>
-          <h1 className="font-display text-xl font-bold text-steel-950 mt-3">
+          <div className="relative h-14 w-full mx-auto">
+            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill className="object-contain" />
+          </div>
+          <h1 className="font-display text-xl font-bold text-steel-950 mt-4">
             Panel de administración
           </h1>
-          <p className="text-sm text-steel-500">BEHMONT-IMP</p>
         </div>
 
         <div className="space-y-4">

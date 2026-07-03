@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -38,10 +39,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen flex bg-plate-50">
       <aside className="w-64 shrink-0 bg-steel-950 text-plate-100 flex flex-col">
         <div className="p-5 border-b border-white/10">
-          <span className="font-display font-bold text-lg text-white">
-            BEHMONT<span className="text-amber-500">-IMP</span>
-          </span>
-          <p className="text-xs text-plate-100/50 mt-0.5">Panel de administración</p>
+          <div className="relative h-9 w-36">
+            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill className="object-contain object-left" />
+          </div>
+          <p className="text-xs text-plate-100/50 mt-1.5">Panel de administración</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {NAV.map(({ href, label, icon: Icon }) => {

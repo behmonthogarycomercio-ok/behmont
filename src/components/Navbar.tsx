@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Search, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
@@ -14,13 +15,14 @@ export default function Navbar({ categories }: { categories: Category[] }) {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-plate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex h-16 items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-steel-700 text-white font-display font-bold text-sm">
-              BI
-            </span>
-            <span className="font-display font-semibold text-lg tracking-tight text-steel-900 hidden sm:inline">
-              BEHMONT<span className="text-amber-500">-IMP</span>
-            </span>
+          <Link href="/" className="relative h-10 w-40 shrink-0">
+            <Image
+              src="/images/logo-behmont.png"
+              alt="BEHMONT — Comercio y Hogar"
+              fill
+              priority
+              className="object-contain object-left"
+            />
           </Link>
 
           <form

@@ -16,7 +16,14 @@ export default async function PedidoPage() {
         </p>
         <OrderForm />
       </main>
-      <Footer whatsappNumber={settings.whatsappNumber} />
+      <Footer
+        whatsappNumber={settings.whatsappNumber}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        contactAddress={settings.contactAddress}
+        instagramUrl={settings.instagramUrl}
+        mlStoreUrl={settings.mlStoreUrl}
+      />
     </>
   );
 }

@@ -81,6 +81,36 @@ export default async function MarcasPage({
         </div>
       </div>
 
+      {/* ── Contacto y redes ── */}
+      <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card mb-8">
+        <h2 className="font-display font-semibold text-steel-900 mb-1">Contacto y redes</h2>
+        <p className="text-sm text-steel-500 mb-4">
+          Se muestran en el pie de página del sitio. Dejá vacío el campo que no quieras mostrar.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Email de contacto</label>
+            <SettingField settingKey="contact_email" defaultValue={settings.contact_email || ''} placeholder="behmont.equipamientos@gmail.com" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Teléfono (formato libre)</label>
+            <SettingField settingKey="contact_phone" defaultValue={settings.contact_phone || ''} placeholder="+54 9 3454 01-5358" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Dirección</label>
+            <SettingField settingKey="contact_address" defaultValue={settings.contact_address || ''} placeholder="San Lorenzo Oeste 380, Concordia, Entre Ríos" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Instagram (URL completa)</label>
+            <SettingField settingKey="instagram_url" defaultValue={settings.instagram_url || ''} placeholder="https://www.instagram.com/behmont_comercio/" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Tienda en MercadoLibre (URL)</label>
+            <SettingField settingKey="ml_store_url" defaultValue={settings.ml_store_url || ''} placeholder="https://listado.mercadolibre.com.ar/_CustId_..." />
+          </div>
+        </div>
+      </div>
+
       {/* ── Marcas ── */}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="overflow-x-auto rounded-xl2 border border-plate-200 bg-white shadow-card">

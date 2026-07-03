@@ -40,7 +40,14 @@ export default async function HomePage() {
         <PromoStrip promotions={stripPromos} />
         <BrandStrip brands={brands} />
       </main>
-      <Footer whatsappNumber={settings.whatsappNumber} />
+      <Footer
+        whatsappNumber={settings.whatsappNumber}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        contactAddress={settings.contactAddress}
+        instagramUrl={settings.instagramUrl}
+        mlStoreUrl={settings.mlStoreUrl}
+      />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </>
   );

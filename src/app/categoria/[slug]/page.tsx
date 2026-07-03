@@ -26,7 +26,14 @@ export default async function CategoryPage({ params }: { params: { slug: string 
         </div>
         <ProductGrid products={products} whatsappNumber={settings.whatsappNumber} />
       </main>
-      <Footer whatsappNumber={settings.whatsappNumber} />
+      <Footer
+        whatsappNumber={settings.whatsappNumber}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        contactAddress={settings.contactAddress}
+        instagramUrl={settings.instagramUrl}
+        mlStoreUrl={settings.mlStoreUrl}
+      />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </>
   );
