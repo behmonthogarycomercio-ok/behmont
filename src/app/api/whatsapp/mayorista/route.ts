@@ -8,6 +8,7 @@ const wholesaleSchema = z.object({
   contactName: z.string().min(2, 'Ingresá tu nombre'),
   phone: z.string().min(6, 'Ingresá un teléfono válido'),
   email: z.string().email().optional().or(z.literal('')),
+  address: z.string().optional(),
   rubro: z.string().optional(),
   volume: z.string().optional(),
   message: z.string().optional(),
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
   }
 
-  const { businessName, contactName, phone, email, rubro, volume, message } = parsed.data;
+  const { businessName, contactName, phone, email, address, rubro, volume, message } = parsed.data;
 
   const lines = [
     '🏢 *Consulta mayorista — BEHMONT*',
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     `Teléfono: ${phone}`,
   ];
   if (email) lines.push(`Email: ${email}`);
+  if (address) lines.push(`Dirección: ${address}`);
   if (rubro) lines.push(`Rubro: ${rubro}`);
   if (volume) lines.push(`Volumen estimado: ${volume}`);
   if (message) lines.push(`Mensaje: ${message}`);
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
     customer_name: `${businessName} (${contactName})`,
     customer_phone: phone,
     customer_email: email || null,
+    customer_address: address || null,
     customer_note: `[MAYORISTA] rubro: ${rubro || '-'} | volumen: ${volume || '-'} | ${message || ''}`,
     items: [],
     total: 0,

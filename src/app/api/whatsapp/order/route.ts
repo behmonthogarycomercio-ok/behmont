@@ -7,6 +7,7 @@ const orderSchema = z.object({
   customerName: z.string().min(2, 'Ingresá tu nombre'),
   customerPhone: z.string().min(6, 'Ingresá un teléfono válido'),
   customerEmail: z.string().email().optional().or(z.literal('')),
+  customerAddress: z.string().optional(),
   customerNote: z.string().optional(),
   items: z
     .array(
@@ -31,9 +32,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { customerName, customerPhone, customerEmail, customerNote, items } = parsed.data;
+  const { customerName, customerPhone, customerEmail, customerAddress, customerNote, items } = parsed.data;
   const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const message = buildOrderMessage({ customerName, customerPhone, customerNote, items });
+  const message = buildOrderMessage({ customerName, customerPhone, customerAddress, customerNote, items });
 
   const supabase = createServiceSupabase();
   const { data: settings } = await supabase
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
     customer_name: customerName,
     customer_phone: customerPhone,
     customer_email: customerEmail || null,
+    customer_address: customerAddress || null,
     customer_note: customerNote || null,
     items,
     total,

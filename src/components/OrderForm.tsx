@@ -7,7 +7,7 @@ import { useCart } from '@/lib/cart-context';
 
 export default function OrderForm() {
   const { items, updateQty, removeItem, total, clear } = useCart();
-  const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', note: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
 
@@ -24,6 +24,7 @@ export default function OrderForm() {
           customerName: form.name,
           customerPhone: form.phone,
           customerEmail: form.email,
+          customerAddress: form.address,
           customerNote: form.note,
           items,
         }),
@@ -135,6 +136,16 @@ export default function OrderForm() {
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-steel-700 mb-1">Dirección de entrega (opcional)</label>
+          <input
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            placeholder="Calle, número, localidad"
             className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
         </div>

@@ -3,6 +3,7 @@ import type { WhatsAppOrderItem } from './types';
 type BuildOrderMessageInput = {
   customerName: string;
   customerPhone: string;
+  customerAddress?: string;
   customerNote?: string;
   items: WhatsAppOrderItem[];
 };
@@ -10,6 +11,7 @@ type BuildOrderMessageInput = {
 export function buildOrderMessage({
   customerName,
   customerPhone,
+  customerAddress,
   customerNote,
   items,
 }: BuildOrderMessageInput): string {
@@ -18,6 +20,7 @@ export function buildOrderMessage({
   lines.push('');
   lines.push(`👤 Cliente: ${customerName}`);
   lines.push(`📞 Teléfono: ${customerPhone}`);
+  if (customerAddress) lines.push(`📍 Dirección: ${customerAddress}`);
   if (customerNote) lines.push(`📝 Nota: ${customerNote}`);
   lines.push('');
   lines.push('📦 Productos:');

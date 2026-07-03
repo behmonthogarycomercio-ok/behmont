@@ -96,6 +96,7 @@ create table if not exists whatsapp_orders (
   customer_name text not null,
   customer_phone text not null,
   customer_email text,
+  customer_address text,
   customer_note text,
   items jsonb not null,                         -- [{sku,name,qty,price}]
   total numeric(12,2),

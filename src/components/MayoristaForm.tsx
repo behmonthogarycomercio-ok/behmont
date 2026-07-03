@@ -8,6 +8,7 @@ export default function MayoristaForm() {
     contactName: '',
     phone: '',
     email: '',
+    address: '',
     rubro: '',
     volume: '',
     message: '',
@@ -96,6 +97,14 @@ export default function MayoristaForm() {
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-steel-700 mb-1">Dirección del negocio</label>
+          <input
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
             className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
         </div>

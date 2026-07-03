@@ -10,6 +10,7 @@ import {
   Megaphone,
   Boxes,
   Tag,
+  BarChart3,
   LogOut,
   ExternalLink,
 } from 'lucide-react';
@@ -17,6 +18,7 @@ import { createClient } from '@/lib/supabase/client';
 
 const NAV = [
   { href: '/admin/dashboard', label: 'Inicio', icon: LayoutDashboard },
+  { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/categorias', label: 'Categorías', icon: FolderTree },
   { href: '/admin/promociones', label: 'Promociones', icon: Megaphone },
@@ -39,8 +41,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen flex bg-plate-50">
       <aside className="w-64 shrink-0 bg-steel-950 text-plate-100 flex flex-col">
         <div className="p-5 border-b border-white/10">
-          <div className="relative h-9 w-36">
-            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill className="object-contain object-left" />
+          <div className="relative h-16 w-16 mx-auto sm:mx-0">
+            <Image src="/images/logo-behmont-dark.png" alt="BEHMONT" fill className="object-contain" />
           </div>
           <p className="text-xs text-plate-100/50 mt-1.5">Panel de administración</p>
         </div>
