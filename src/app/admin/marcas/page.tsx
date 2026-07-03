@@ -108,6 +108,10 @@ export default async function MarcasPage({
             <label className="block text-xs font-semibold text-steel-500 mb-1">Tienda en MercadoLibre (URL)</label>
             <SettingField settingKey="ml_store_url" defaultValue={settings.ml_store_url || ''} placeholder="https://listado.mercadolibre.com.ar/_CustId_..." />
           </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-steel-500 mb-1">Horarios de atención (se muestra junto al mapa)</label>
+            <SettingField settingKey="business_hours" defaultValue={settings.business_hours || ''} placeholder="Lun a Vie 09:00-13:00 / 17:00-21:00 · Sáb 09:00-13:00" />
+          </div>
         </div>
       </div>
 

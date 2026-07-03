@@ -3,9 +3,11 @@ import { MapPin, MessageCircle, Clock } from 'lucide-react';
 export default function LocationSection({
   address,
   whatsappNumber,
+  businessHours,
 }: {
   address: string;
   whatsappNumber: string;
+  businessHours?: string;
 }) {
   if (!address) return null;
 
@@ -21,9 +23,13 @@ export default function LocationSection({
             <MapPin className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="font-medium">{address}</p>
           </div>
-          <div className="flex items-center gap-2 text-steel-500 text-sm mt-3">
-            <Clock className="h-4 w-4 shrink-0" />
-            <p>Consultá nuestros horarios de atención por WhatsApp</p>
+          <div className="flex items-start gap-2 text-steel-600 text-sm mt-3">
+            <Clock className="h-4 w-4 shrink-0 mt-0.5" />
+            {businessHours ? (
+              <p className="whitespace-pre-line">{businessHours}</p>
+            ) : (
+              <p className="text-steel-500">Consultá nuestros horarios de atención por WhatsApp</p>
+            )}
           </div>
           <div className="flex flex-wrap gap-3 mt-5">
             <a

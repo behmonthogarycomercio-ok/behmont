@@ -34,7 +34,16 @@ export default function Footer({
           <ul className="space-y-2 text-sm text-plate-100/80">
             <li><a href="/faq" className="hover:text-amber-400">Preguntas frecuentes</a></li>
             <li><a href="/guia-de-compras" className="hover:text-amber-400">Guía de compras</a></li>
-            <li><a href="/seguimiento" className="hover:text-amber-400">Seguimiento de mi pedido</a></li>
+            <li>
+              <a
+                href="https://www.andreani.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-amber-400"
+              >
+                Seguimiento de mi pedido
+              </a>
+            </li>
           </ul>
         </div>
         <div>

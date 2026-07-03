@@ -40,7 +40,11 @@ export default async function HomePage() {
         />
         <PromoStrip promotions={stripPromos} />
         <BrandStrip brands={brands} />
-        <LocationSection address={settings.contactAddress} whatsappNumber={settings.whatsappNumber} />
+        <LocationSection
+          address={settings.contactAddress}
+          whatsappNumber={settings.whatsappNumber}
+          businessHours={settings.businessHours}
+        />
       </main>
       <Footer
         whatsappNumber={settings.whatsappNumber}

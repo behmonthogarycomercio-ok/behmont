@@ -126,7 +126,8 @@ insert into site_settings (key, value) values
   ('contact_email', ''),
   ('contact_phone', ''),
   ('contact_address', ''),
-  ('instagram_url', '')
+  ('instagram_url', ''),
+  ('business_hours', '')
 on conflict (key) do nothing;
 
 -- ── updated_at automático en products ─────────────────────
