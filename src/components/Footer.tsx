@@ -24,6 +24,7 @@ export default function Footer({
           <h3 className="font-display font-semibold text-white mb-3">Institucional</h3>
           <ul className="space-y-2 text-sm text-plate-100/80">
             <li><a href="/nosotros" className="hover:text-amber-400">Nosotros</a></li>
+            <li><a href="/mayorista" className="hover:text-amber-400">Ventas mayoristas</a></li>
             <li><a href="/sucursales" className="hover:text-amber-400">Sucursales</a></li>
             <li><a href="/contacto" className="hover:text-amber-400">Sumate al equipo</a></li>
           </ul>
@@ -68,14 +69,9 @@ export default function Footer({
         <div>
           <h3 className="font-display font-semibold text-white mb-3">Contacto</h3>
           <ul className="space-y-2.5 text-sm text-plate-100/80">
-            {whatsappNumber && (
+            {(contactPhone || whatsappNumber) && (
               <li className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4 shrink-0" /> +{whatsappNumber}
-              </li>
-            )}
-            {contactPhone && contactPhone !== whatsappNumber && (
-              <li className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4 shrink-0" /> {contactPhone}
+                <MessageCircle className="h-4 w-4 shrink-0" /> {contactPhone || `+${whatsappNumber}`}
               </li>
             )}
             {contactEmail && (

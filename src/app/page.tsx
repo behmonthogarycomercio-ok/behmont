@@ -4,6 +4,7 @@ import CategoryGrid from '@/components/CategoryGrid';
 import ProductGrid from '@/components/ProductGrid';
 import PromoStrip from '@/components/PromoStrip';
 import BrandStrip from '@/components/BrandStrip';
+import LocationSection from '@/components/LocationSection';
 import Footer from '@/components/Footer';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import {
@@ -39,6 +40,7 @@ export default async function HomePage() {
         />
         <PromoStrip promotions={stripPromos} />
         <BrandStrip brands={brands} />
+        <LocationSection address={settings.contactAddress} whatsappNumber={settings.whatsappNumber} />
       </main>
       <Footer
         whatsappNumber={settings.whatsappNumber}

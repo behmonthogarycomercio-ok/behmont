@@ -73,6 +73,9 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           <Link href="/ofertas" className="whitespace-nowrap text-amber-600 hover:text-amber-700">
             Ofertas
           </Link>
+          <Link href="/mayorista" className="whitespace-nowrap hover:text-amber-600 transition-colors">
+            Mayorista
+          </Link>
         </nav>
       </div>
 
@@ -90,6 +93,9 @@ export default function Navbar({ categories }: { categories: Category[] }) {
             ))}
             <Link href="/ofertas" className="text-amber-600" onClick={() => setMenuOpen(false)}>
               Ofertas
+            </Link>
+            <Link href="/mayorista" onClick={() => setMenuOpen(false)}>
+              Mayorista
             </Link>
           </div>
         </div>
