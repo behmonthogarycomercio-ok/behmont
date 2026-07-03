@@ -1,0 +1,98 @@
+import { createServerSupabase } from './supabase/server';
+import type { Category, Product, Promotion, Brand } from './types';
+
+export async function getSiteSettings() {
+  const supabase = createServerSupabase();
+  const { data } = await supabase.from('site_settings').select('key, value');
+  const settings = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
+  return {
+    whatsappNumber: settings.whatsapp_number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
+    mlStoreUrl: settings.ml_store_url || '',
+    siteName: settings.site_name || 'BEHMONT-IMP',
+  };
+}
+
+export async function getCategories(): Promise<Category[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+  return data || [];
+}
+
+export async function getPromotions(placement?: 'hero' | 'banner' | 'strip'): Promise<Promotion[]> {
+  const supabase = createServerSupabase();
+  let query = supabase
+    .from('promotions')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+  if (placement) query = query.eq('placement', placement);
+  const { data } = await query;
+  return data || [];
+}
+
+export async function getBrands(): Promise<Brand[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase.from('brands').select('*').order('sort_order', { ascending: true });
+  return data || [];
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .eq('featured', true)
+    .order('created_at', { ascending: false })
+    .limit(12);
+  return data || [];
+}
+
+export async function getProductsByCategory(slug: string): Promise<{
+  category: Category | null;
+  products: Product[];
+}> {
+  const supabase = createServerSupabase();
+  const { data: category } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (!category) return { category: null, products: [] };
+
+  const { data: products } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .eq('category_id', category.id)
+    .order('created_at', { ascending: false });
+
+  return { category, products: products || [] };
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('slug', slug)
+    .eq('active', true)
+    .maybeSingle();
+  return data;
+}
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .ilike('name', `%${query}%`)
+    .limit(40);
+  return data || [];
+}
