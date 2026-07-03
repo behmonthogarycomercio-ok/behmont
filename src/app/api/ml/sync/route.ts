@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase, createServerSupabase } from '@/lib/supabase/server';
-import { fetchAllSellerItems, refreshMLToken } from '@/lib/mercadolibre';
+import { fetchAllSellerItems, fetchItemDescription, refreshMLToken } from '@/lib/mercadolibre';
 import { guessCategorySlug } from '@/lib/categorize';
 
 /**
@@ -74,23 +74,33 @@ async function runSync(request: Request, fromCron: boolean) {
     for (const item of items) {
       const image = item.pictures?.[0]?.secure_url || item.thumbnail;
       const sku = item.seller_custom_field?.trim() || item.id;
+
+      // Descripción y características: se traen de ML pero NUNCA pisan lo que ya
+      // esté cargado con contenido vacío — si ML no tiene nada, se omite el campo
+      // del upsert y el valor existente (manual o de un sync anterior) queda igual.
+      const description = await fetchItemDescription(item.id, refreshed.access_token);
+      const specs = (item.attributes || [])
+        .filter((a) => a.value_name)
+        .map((a) => ({ label: a.name || a.id, value: a.value_name as string }));
+
+      const payload: Record<string, unknown> = {
+        sku,
+        ml_item_id: item.id,
+        ml_permalink: item.permalink,
+        ml_last_synced_at: new Date().toISOString(),
+        name: item.title,
+        slug: slugify(item.title, item.id),
+        price: item.price,
+        stock: item.available_quantity,
+        images: image ? [image] : [],
+        active: true,
+      };
+      if (description) payload.description = description;
+      if (specs.length > 0) payload.specs = specs;
+
       const { error } = await supabase
         .from('products')
-        .upsert(
-          {
-            sku,
-            ml_item_id: item.id,
-            ml_permalink: item.permalink,
-            ml_last_synced_at: new Date().toISOString(),
-            name: item.title,
-            slug: slugify(item.title, item.id),
-            price: item.price,
-            stock: item.available_quantity,
-            images: image ? [image] : [],
-            active: true,
-          },
-          { onConflict: 'ml_item_id', ignoreDuplicates: false }
-        );
+        .upsert(payload, { onConflict: 'ml_item_id', ignoreDuplicates: false });
       if (!error) synced++;
 
       // Categorización automática por palabra clave — SOLO si el producto todavía

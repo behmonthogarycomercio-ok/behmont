@@ -47,6 +47,7 @@ create table if not exists products (
   compare_at_price numeric(12,2),               -- precio "antes de" -> calcula % off
   stock int not null default 0,
   images jsonb not null default '[]'::jsonb,    -- ["https://.../1.jpg", ...]
+  specs jsonb not null default '[]'::jsonb,      -- [{"label":"Potencia","value":"1.5 HP"}, ...]
   active boolean not null default true,
   featured boolean not null default false,
   -- Integración MercadoLibre (se completa vía sync automático)

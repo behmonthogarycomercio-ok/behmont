@@ -77,6 +77,20 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </p>
           )}
 
+          {product.specs && product.specs.length > 0 && (
+            <div className="mt-6">
+              <h2 className="font-display font-semibold text-steel-900 mb-3">Características</h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 rounded-xl2 border border-plate-200 bg-plate-50 p-4">
+                {product.specs.map((spec, i) => (
+                  <div key={i} className="flex justify-between gap-3 text-sm border-b border-plate-200/70 py-1.5 last:border-0 sm:[&:nth-last-child(-n+2)]:border-0">
+                    <dt className="text-steel-500">{spec.label}</dt>
+                    <dd className="text-steel-800 font-medium text-right">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
           <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
 
           {product.ml_permalink && (

@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUploader from './ImageUploader';
+import SpecsEditor from './SpecsEditor';
 import { upsertProduct } from '@/lib/actions';
+import type { ProductSpec } from '@/lib/types';
 
 type Option = { id: string; name: string };
 
@@ -18,11 +20,13 @@ export default function ProductForm({
 }) {
   const router = useRouter();
   const [images, setImages] = useState<string[]>(product?.images || []);
+  const [specs, setSpecs] = useState<ProductSpec[]>(product?.specs || []);
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setSaving(true);
     formData.set('images', images.join(','));
+    formData.set('specs', JSON.stringify(specs.filter((s) => s.label.trim() && s.value.trim())));
     await upsertProduct(formData);
     setSaving(false);
     router.push('/admin/productos');
@@ -78,6 +82,10 @@ export default function ProductForm({
 
       <Field label="Imágenes">
         <ImageUploader value={images} onChange={setImages} />
+      </Field>
+
+      <Field label="Características (se muestran en la ficha del producto)">
+        <SpecsEditor value={specs} onChange={setSpecs} />
       </Field>
 
       <div className="flex gap-6">

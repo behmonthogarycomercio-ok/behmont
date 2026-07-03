@@ -42,6 +42,12 @@ CATEGORIES = [
     ('Frío', 'frio'),
     ('Hogar', 'hogar'),
     ('Importados', 'importados'),
+    ('Peluquería y Barbería', 'peluqueria-barberia'),
+    ('Estética', 'estetica'),
+    ('Decoración', 'decoracion'),
+    ('Almacenamiento', 'almacenamiento'),
+    ('Oficina', 'oficina'),
+    ('Herramientas', 'herramientas'),
 ]
 
 products = []

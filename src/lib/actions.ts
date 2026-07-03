@@ -49,6 +49,14 @@ export async function upsertProduct(formData: FormData) {
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
   const imagesRaw = formData.get('images') as string;
+  const specsRaw = formData.get('specs') as string;
+
+  let specs: { label: string; value: string }[] = [];
+  try {
+    specs = specsRaw ? JSON.parse(specsRaw) : [];
+  } catch {
+    specs = [];
+  }
 
   const payload = {
     sku: formData.get('sku') as string,
@@ -63,6 +71,7 @@ export async function upsertProduct(formData: FormData) {
       : null,
     stock: Number(formData.get('stock')),
     images: imagesRaw ? imagesRaw.split(',').map((s) => s.trim()).filter(Boolean) : [],
+    specs,
     active: formData.get('active') === 'on',
     featured: formData.get('featured') === 'on',
   };

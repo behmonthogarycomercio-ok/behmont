@@ -14,6 +14,8 @@ export type Brand = {
   sort_order: number;
 };
 
+export type ProductSpec = { label: string; value: string };
+
 export type Product = {
   id: string;
   sku: string;
@@ -26,6 +28,7 @@ export type Product = {
   compare_at_price: number | null;
   stock: number;
   images: string[];
+  specs: ProductSpec[];
   active: boolean;
   featured: boolean;
   ml_item_id: string | null;

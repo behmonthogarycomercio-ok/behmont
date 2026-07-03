@@ -63,7 +63,7 @@ export type MLItem = {
   thumbnail: string;
   seller_custom_field?: string | null;
   pictures?: { secure_url: string }[];
-  attributes?: { id: string; value_name: string | null }[];
+  attributes?: { id: string; name?: string; value_name: string | null }[];
 };
 
 /**
@@ -163,4 +163,22 @@ export async function fetchAllSellerItems(
 ): Promise<MLItem[]> {
   const ids = await fetchSellerItemIds(sellerId, accessToken);
   return fetchItemsDetail(ids, accessToken);
+}
+
+/**
+ * Trae la descripción completa de una publicación (endpoint separado en la API de ML).
+ * Devuelve '' si el item no tiene descripción cargada o si falla la consulta —
+ * nunca tira error, para no cortar el sync de todos los demás productos.
+ */
+export async function fetchItemDescription(itemId: string, accessToken: string): Promise<string> {
+  try {
+    const res = await fetch(`${ML_API}/items/${itemId}/description`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    return (data.plain_text || data.text || '').trim();
+  } catch {
+    return '';
+  }
 }

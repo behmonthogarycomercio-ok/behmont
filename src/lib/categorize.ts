@@ -4,6 +4,35 @@
 
 const RULES: { slug: string; keywords: string[] }[] = [
   {
+    slug: 'peluqueria-barberia',
+    keywords: [
+      'peluqueria', 'peluquería', 'barberia', 'barbería', 'sillon barbero', 'sillon peluquero',
+      'lavacabeza', 'ayudante de peluqueria', 'clipper', 'maquina de corte', 'máquina de corte',
+      'navaja de acero', 'capa de corte', 'tijera de corte', 'tijera de entresacar',
+      'secador casco', 'vaporizador casco', 'tintorero',
+    ],
+  },
+  {
+    slug: 'estetica',
+    keywords: ['camilla', 'esterilizador', 'climazon', 'gorro termico', 'cabina uv', 'torno electrico para unas'],
+  },
+  {
+    slug: 'decoracion',
+    keywords: ['espejo con iluminacion', 'espejo led', 'cartel giratorio'],
+  },
+  {
+    slug: 'almacenamiento',
+    keywords: ['estante modulo', 'rack ', 'estanteria', 'estantería'],
+  },
+  {
+    slug: 'oficina',
+    keywords: ['silla de oficina', 'silla fija apilable'],
+  },
+  {
+    slug: 'herramientas',
+    keywords: ['atornillador', 'taladro percutor', 'amoladora', 'cargador para baterias'],
+  },
+  {
     slug: 'frio',
     keywords: [
       'heladera', 'freezer', 'conservadora', 'exhibidora', 'frigorifico', 'frigorífico',
@@ -14,14 +43,14 @@ const RULES: { slug: string; keywords: string[] }[] = [
     slug: 'panaderia',
     keywords: [
       'amasadora', 'sobadora', 'horno pastelero', 'horno panadero', 'divisora', 'boleadora',
-      'leudadora', 'sobadora', 'pastelero', 'panadero',
+      'leudadora', 'sobadora', 'pastelero', 'panadero', 'rebanadora de pan',
     ],
   },
   {
     slug: 'carniceria',
     keywords: [
       'carnicera', 'picadora de carne', 'embutidora', 'sierra cinta', 'sierra carnicera',
-      'moledora', 'ablandador de carne', 'gancho carnicero',
+      'moledora', 'ablandador de carne', 'gancho carnicero', 'hamburguesera',
     ],
   },
   {
@@ -36,7 +65,7 @@ const RULES: { slug: string; keywords: string[] }[] = [
     keywords: [
       'horno convector', 'horno pizzero', 'anafe', 'cocina industrial', 'freidora',
       'licuadora industrial', 'batidora planetaria', 'mesada', 'campana extractora',
-      'salamandra', 'plancha industrial', 'olla', 'marmita',
+      'salamandra', 'plancha industrial', 'olla', 'marmita', 'cortapapas',
     ],
   },
 ];
