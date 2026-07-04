@@ -91,14 +91,13 @@ export default function ProductCard({
           )}
         </div>
 
+        {code && <span className="mt-1 text-xs text-steel-500">Código: {code}</span>}
         {product.stock <= 0 ? (
-          <span className="mt-1 text-xs font-medium text-danger-600">Sin stock</span>
+          <span className="text-xs font-medium text-danger-600">Sin stock</span>
         ) : product.stock <= 3 ? (
-          <span className="mt-1 text-xs font-medium text-amber-600">
+          <span className="text-xs font-medium text-amber-600">
             ¡Últimas {product.stock} unidades!
           </span>
-        ) : code ? (
-          <span className="mt-1 text-xs text-steel-500">Código: {code}</span>
         ) : null}
 
         <div className="mt-3 flex gap-2">
