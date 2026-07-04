@@ -8,15 +8,22 @@ import Image from 'next/image';
 export default async function ProductosPage({
   searchParams,
 }: {
-  searchParams: { edit?: string; new?: string };
+  searchParams: { edit?: string; new?: string; q?: string };
 }) {
   const supabase = createServerSupabase();
+  const q = searchParams.q?.trim() || '';
+
+  let productsQuery = supabase
+    .from('products')
+    .select('*, category:categories(name), brand:brands(name)')
+    .order('created_at', { ascending: false });
+
+  if (q) {
+    productsQuery = productsQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+  }
 
   const [{ data: products }, { data: categories }, { data: brands }] = await Promise.all([
-    supabase
-      .from('products')
-      .select('*, category:categories(name), brand:brands(name)')
-      .order('created_at', { ascending: false }),
+    productsQuery,
     supabase.from('categories').select('id,name').order('name'),
     supabase.from('brands').select('id,name').order('name'),
   ]);
@@ -47,7 +54,23 @@ export default async function ProductosPage({
           brands={brands || []}
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl2 border border-plate-200 bg-white shadow-card">
+        <>
+          <form action="" className="mb-4">
+            <input
+              type="text"
+              name="q"
+              defaultValue={q}
+              placeholder="Buscar por nombre o código (SKU)..."
+              className="w-full max-w-md rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+            />
+          </form>
+          {q && (
+            <p className="text-sm text-steel-500 mb-3">
+              {(products || []).length} resultado{(products || []).length === 1 ? '' : 's'} para
+              &quot;{q}&quot; — <a href="?" className="text-amber-600 hover:underline">limpiar búsqueda</a>
+            </p>
+          )}
+          <div className="overflow-x-auto rounded-xl2 border border-plate-200 bg-white shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-plate-200 text-left text-steel-500">
@@ -98,7 +121,8 @@ export default async function ProductosPage({
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </AdminShell>
   );
