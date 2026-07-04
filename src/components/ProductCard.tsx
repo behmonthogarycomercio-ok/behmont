@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Plus } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
+import { getProductCode } from '@/lib/product-display';
 import { clsx } from 'clsx';
 import Badge from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
@@ -21,7 +22,7 @@ export default function ProductCard({
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.sku);
-  const showSku = Boolean(product.sku) && product.sku !== product.ml_item_id;
+  const code = getProductCode(product);
   const discountPct =
     product.compare_at_price && product.compare_at_price > product.price
       ? Math.round(100 - (product.price / product.compare_at_price) * 100)
@@ -96,8 +97,8 @@ export default function ProductCard({
           <span className="mt-1 text-xs font-medium text-amber-600">
             ¡Últimas {product.stock} unidades!
           </span>
-        ) : showSku ? (
-          <span className="mt-1 text-xs text-steel-500">Código: {product.sku}</span>
+        ) : code ? (
+          <span className="mt-1 text-xs text-steel-500">Código: {code}</span>
         ) : null}
 
         <div className="mt-3 flex gap-2">

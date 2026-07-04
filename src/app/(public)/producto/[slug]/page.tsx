@@ -5,6 +5,7 @@ import ProductGallery from '@/components/ProductGallery';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
+import { getProductCode } from '@/lib/product-display';
 
 export const revalidate = 60;
 
@@ -24,6 +25,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
     product.compare_at_price && product.compare_at_price > product.price
       ? Math.round(100 - (product.price / product.compare_at_price) * 100)
       : null;
+
+  const code = getProductCode(product);
 
   return (
     <main>
@@ -51,9 +54,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mt-1">
             {product.name}
           </h1>
-          {product.sku && product.sku !== product.ml_item_id && (
-            <p className="text-sm text-steel-500 mt-1">Código: {product.sku}</p>
-          )}
+          {code && <p className="text-sm text-steel-500 mt-1">Código: {code}</p>}
 
           <div className="mt-4 flex items-baseline gap-3">
             <span className="font-display font-bold text-3xl text-steel-950">
@@ -87,11 +88,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </p>
           )}
 
-          {product.specs && product.specs.length > 0 && (
+          {product.specs && product.specs.filter((s) => s.label.trim().toLowerCase() !== 'sku').length > 0 && (
             <div className="mt-6">
               <h2 className="font-display font-semibold text-steel-900 mb-3">Características</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {product.specs.map((spec, i) => (
+                {product.specs.filter((s) => s.label.trim().toLowerCase() !== 'sku').map((spec, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between gap-3 rounded-lg border border-plate-200 bg-plate-50 px-3 py-2 text-sm"
