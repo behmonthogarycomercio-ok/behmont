@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
 
 export type FaqItem = { q: string; a: string };
@@ -31,13 +32,20 @@ export default function FaqAccordion({ categories }: { categories: FaqCategory[]
                       }`}
                     />
                   </button>
-                  {open && (
-                    <div className="px-5 pb-4 -mt-1">
-                      <p className="text-sm text-steel-600 leading-relaxed whitespace-pre-line">
-                        {item.a}
-                      </p>
+                  <div
+                    className={clsx(
+                      'grid transition-[grid-template-rows] duration-300 ease-in-out',
+                      open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-5 pb-4 -mt-1">
+                        <p className="text-sm text-steel-600 leading-relaxed whitespace-pre-line">
+                          {item.a}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}

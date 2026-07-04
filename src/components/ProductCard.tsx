@@ -4,7 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, MessageCircle, Plus } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
+import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
+import { clsx } from 'clsx';
+import Badge from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import type { Product } from '@/lib/types';
 
 export default function ProductCard({
@@ -15,6 +19,8 @@ export default function ProductCard({
   whatsappNumber: string;
 }) {
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(product.sku);
   const discountPct =
     product.compare_at_price && product.compare_at_price > product.price
       ? Math.round(100 - (product.price / product.compare_at_price) * 100)
@@ -28,15 +34,20 @@ export default function ProductCard({
   return (
     <div className="group relative flex flex-col rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
       {discountPct && (
-        <span className="badge-plate absolute left-3 top-3 z-10 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white">
-          {discountPct}% OFF
-        </span>
+        <Badge className="absolute left-3 top-3 z-10">{discountPct}% OFF</Badge>
       )}
       <button
+        onClick={(e) => {
+          e.preventDefault();
+          toggleFavorite(product.sku);
+        }}
         className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 hover:bg-white shadow"
-        aria-label="Guardar en favoritos"
+        aria-label={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+        aria-pressed={favorite}
       >
-        <Heart className="h-4 w-4 text-steel-700" />
+        <Heart
+          className={clsx('h-4 w-4', favorite ? 'fill-amber-500 text-amber-500' : 'text-steel-700')}
+        />
       </button>
 
       <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-plate-50">
@@ -79,7 +90,7 @@ export default function ProductCard({
         </div>
 
         {product.stock <= 0 ? (
-          <span className="mt-1 text-xs font-medium text-red-600">Sin stock</span>
+          <span className="mt-1 text-xs font-medium text-danger-600">Sin stock</span>
         ) : product.stock <= 3 ? (
           <span className="mt-1 text-xs font-medium text-amber-600">
             ¡Últimas {product.stock} unidades!
@@ -94,7 +105,7 @@ export default function ProductCard({
               addItem({ sku: product.sku, name: product.name, qty: 1, price: product.price })
             }
             disabled={product.stock <= 0}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-steel-900 px-3 py-2 text-xs font-semibold text-white hover:bg-steel-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className={buttonClasses({ variant: 'primary', size: 'sm', className: 'flex-1' })}
           >
             <Plus className="h-3.5 w-3.5" /> Agregar al pedido
           </button>
@@ -102,7 +113,7 @@ export default function ProductCard({
             href={inquiryLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition-colors"
+            className={buttonClasses({ variant: 'whatsapp', size: 'sm' })}
             aria-label={`Consultar ${product.name} por WhatsApp`}
           >
             <MessageCircle className="h-3.5 w-3.5" />

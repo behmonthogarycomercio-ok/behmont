@@ -1,11 +1,10 @@
-import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
+import TrustBadges from '@/components/TrustBadges';
 import CategoryGrid from '@/components/CategoryGrid';
 import ProductGrid from '@/components/ProductGrid';
 import PromoStrip from '@/components/PromoStrip';
 import BrandStrip from '@/components/BrandStrip';
 import LocationSection from '@/components/LocationSection';
-import Footer from '@/components/Footer';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import {
   getCategories,
@@ -28,34 +27,23 @@ export default async function HomePage() {
   ]);
 
   return (
-    <>
-      <Navbar categories={categories} />
-      <main>
-        <Hero promotions={heroPromos} />
-        <CategoryGrid categories={categories} />
-        <ProductGrid
-          title="El mejor precio de contado"
-          products={featured}
-          whatsappNumber={settings.whatsappNumber}
-        />
-        <PromoStrip promotions={stripPromos} />
-        <BrandStrip brands={brands} />
-        <LocationSection
-          address={settings.contactAddress}
-          whatsappNumber={settings.whatsappNumber}
-          businessHours={settings.businessHours}
-        />
-      </main>
-      <Footer
+    <main>
+      <Hero promotions={heroPromos} />
+      <TrustBadges />
+      <CategoryGrid categories={categories} />
+      <ProductGrid
+        title="El mejor precio de contado"
+        products={featured}
         whatsappNumber={settings.whatsappNumber}
-        contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
-        contactAddress={settings.contactAddress}
-        instagramUrl={settings.instagramUrl}
-        facebookUrl={settings.facebookUrl}
-        mlStoreUrl={settings.mlStoreUrl}
+      />
+      <PromoStrip promotions={stripPromos} />
+      <BrandStrip brands={brands} />
+      <LocationSection
+        address={settings.contactAddress}
+        whatsappNumber={settings.whatsappNumber}
+        businessHours={settings.businessHours}
       />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
-    </>
+    </main>
   );
 }

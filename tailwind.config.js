@@ -11,6 +11,10 @@ module.exports = {
           800: '#182548',
           700: '#213262',
           600: '#2D4380',
+          500: '#52649C',
+          400: '#7886AD',
+          300: '#9DA7C4',
+          200: '#C3C9DA',
           100: '#E8EAF1',
           50: '#F5F6F9',
         },
@@ -24,6 +28,22 @@ module.exports = {
           100: '#EEF0F2',
           200: '#DFE3E8',
         },
+        success: {
+          600: '#059669',
+          700: '#047857',
+        },
+        warning: {
+          500: '#F59E0B',
+          600: '#D97706',
+        },
+        danger: {
+          600: '#DC2626',
+          700: '#B91C1C',
+        },
+        whatsapp: {
+          600: '#059669',
+          700: '#047857',
+        },
       },
       fontFamily: {
         display: ['var(--font-display)'],
@@ -35,6 +55,15 @@ module.exports = {
       },
       borderRadius: {
         xl2: '1.25rem',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.2s ease-out',
       },
     },
   },

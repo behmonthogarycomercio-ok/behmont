@@ -1,4 +1,5 @@
 import { Instagram, Facebook, MessageCircle, MapPin, Mail, ExternalLink } from 'lucide-react';
+import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 
 type FooterProps = {
   whatsappNumber: string;
@@ -19,6 +20,10 @@ export default function Footer({
   facebookUrl,
   mlStoreUrl,
 }: FooterProps) {
+  const whatsappLink = whatsappNumber
+    ? buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage())
+    : '';
+
   return (
     <footer className="bg-steel-900 text-plate-100 mt-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -27,8 +32,14 @@ export default function Footer({
           <ul className="space-y-2 text-sm text-plate-100/80">
             <li><a href="/nosotros" className="hover:text-amber-400">Nosotros</a></li>
             <li><a href="/mayorista" className="hover:text-amber-400">Ventas mayoristas</a></li>
-            <li><a href="/sucursales" className="hover:text-amber-400">Sucursales</a></li>
-            <li><a href="/contacto" className="hover:text-amber-400">Sumate al equipo</a></li>
+            <li><a href="/#ubicacion" className="hover:text-amber-400">Sucursales</a></li>
+            {whatsappLink && (
+              <li>
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="hover:text-amber-400">
+                  Sumate al equipo
+                </a>
+              </li>
+            )}
           </ul>
         </div>
         <div>

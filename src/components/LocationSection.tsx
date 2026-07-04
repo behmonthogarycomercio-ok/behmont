@@ -1,5 +1,6 @@
 import { MapPin, MessageCircle, Clock } from 'lucide-react';
 import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
+import { buttonClasses } from '@/components/ui/Button';
 
 export default function LocationSection({
   address,
@@ -19,7 +20,7 @@ export default function LocationSection({
     : '';
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
+    <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 scroll-mt-20">
       <h2 className="font-display text-xl font-semibold text-steel-900 mb-5">Dónde estamos</h2>
       <div className="grid gap-4 md:grid-cols-[1fr_1.3fr] rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
         <div className="p-6 sm:p-8 flex flex-col justify-center">
@@ -40,7 +41,7 @@ export default function LocationSection({
               href={mapLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-steel-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-steel-800"
+              className={buttonClasses({ variant: 'outline', size: 'md' })}
             >
               <MapPin className="h-4 w-4" /> Cómo llegar
             </a>
@@ -49,7 +50,7 @@ export default function LocationSection({
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                className={buttonClasses({ variant: 'whatsapp', size: 'md' })}
               >
                 <MessageCircle className="h-4 w-4" /> Consultar
               </a>

@@ -1,7 +1,8 @@
+import { cache } from 'react';
 import { createServerSupabase } from './supabase/server';
 import type { Category, Product, Promotion, Brand } from './types';
 
-export async function getSiteSettings() {
+export const getSiteSettings = cache(async () => {
   const supabase = createServerSupabase();
   const { data } = await supabase.from('site_settings').select('key, value');
   const settings = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
@@ -16,9 +17,9 @@ export async function getSiteSettings() {
     facebookUrl: settings.facebook_url || '',
     businessHours: settings.business_hours || '',
   };
-}
+});
 
-export async function getCategories(): Promise<Category[]> {
+export const getCategories = cache(async (): Promise<Category[]> => {
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from('categories')
@@ -26,7 +27,7 @@ export async function getCategories(): Promise<Category[]> {
     .eq('active', true)
     .order('sort_order', { ascending: true });
   return data || [];
-}
+});
 
 export async function getPromotions(placement?: 'hero' | 'banner' | 'strip'): Promise<Promotion[]> {
   const supabase = createServerSupabase();
@@ -56,6 +57,17 @@ export async function getFeaturedProducts(): Promise<Product[]> {
     .order('created_at', { ascending: false })
     .limit(12);
   return data || [];
+}
+
+export async function getDiscountedProducts(): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .not('compare_at_price', 'is', null)
+    .order('created_at', { ascending: false });
+  return (data || []).filter((p) => p.compare_at_price && p.compare_at_price > p.price);
 }
 
 export async function getProductsByCategory(slug: string): Promise<{
@@ -90,6 +102,22 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .eq('active', true)
     .maybeSingle();
   return data;
+}
+
+export async function getRelatedProducts(
+  categoryId: string,
+  excludeProductId: string,
+  limit = 4
+): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .eq('category_id', categoryId)
+    .neq('id', excludeProductId)
+    .limit(limit);
+  return data || [];
 }
 
 export async function searchProducts(query: string): Promise<Product[]> {

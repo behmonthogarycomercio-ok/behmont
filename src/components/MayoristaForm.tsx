@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import Button from '@/components/ui/Button';
 
 export default function MayoristaForm() {
   const [form, setForm] = useState({
@@ -60,91 +64,68 @@ export default function MayoristaForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl2 border border-plate-200 bg-white p-6 shadow-card">
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Nombre del negocio</label>
-          <input
+        <FormField label="Nombre del negocio" error={errors.businessName}>
+          <Input
             required
             value={form.businessName}
             onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-          {errors.businessName && <p className="text-xs text-red-600 mt-1">{errors.businessName}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Tu nombre</label>
-          <input
+        </FormField>
+        <FormField label="Tu nombre" error={errors.contactName}>
+          <Input
             required
             value={form.contactName}
             onChange={(e) => setForm({ ...form, contactName: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-          {errors.contactName && <p className="text-xs text-red-600 mt-1">{errors.contactName}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Teléfono</label>
-          <input
+        </FormField>
+        <FormField label="Teléfono" error={errors.phone}>
+          <Input
             required
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="+54 9 3454..."
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-          {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Email (opcional)</label>
-          <input
+        </FormField>
+        <FormField label="Email (opcional)">
+          <Input
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Dirección del negocio</label>
-          <input
+        </FormField>
+        <FormField label="Dirección del negocio">
+          <Input
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Rubro</label>
-          <input
+        </FormField>
+        <FormField label="Rubro">
+          <Input
             value={form.rubro}
             onChange={(e) => setForm({ ...form, rubro: e.target.value })}
             placeholder="Ej: gastronomía, hotelería, reventa..."
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Volumen estimado</label>
-          <input
+        </FormField>
+        <FormField label="Volumen estimado">
+          <Input
             value={form.volume}
             onChange={(e) => setForm({ ...form, volume: e.target.value })}
             placeholder="Ej: 10-20 unidades/mes"
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
+        </FormField>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-steel-700 mb-1">Contanos qué necesitás</label>
-        <textarea
+      <FormField label="Contanos qué necesitás">
+        <Textarea
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
           rows={4}
-          className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
         />
-      </div>
+      </FormField>
 
-      <button
-        type="submit"
-        disabled={sending}
-        className="w-full rounded-lg bg-steel-900 py-3 text-sm font-semibold text-white hover:bg-steel-800 disabled:opacity-50 transition-colors"
-      >
+      <Button type="submit" variant="primary" size="lg" disabled={sending} className="w-full">
         {sending ? 'Enviando...' : 'Enviar consulta mayorista'}
-      </button>
+      </Button>
     </form>
   );
 }

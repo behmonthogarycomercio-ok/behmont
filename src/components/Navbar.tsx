@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { clsx } from 'clsx';
 import { Search, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import type { Category } from '@/lib/types';
@@ -79,27 +80,34 @@ export default function Navbar({ categories }: { categories: Category[] }) {
         </nav>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden border-t border-plate-200 px-4 py-3 space-y-3">
-          <form action="/buscar" className="flex items-center gap-2 rounded-full border border-plate-200 bg-plate-50 px-4 py-2">
-            <Search className="h-4 w-4 text-steel-600" />
-            <input name="q" placeholder="¿Qué estás buscando?" className="w-full bg-transparent text-sm outline-none" />
-          </form>
-          <div className="flex flex-col gap-2 text-sm font-medium text-steel-800">
-            {categories.map((cat) => (
-              <Link key={cat.id} href={`/categoria/${cat.slug}`} onClick={() => setMenuOpen(false)}>
-                {cat.name}
+      <div
+        className={clsx(
+          'md:hidden grid transition-[grid-template-rows] duration-300 ease-in-out',
+          menuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-plate-200 px-4 py-3 space-y-3">
+            <form action="/buscar" className="flex items-center gap-2 rounded-full border border-plate-200 bg-plate-50 px-4 py-2">
+              <Search className="h-4 w-4 text-steel-600" />
+              <input name="q" placeholder="¿Qué estás buscando?" className="w-full bg-transparent text-sm outline-none" />
+            </form>
+            <div className="flex flex-col gap-2 text-sm font-medium text-steel-800">
+              {categories.map((cat) => (
+                <Link key={cat.id} href={`/categoria/${cat.slug}`} onClick={() => setMenuOpen(false)}>
+                  {cat.name}
+                </Link>
+              ))}
+              <Link href="/ofertas" className="text-amber-600" onClick={() => setMenuOpen(false)}>
+                Ofertas
               </Link>
-            ))}
-            <Link href="/ofertas" className="text-amber-600" onClick={() => setMenuOpen(false)}>
-              Ofertas
-            </Link>
-            <Link href="/mayorista" onClick={() => setMenuOpen(false)}>
-              Mayorista
-            </Link>
+              <Link href="/mayorista" onClick={() => setMenuOpen(false)}>
+                Mayorista
+              </Link>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

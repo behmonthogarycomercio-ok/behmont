@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import Badge from '@/components/ui/Badge';
 import type { Promotion } from '@/lib/types';
 
 export default function Hero({ promotions }: { promotions: Promotion[] }) {
@@ -23,9 +24,7 @@ export default function Hero({ promotions }: { promotions: Promotion[] }) {
             />
           )}
           <div className="relative z-10 p-6 sm:p-8">
-            <span className="badge-plate inline-block rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white mb-3">
-              Destacado
-            </span>
+            <Badge className="mb-3 text-xs px-3 py-1">Destacado</Badge>
             <h1 className="font-display text-2xl sm:text-4xl font-bold text-white max-w-md leading-tight">
               {main.title}
             </h1>

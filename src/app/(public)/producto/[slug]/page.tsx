@@ -1,21 +1,24 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import ProductActions from '@/components/ProductActions';
-import { getCategories, getProductBySlug, getSiteSettings } from '@/lib/data';
+import ProductGallery from '@/components/ProductGallery';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import ProductGrid from '@/components/ProductGrid';
+import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
 
 export const revalidate = 60;
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const [settings, categories, product] = await Promise.all([
+  const [settings, product] = await Promise.all([
     getSiteSettings(),
-    getCategories(),
     getProductBySlug(params.slug),
   ]);
 
   if (!product) notFound();
+
+  const related = product.category_id
+    ? await getRelatedProducts(product.category_id, product.id)
+    : [];
 
   const discountPct =
     product.compare_at_price && product.compare_at_price > product.price
@@ -23,16 +26,21 @@ export default async function ProductPage({ params }: { params: { slug: string }
       : null;
 
   return (
-    <>
-      <Navbar categories={categories} />
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid gap-10 md:grid-cols-2">
-        <div className="relative aspect-square rounded-xl2 bg-plate-50 border border-plate-200">
-          {product.images?.[0] ? (
-            <Image src={product.images[0]} alt={product.name} fill className="object-contain p-8" />
-          ) : (
-            <div className="grid h-full place-items-center text-steel-300">Sin imagen</div>
-          )}
-        </div>
+    <main>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
+        <Breadcrumbs
+          items={[
+            { label: 'Inicio', href: '/' },
+            ...(product.category
+              ? [{ label: product.category.name, href: `/categoria/${product.category.slug}` }]
+              : []),
+            { label: product.name },
+          ]}
+        />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-10 grid gap-10 md:grid-cols-2">
+        <ProductGallery images={product.images} name={product.name} />
 
         <div>
           {product.brand && (
@@ -63,11 +71,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
           <p className="mt-2 text-sm">
             {product.stock > 0 ? (
-              <span className="text-emerald-600 font-medium">
+              <span className="text-success-600 font-medium">
                 Stock disponible ({product.stock} unidades)
               </span>
             ) : (
-              <span className="text-red-600 font-medium">Sin stock</span>
+              <span className="text-danger-600 font-medium">Sin stock</span>
             )}
           </p>
 
@@ -80,14 +88,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {product.specs && product.specs.length > 0 && (
             <div className="mt-6">
               <h2 className="font-display font-semibold text-steel-900 mb-3">Características</h2>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 rounded-xl2 border border-plate-200 bg-plate-50 p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {product.specs.map((spec, i) => (
-                  <div key={i} className="flex justify-between gap-3 text-sm border-b border-plate-200/70 py-1.5 last:border-0 sm:[&:nth-last-child(-n+2)]:border-0">
-                    <dt className="text-steel-500">{spec.label}</dt>
-                    <dd className="text-steel-800 font-medium text-right">{spec.value}</dd>
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-plate-200 bg-plate-50 px-3 py-2 text-sm"
+                  >
+                    <span className="text-steel-500">{spec.label}</span>
+                    <span className="text-steel-800 font-medium text-right">{spec.value}</span>
                   </div>
                 ))}
-              </dl>
+              </div>
             </div>
           )}
 
@@ -104,17 +115,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </a>
           )}
         </div>
-      </main>
-      <Footer
-        whatsappNumber={settings.whatsappNumber}
-        contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
-        contactAddress={settings.contactAddress}
-        instagramUrl={settings.instagramUrl}
-        facebookUrl={settings.facebookUrl}
-        mlStoreUrl={settings.mlStoreUrl}
-      />
+      </div>
+
+      {related.length > 0 && (
+        <ProductGrid
+          title="También te puede interesar"
+          products={related}
+          whatsappNumber={settings.whatsappNumber}
+        />
+      )}
+
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
-    </>
+    </main>
   );
 }

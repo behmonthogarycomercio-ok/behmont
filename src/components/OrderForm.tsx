@@ -4,6 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import Button from '@/components/ui/Button';
 
 export default function OrderForm() {
   const { items, updateQty, removeItem, total, clear } = useCart();
@@ -89,7 +93,7 @@ export default function OrderForm() {
             </span>
             <button
               onClick={() => removeItem(item.sku)}
-              className="text-steel-400 hover:text-red-600"
+              className="text-steel-400 hover:text-danger-600"
               aria-label={`Quitar ${item.name}`}
             >
               <Trash2 className="h-4 w-4" />
@@ -107,66 +111,50 @@ export default function OrderForm() {
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl2 border border-plate-200 p-6">
         <h2 className="font-display font-semibold text-steel-900">Tus datos</h2>
 
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Nombre y apellido</label>
-          <input
+        <FormField label="Nombre y apellido" error={errors.customerName}>
+          <Input
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-          {errors.customerName && <p className="text-xs text-red-600 mt-1">{errors.customerName}</p>}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Teléfono</label>
-          <input
+        <FormField label="Teléfono" error={errors.customerPhone}>
+          <Input
             required
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="+54 9 3416..."
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-          {errors.customerPhone && <p className="text-xs text-red-600 mt-1">{errors.customerPhone}</p>}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Email (opcional)</label>
-          <input
+        <FormField label="Email (opcional)">
+          <Input
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Dirección de entrega (opcional)</label>
-          <input
+        <FormField label="Dirección de entrega (opcional)">
+          <Input
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
             placeholder="Calle, número, localidad"
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium text-steel-700 mb-1">Nota (opcional)</label>
-          <textarea
+        <FormField label="Nota (opcional)">
+          <Textarea
             value={form.note}
             onChange={(e) => setForm({ ...form, note: e.target.value })}
             rows={3}
-            className="w-full rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
-        </div>
+        </FormField>
 
-        <button
-          type="submit"
-          disabled={sending}
-          className="w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
           {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
-        </button>
+        </Button>
       </form>
     </div>
   );

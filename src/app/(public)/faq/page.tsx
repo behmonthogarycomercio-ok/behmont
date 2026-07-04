@@ -1,8 +1,6 @@
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import FaqAccordion, { type FaqCategory } from '@/components/FaqAccordion';
-import { getCategories, getSiteSettings } from '@/lib/data';
+import { getSiteSettings } from '@/lib/data';
 
 const FAQ_CATEGORIES: FaqCategory[] = [
   {
@@ -56,31 +54,19 @@ const FAQ_CATEGORIES: FaqCategory[] = [
 ];
 
 export default async function FaqPage() {
-  const [settings, categories] = await Promise.all([getSiteSettings(), getCategories()]);
+  const settings = await getSiteSettings();
 
   return (
-    <>
-      <Navbar categories={categories} />
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mb-2">
-          Preguntas frecuentes
-        </h1>
-        <p className="text-steel-500 text-sm mb-8">
-          Todo lo que necesitás saber antes de comprar. Si tenés otra duda, escribinos por
-          WhatsApp y te respondemos al toque.
-        </p>
-        <FaqAccordion categories={FAQ_CATEGORIES} />
-      </main>
-      <Footer
-        whatsappNumber={settings.whatsappNumber}
-        contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
-        contactAddress={settings.contactAddress}
-        instagramUrl={settings.instagramUrl}
-        facebookUrl={settings.facebookUrl}
-        mlStoreUrl={settings.mlStoreUrl}
-      />
+    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
+      <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mb-2">
+        Preguntas frecuentes
+      </h1>
+      <p className="text-steel-500 text-sm mb-8">
+        Todo lo que necesitás saber antes de comprar. Si tenés otra duda, escribinos por
+        WhatsApp y te respondemos al toque.
+      </p>
+      <FaqAccordion categories={FAQ_CATEGORIES} />
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
-    </>
+    </main>
   );
 }

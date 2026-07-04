@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Minus, Plus, MessageCircle, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
+import { buttonClasses } from '@/components/ui/Button';
 import type { Product } from '@/lib/types';
 
 export default function ProductActions({
@@ -49,7 +50,7 @@ export default function ProductActions({
           setTimeout(() => setAdded(false), 1800);
         }}
         disabled={product.stock <= 0}
-        className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-steel-900 px-5 py-3 text-sm font-semibold text-white hover:bg-steel-800 disabled:opacity-40 transition-colors"
+        className={buttonClasses({ variant: 'primary', size: 'lg', className: 'flex-1' })}
       >
         <ShoppingCart className="h-4 w-4" />
         {added ? 'Agregado ✓' : 'Agregar al pedido'}
@@ -59,7 +60,7 @@ export default function ProductActions({
         href={inquiryLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+        className={buttonClasses({ variant: 'whatsapp', size: 'lg' })}
       >
         <MessageCircle className="h-4 w-4" /> Consultar
       </a>

@@ -5,7 +5,7 @@ export default function BrandStrip({ brands }: { brands: Brand[] }) {
   if (brands.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
       <h2 className="font-display text-xl font-semibold text-steel-900 mb-6">
         Encontrá tus productos por marca
       </h2>
