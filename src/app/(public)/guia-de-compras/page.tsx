@@ -8,7 +8,7 @@ const POLICY_FAQ: FaqCategory[] = [
     items: [
       {
         q: '¿Cuál es la política de garantías?',
-        a: 'Todos los productos de nuestro catálogo cuentan con garantía oficial. Ante un reclamo, la unidad queda sujeta a una revisión técnica bajo los términos específicos de la fábrica para determinar si el defecto corresponde a una falla de fabricación o a una negligencia por uso indebido del cliente.\n\nEn caso de que se corrobore una falla de fábrica, el cliente deberá abonar el costo del envío de retorno del producto hacia nuestras instalaciones, mientras que nuestra empresa asumirá la totalidad del costo logístico para reenviar el producto reparado o el nuevo cambio hacia el domicilio del comprador.',
+        a: 'Todos los productos de nuestro catálogo cuentan con garantía. Algunos productos tienen garantía oficial de fábrica y otros garantía de vendedor, según corresponda a cada artículo. Ante un reclamo, la unidad queda sujeta a una revisión técnica bajo los términos específicos de la garantía para determinar si el defecto corresponde a una falla de fabricación o a una negligencia por uso indebido del cliente.\n\nEn caso de que se corrobore una falla cubierta por la garantía, el cliente deberá abonar el costo del envío de retorno del producto hacia nuestras instalaciones, mientras que nuestra empresa asumirá la totalidad del costo logístico para reenviar el producto reparado o el nuevo cambio hacia el domicilio del comprador.',
       },
       {
         q: '¿Se emiten comprobantes fiscales?',

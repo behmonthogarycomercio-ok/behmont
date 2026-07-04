@@ -21,6 +21,7 @@ export default function ProductCard({
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.sku);
+  const showSku = Boolean(product.sku) && product.sku !== product.ml_item_id;
   const discountPct =
     product.compare_at_price && product.compare_at_price > product.price
       ? Math.round(100 - (product.price / product.compare_at_price) * 100)
@@ -95,9 +96,9 @@ export default function ProductCard({
           <span className="mt-1 text-xs font-medium text-amber-600">
             ¡Últimas {product.stock} unidades!
           </span>
-        ) : (
+        ) : showSku ? (
           <span className="mt-1 text-xs text-steel-500">Código: {product.sku}</span>
-        )}
+        ) : null}
 
         <div className="mt-3 flex gap-2">
           <button

@@ -51,7 +51,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mt-1">
             {product.name}
           </h1>
-          <p className="text-sm text-steel-500 mt-1">Código: {product.sku}</p>
+          {product.sku && product.sku !== product.ml_item_id && (
+            <p className="text-sm text-steel-500 mt-1">Código: {product.sku}</p>
+          )}
 
           <div className="mt-4 flex items-baseline gap-3">
             <span className="font-display font-bold text-3xl text-steel-950">

@@ -34,7 +34,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: '¿Los productos tienen garantía?',
-        a: 'Sí, todos nuestros productos de equipamiento comercial, hogar y electrónica cuentan con garantía oficial de fábrica.',
+        a: 'Sí, todos nuestros productos cuentan con garantía. Algunos tienen garantía oficial de fábrica y otros garantía de vendedor — el tipo de garantía correspondiente se detalla en cada producto.',
       },
       {
         q: '¿Qué hago si tengo un problema con mi compra o necesito asesoramiento?',
