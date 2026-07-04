@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { createServerSupabase } from './supabase/server';
+import { slugify } from './slugify';
 import type { Category, Product, Promotion, Brand } from './types';
 
 export const getSiteSettings = cache(async () => {
@@ -91,6 +92,25 @@ export async function getProductsByCategory(slug: string): Promise<{
     .order('created_at', { ascending: false });
 
   return { category, products: products || [] };
+}
+
+export async function getProductsByBrand(slug: string): Promise<{
+  brand: Brand | null;
+  products: Product[];
+}> {
+  const brands = await getBrands();
+  const brand = brands.find((b) => slugify(b.name) === slug) || null;
+  if (!brand) return { brand: null, products: [] };
+
+  const supabase = createServerSupabase();
+  const { data: products } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .eq('brand_id', brand.id)
+    .order('created_at', { ascending: false });
+
+  return { brand, products: products || [] };
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
