@@ -22,14 +22,20 @@ export default function ProductForm({
   const [images, setImages] = useState<string[]>(product?.images || []);
   const [specs, setSpecs] = useState<ProductSpec[]>(product?.specs || []);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setSaving(true);
+    setError(null);
     formData.set('images', images.join(','));
     formData.set('specs', JSON.stringify(specs.filter((s) => s.label.trim() && s.value.trim())));
-    await upsertProduct(formData);
-    setSaving(false);
-    router.push('/admin/productos');
+    try {
+      await upsertProduct(formData);
+      router.push('/admin/productos');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el producto.');
+      setSaving(false);
+    }
   }
 
   return (
@@ -96,6 +102,12 @@ export default function ProductForm({
           <input type="checkbox" name="featured" defaultChecked={product?.featured} /> Destacado en portada
         </label>
       </div>
+
+      {error && (
+        <p role="alert" className="rounded-lg bg-danger-600/10 px-3 py-2 text-sm font-medium text-danger-600">
+          {error}
+        </p>
+      )}
 
       <div className="flex gap-3 pt-2">
         <button

@@ -13,6 +13,14 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+/** Traduce errores comunes de Postgres a un mensaje entendible; si no reconoce el codigo, usa el mensaje original. */
+function friendlyDbError(error: { code?: string; message: string }): string {
+  if (error.code === '23505') {
+    return 'Ya existe otro registro con ese mismo c\u00f3digo/nombre. Cambialo por uno distinto.';
+  }
+  return error.message;
+}
+
 /**
  * Empuja precio/stock hacia MercadoLibre cuando el producto editado en el panel
  * viene de una publicación sincronizada (tiene ml_item_id). "Best effort": si falla,
@@ -84,9 +92,11 @@ export async function upsertProduct(formData: FormData) {
       .eq('id', id)
       .maybeSingle();
     mlItemId = existing?.ml_item_id || null;
-    await supabase.from('products').update(payload).eq('id', id);
+    const { error } = await supabase.from('products').update(payload).eq('id', id);
+    if (error) throw new Error(friendlyDbError(error));
   } else {
-    await supabase.from('products').insert(payload);
+    const { error } = await supabase.from('products').insert(payload);
+    if (error) throw new Error(friendlyDbError(error));
   }
 
   if (mlItemId) {
@@ -99,7 +109,8 @@ export async function upsertProduct(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   const supabase = createServerSupabase();
-  await supabase.from('products').delete().eq('id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) throw new Error(friendlyDbError(error));
   revalidatePath('/admin/productos');
   revalidatePath('/');
 }
@@ -112,7 +123,8 @@ export async function updateStockAndPrice(id: string, stock: number, price: numb
     .eq('id', id)
     .maybeSingle();
 
-  await supabase.from('products').update({ stock, price }).eq('id', id);
+  const { error } = await supabase.from('products').update({ stock, price }).eq('id', id);
+  if (error) throw new Error(friendlyDbError(error));
 
   if (existing?.ml_item_id) {
     await pushToMLIfLinked(existing.ml_item_id, { price, stock });
@@ -137,9 +149,11 @@ export async function upsertCategory(formData: FormData) {
   };
 
   if (id) {
-    await supabase.from('categories').update(payload).eq('id', id);
+    const { error } = await supabase.from('categories').update(payload).eq('id', id);
+    if (error) throw new Error(friendlyDbError(error));
   } else {
-    await supabase.from('categories').insert(payload);
+    const { error } = await supabase.from('categories').insert(payload);
+    if (error) throw new Error(friendlyDbError(error));
   }
 
   revalidatePath('/admin/categorias');
@@ -148,7 +162,8 @@ export async function upsertCategory(formData: FormData) {
 
 export async function deleteCategory(id: string) {
   const supabase = createServerSupabase();
-  await supabase.from('categories').delete().eq('id', id);
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) throw new Error(friendlyDbError(error));
   revalidatePath('/admin/categorias');
   revalidatePath('/');
 }
@@ -170,9 +185,11 @@ export async function upsertPromotion(formData: FormData) {
   };
 
   if (id) {
-    await supabase.from('promotions').update(payload).eq('id', id);
+    const { error } = await supabase.from('promotions').update(payload).eq('id', id);
+    if (error) throw new Error(friendlyDbError(error));
   } else {
-    await supabase.from('promotions').insert(payload);
+    const { error } = await supabase.from('promotions').insert(payload);
+    if (error) throw new Error(friendlyDbError(error));
   }
 
   revalidatePath('/admin/promociones');
@@ -181,7 +198,8 @@ export async function upsertPromotion(formData: FormData) {
 
 export async function deletePromotion(id: string) {
   const supabase = createServerSupabase();
-  await supabase.from('promotions').delete().eq('id', id);
+  const { error } = await supabase.from('promotions').delete().eq('id', id);
+  if (error) throw new Error(friendlyDbError(error));
   revalidatePath('/admin/promociones');
   revalidatePath('/');
 }
@@ -198,9 +216,11 @@ export async function upsertBrand(formData: FormData) {
   };
 
   if (id) {
-    await supabase.from('brands').update(payload).eq('id', id);
+    const { error } = await supabase.from('brands').update(payload).eq('id', id);
+    if (error) throw new Error(friendlyDbError(error));
   } else {
-    await supabase.from('brands').insert(payload);
+    const { error } = await supabase.from('brands').insert(payload);
+    if (error) throw new Error(friendlyDbError(error));
   }
 
   revalidatePath('/admin/marcas');
@@ -209,7 +229,8 @@ export async function upsertBrand(formData: FormData) {
 
 export async function deleteBrand(id: string) {
   const supabase = createServerSupabase();
-  await supabase.from('brands').delete().eq('id', id);
+  const { error } = await supabase.from('brands').delete().eq('id', id);
+  if (error) throw new Error(friendlyDbError(error));
   revalidatePath('/admin/marcas');
   revalidatePath('/');
 }
@@ -217,7 +238,8 @@ export async function deleteBrand(id: string) {
 // ── CONFIGURACIÓN DEL SITIO ──────────────────────────────
 export async function updateSiteSetting(key: string, value: string) {
   const supabase = createServerSupabase();
-  await supabase.from('site_settings').upsert({ key, value });
+  const { error } = await supabase.from('site_settings').upsert({ key, value });
+  if (error) throw new Error(friendlyDbError(error));
   revalidatePath('/admin/marcas');
   revalidatePath('/');
 }
