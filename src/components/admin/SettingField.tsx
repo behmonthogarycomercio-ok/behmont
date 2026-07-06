@@ -20,13 +20,13 @@ export default function SettingField({
   function handleSave() {
     setError(null);
     startTransition(async () => {
-      try {
-        await updateSiteSetting(settingKey, value);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 1500);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'No se pudo guardar.');
+      const result = await updateSiteSetting(settingKey, value);
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1500);
     });
   }
 

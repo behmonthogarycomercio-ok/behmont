@@ -29,13 +29,13 @@ export default function ProductForm({
     setError(null);
     formData.set('images', images.join(','));
     formData.set('specs', JSON.stringify(specs.filter((s) => s.label.trim() && s.value.trim())));
-    try {
-      await upsertProduct(formData);
-      router.push('/admin/productos');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo guardar el producto.');
+    const result = await upsertProduct(formData);
+    if (result?.error) {
+      setError(result.error);
       setSaving(false);
+      return;
     }
+    router.push('/admin/productos');
   }
 
   return (

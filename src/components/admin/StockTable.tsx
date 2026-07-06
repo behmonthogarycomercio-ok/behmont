@@ -9,14 +9,20 @@ export default function StockTable({ products }: { products: Row[] }) {
   const [rows, setRows] = useState(products);
   const [pending, startTransition] = useTransition();
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   function handleChange(id: string, field: 'price' | 'stock', value: number) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   }
 
   function handleSave(row: Row) {
+    setErrors((prev) => ({ ...prev, [row.id]: '' }));
     startTransition(async () => {
-      await updateStockAndPrice(row.id, row.stock, row.price);
+      const result = await updateStockAndPrice(row.id, row.stock, row.price);
+      if (result?.error) {
+        setErrors((prev) => ({ ...prev, [row.id]: result.error! }));
+        return;
+      }
       setSavedId(row.id);
       setTimeout(() => setSavedId(null), 1200);
     });
@@ -66,6 +72,9 @@ export default function StockTable({ products }: { products: Row[] }) {
                 >
                   {savedId === row.id ? 'Guardado ✓' : 'Guardar'}
                 </button>
+                {errors[row.id] && (
+                  <p role="alert" className="mt-1 text-xs font-medium text-danger-600">{errors[row.id]}</p>
+                )}
               </td>
             </tr>
           ))}

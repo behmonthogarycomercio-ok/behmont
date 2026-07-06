@@ -4,11 +4,18 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
 import { getValidMLAccessToken, updateMLItemPriceStock } from './mercadolibre';
 
+/**
+ * Resultado de una accion. Se devuelve en vez de "throw" porque Next.js oculta
+ * el mensaje de los errores tirados desde Server Actions en produccion — con
+ * un valor de retorno normal el mensaje si llega al cliente.
+ */
+export type ActionResult = { error?: string };
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
@@ -16,7 +23,7 @@ function slugify(text: string): string {
 /** Traduce errores comunes de Postgres a un mensaje entendible; si no reconoce el codigo, usa el mensaje original. */
 function friendlyDbError(error: { code?: string; message: string }): string {
   if (error.code === '23505') {
-    return 'Ya existe otro registro con ese mismo c\u00f3digo/nombre. Cambialo por uno distinto.';
+    return 'Ya existe otro registro con ese mismo código/nombre. Cambialo por uno distinto.';
   }
   return error.message;
 }
@@ -52,7 +59,7 @@ async function pushToMLIfLinked(mlItemId: string | null, changes: { price?: numb
 }
 
 // ── PRODUCTOS ────────────────────────────────────────────
-export async function upsertProduct(formData: FormData) {
+export async function upsertProduct(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
@@ -93,10 +100,10 @@ export async function upsertProduct(formData: FormData) {
       .maybeSingle();
     mlItemId = existing?.ml_item_id || null;
     const { error } = await supabase.from('products').update(payload).eq('id', id);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   } else {
     const { error } = await supabase.from('products').insert(payload);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   }
 
   if (mlItemId) {
@@ -105,17 +112,19 @@ export async function upsertProduct(formData: FormData) {
 
   revalidatePath('/admin/productos');
   revalidatePath('/');
+  return {};
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/productos');
   revalidatePath('/');
+  return {};
 }
 
-export async function updateStockAndPrice(id: string, stock: number, price: number) {
+export async function updateStockAndPrice(id: string, stock: number, price: number): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { data: existing } = await supabase
     .from('products')
@@ -124,7 +133,7 @@ export async function updateStockAndPrice(id: string, stock: number, price: numb
     .maybeSingle();
 
   const { error } = await supabase.from('products').update({ stock, price }).eq('id', id);
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
 
   if (existing?.ml_item_id) {
     await pushToMLIfLinked(existing.ml_item_id, { price, stock });
@@ -132,10 +141,11 @@ export async function updateStockAndPrice(id: string, stock: number, price: numb
 
   revalidatePath('/admin/stock');
   revalidatePath('/');
+  return {};
 }
 
 // ── CATEGORÍAS ───────────────────────────────────────────
-export async function upsertCategory(formData: FormData) {
+export async function upsertCategory(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
@@ -150,26 +160,28 @@ export async function upsertCategory(formData: FormData) {
 
   if (id) {
     const { error } = await supabase.from('categories').update(payload).eq('id', id);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   } else {
     const { error } = await supabase.from('categories').insert(payload);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   }
 
   revalidatePath('/admin/categorias');
   revalidatePath('/');
+  return {};
 }
 
-export async function deleteCategory(id: string) {
+export async function deleteCategory(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('categories').delete().eq('id', id);
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/categorias');
   revalidatePath('/');
+  return {};
 }
 
 // ── PROMOCIONES ──────────────────────────────────────────
-export async function upsertPromotion(formData: FormData) {
+export async function upsertPromotion(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
 
@@ -186,26 +198,28 @@ export async function upsertPromotion(formData: FormData) {
 
   if (id) {
     const { error } = await supabase.from('promotions').update(payload).eq('id', id);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   } else {
     const { error } = await supabase.from('promotions').insert(payload);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   }
 
   revalidatePath('/admin/promociones');
   revalidatePath('/');
+  return {};
 }
 
-export async function deletePromotion(id: string) {
+export async function deletePromotion(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('promotions').delete().eq('id', id);
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/promociones');
   revalidatePath('/');
+  return {};
 }
 
 // ── MARCAS ───────────────────────────────────────────────
-export async function upsertBrand(formData: FormData) {
+export async function upsertBrand(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
 
@@ -217,29 +231,32 @@ export async function upsertBrand(formData: FormData) {
 
   if (id) {
     const { error } = await supabase.from('brands').update(payload).eq('id', id);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   } else {
     const { error } = await supabase.from('brands').insert(payload);
-    if (error) throw new Error(friendlyDbError(error));
+    if (error) return { error: friendlyDbError(error) };
   }
 
   revalidatePath('/admin/marcas');
   revalidatePath('/');
+  return {};
 }
 
-export async function deleteBrand(id: string) {
+export async function deleteBrand(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('brands').delete().eq('id', id);
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/marcas');
   revalidatePath('/');
+  return {};
 }
 
 // ── CONFIGURACIÓN DEL SITIO ──────────────────────────────
-export async function updateSiteSetting(key: string, value: string) {
+export async function updateSiteSetting(key: string, value: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('site_settings').upsert({ key, value });
-  if (error) throw new Error(friendlyDbError(error));
+  if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/marcas');
   revalidatePath('/');
+  return {};
 }

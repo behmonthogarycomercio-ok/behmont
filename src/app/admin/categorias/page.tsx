@@ -1,5 +1,6 @@
 import AdminShell from '@/components/admin/AdminShell';
 import DeleteButton from '@/components/admin/DeleteButton';
+import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { upsertCategory, deleteCategory } from '@/lib/actions';
 
@@ -43,7 +44,7 @@ export default async function CategoriasPage() {
           </table>
         </div>
 
-        <form action={upsertCategory} className="h-fit rounded-xl2 border border-plate-200 bg-white p-5 shadow-card space-y-3">
+        <AdminActionForm action={upsertCategory} className="h-fit rounded-xl2 border border-plate-200 bg-white p-5 shadow-card space-y-3">
           <h2 className="font-display font-semibold text-steel-900">Nueva categoría</h2>
           <input name="name" required placeholder="Nombre (ej: Panadería)" className="input" />
           <input name="icon_url" placeholder="URL del ícono (opcional)" className="input" />
@@ -54,7 +55,7 @@ export default async function CategoriasPage() {
           <button type="submit" className="w-full rounded-lg bg-steel-900 py-2.5 text-sm font-semibold text-white hover:bg-steel-800">
             Guardar
           </button>
-        </form>
+        </AdminActionForm>
       </div>
 
       <style>{`.input{width:100%;border-radius:0.5rem;border:1px solid #dfe3e8;padding:0.5rem 0.75rem;font-size:0.875rem;outline:none;margin-bottom:0.25rem}`}</style>

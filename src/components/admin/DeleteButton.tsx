@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { Trash2 } from 'lucide-react';
+import type { ActionResult } from '@/lib/actions';
 
 export default function DeleteButton({
   id,
@@ -9,7 +10,7 @@ export default function DeleteButton({
   label,
 }: {
   id: string;
-  action: (id: string) => Promise<void>;
+  action: (id: string) => Promise<ActionResult>;
   label: string;
 }) {
   const [pending, startTransition] = useTransition();
@@ -19,11 +20,8 @@ export default function DeleteButton({
     if (!confirm(`¿Eliminar este ${label}? Esta acción no se puede deshacer.`)) return;
     setError(null);
     startTransition(async () => {
-      try {
-        await action(id);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : `No se pudo eliminar el ${label}.`);
-      }
+      const result = await action(id);
+      if (result?.error) setError(result.error);
     });
   }
 
