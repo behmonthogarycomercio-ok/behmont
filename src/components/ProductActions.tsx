@@ -28,7 +28,7 @@ export default function ProductActions({
       <div className="flex items-center gap-3 rounded-lg border border-plate-200 px-2 py-2 w-fit">
         <button
           onClick={() => setQty((q) => Math.max(1, q - 1))}
-          className="grid h-7 w-7 place-items-center rounded-md hover:bg-plate-100"
+          className="grid h-7 w-7 place-items-center rounded-md transition active:scale-[0.95] hover:bg-plate-100"
           aria-label="Restar cantidad"
         >
           <Minus className="h-3.5 w-3.5" />
@@ -36,7 +36,7 @@ export default function ProductActions({
         <span className="w-6 text-center text-sm font-medium">{qty}</span>
         <button
           onClick={() => setQty((q) => q + 1)}
-          className="grid h-7 w-7 place-items-center rounded-md hover:bg-plate-100"
+          className="grid h-7 w-7 place-items-center rounded-md transition active:scale-[0.95] hover:bg-plate-100"
           aria-label="Sumar cantidad"
         >
           <Plus className="h-3.5 w-3.5" />

@@ -41,7 +41,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           <div className="ml-auto flex items-center gap-3">
             <Link
               href="/pedido"
-              className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-plate-100"
+              className="relative grid h-10 w-10 place-items-center rounded-full transition active:scale-[0.95] hover:bg-plate-100"
               aria-label="Ver pedido"
             >
               <ShoppingCart className="h-5 w-5 text-steel-800" />
@@ -52,7 +52,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
               )}
             </Link>
             <button
-              className="md:hidden grid h-10 w-10 place-items-center rounded-full hover:bg-plate-100"
+              className="md:hidden grid h-10 w-10 place-items-center rounded-full transition active:scale-[0.95] hover:bg-plate-100"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Abrir menú"
             >

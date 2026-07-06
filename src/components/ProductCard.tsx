@@ -43,7 +43,7 @@ export default function ProductCard({
           e.preventDefault();
           toggleFavorite(product.sku);
         }}
-        className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 hover:bg-white shadow"
+        className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow transition active:scale-[0.95] hover:bg-white"
         aria-label={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
         aria-pressed={favorite}
       >

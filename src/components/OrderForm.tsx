@@ -74,7 +74,7 @@ export default function OrderForm() {
             <div className="flex items-center gap-2 rounded-lg border border-plate-200 px-1.5 py-1">
               <button
                 onClick={() => updateQty(item.sku, item.qty - 1)}
-                className="grid h-6 w-6 place-items-center rounded hover:bg-plate-100"
+                className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
                 aria-label="Restar"
               >
                 <Minus className="h-3 w-3" />
@@ -82,7 +82,7 @@ export default function OrderForm() {
               <span className="w-5 text-center text-sm">{item.qty}</span>
               <button
                 onClick={() => updateQty(item.sku, item.qty + 1)}
-                className="grid h-6 w-6 place-items-center rounded hover:bg-plate-100"
+                className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
                 aria-label="Sumar"
               >
                 <Plus className="h-3 w-3" />

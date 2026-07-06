@@ -26,7 +26,7 @@ export function buttonClasses({
   className?: string;
 } = {}) {
   return clsx(
-    'inline-flex items-center justify-center rounded-lg font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
+    'inline-flex items-center justify-center rounded-lg font-semibold transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
     variantClasses[variant],
     sizeClasses[size],
     className
