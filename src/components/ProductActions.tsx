@@ -53,7 +53,7 @@ export default function ProductActions({
         className={buttonClasses({ variant: 'primary', size: 'lg', className: 'flex-1' })}
       >
         <ShoppingCart className="h-4 w-4" />
-        {added ? 'Agregado ✓' : 'Agregar al pedido'}
+        <span aria-live="polite">{added ? 'Agregado ✓' : 'Agregar al pedido'}</span>
       </button>
 
       <a

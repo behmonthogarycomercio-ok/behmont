@@ -48,6 +48,30 @@ export async function getBrands(): Promise<Brand[]> {
   return data || [];
 }
 
+/** Marcas con más productos activos, para destacar en el home (no hay logos cargados hoy). */
+export async function getTopBrands(limit = 14): Promise<Brand[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('brand_id, brand:brands(*)')
+    .eq('active', true)
+    .not('brand_id', 'is', null);
+
+  const counts = new Map<string, { brand: Brand; count: number }>();
+  for (const row of data || []) {
+    const brand = row.brand as unknown as Brand | null;
+    if (!brand) continue;
+    const existing = counts.get(brand.id);
+    if (existing) existing.count += 1;
+    else counts.set(brand.id, { brand, count: 1 });
+  }
+
+  return [...counts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((entry) => entry.brand);
+}
+
 export async function getFeaturedProducts(): Promise<Product[]> {
   const supabase = createServerSupabase();
   const { data } = await supabase
