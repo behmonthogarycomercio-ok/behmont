@@ -23,6 +23,22 @@ export default function ProductForm({
   const [specs, setSpecs] = useState<ProductSpec[]>(product?.specs || []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [price, setPrice] = useState(product?.price?.toString() ?? '');
+  const [compareAtPrice, setCompareAtPrice] = useState(product?.compare_at_price?.toString() ?? '');
+  const [discountPct, setDiscountPct] = useState('');
+
+  function applyDiscount() {
+    const pct = Number(discountPct);
+    const current = Number(price);
+    if (!pct || pct <= 0 || pct >= 100 || !current) return;
+    setCompareAtPrice(current.toString());
+    setPrice(Math.round(current * (1 - pct / 100)).toString());
+  }
+
+  const previewPct =
+    compareAtPrice && price && Number(compareAtPrice) > Number(price)
+      ? Math.round(100 - (Number(price) / Number(compareAtPrice)) * 100)
+      : null;
 
   async function handleSubmit(formData: FormData) {
     setSaving(true);
@@ -76,14 +92,65 @@ export default function ProductForm({
 
       <div className="grid grid-cols-3 gap-4">
         <Field label="Precio">
-          <input type="number" step="0.01" name="price" required defaultValue={product?.price} className="input" />
+          <input
+            type="number"
+            step="0.01"
+            name="price"
+            required
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="input"
+          />
         </Field>
         <Field label="Precio anterior (para % OFF)">
-          <input type="number" step="0.01" name="compare_at_price" defaultValue={product?.compare_at_price} className="input" />
+          <input
+            type="number"
+            step="0.01"
+            name="compare_at_price"
+            value={compareAtPrice}
+            onChange={(e) => setCompareAtPrice(e.target.value)}
+            className="input"
+          />
         </Field>
         <Field label="Stock">
           <input type="number" name="stock" required defaultValue={product?.stock ?? 0} className="input" />
         </Field>
+      </div>
+
+      <div className="rounded-lg border border-plate-200 bg-plate-50 p-3">
+        <label className="block text-xs font-medium text-steel-700 mb-1">Aplicar % de descuento</label>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="number"
+            min={1}
+            max={90}
+            placeholder="Ej: 20"
+            value={discountPct}
+            onChange={(e) => setDiscountPct(e.target.value)}
+            className="input w-24"
+          />
+          <button
+            type="button"
+            onClick={applyDiscount}
+            className="rounded-lg border border-plate-200 bg-white px-4 py-2 text-sm font-semibold text-steel-800 hover:bg-plate-100"
+          >
+            Calcular
+          </button>
+          {previewPct !== null && (
+            <p className="text-sm text-steel-700">
+              <span className="text-steel-400 line-through">
+                ${Number(compareAtPrice).toLocaleString('es-AR')}
+              </span>{' '}
+              → <span className="font-bold text-steel-950">${Number(price).toLocaleString('es-AR')}</span>{' '}
+              <span className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+                {previewPct}% OFF
+              </span>
+            </p>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-steel-500">
+          Toma el precio actual como referencia, lo guarda como "Precio anterior" y calcula el nuevo precio con el descuento.
+        </p>
       </div>
 
       <Field label="Imágenes">
