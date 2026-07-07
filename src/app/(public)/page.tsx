@@ -2,8 +2,9 @@ import Hero from '@/components/Hero';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryGrid from '@/components/CategoryGrid';
 import BusinessSection from '@/components/BusinessSection';
-import ProductGrid from '@/components/ProductGrid';
 import FlashOffers from '@/components/FlashOffers';
+import ProductGrid from '@/components/ProductGrid';
+import PaymentSection from '@/components/PaymentSection';
 import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
 import BrandStrip from '@/components/BrandStrip';
@@ -45,8 +46,9 @@ export default async function HomePage() {
         products={featured}
         whatsappNumber={settings.whatsappNumber}
       />
-      <WhatsAppSection whatsappNumber={settings.whatsappNumber} />
+      <PaymentSection />
       <PromoStrip promotions={stripPromos} />
+      <WhatsAppSection whatsappNumber={settings.whatsappNumber} />
       <BrandStrip brands={brands} topBrands={topBrands} />
       <LocationSection
         address={settings.contactAddress}

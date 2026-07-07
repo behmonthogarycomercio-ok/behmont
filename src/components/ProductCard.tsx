@@ -100,13 +100,24 @@ export default function ProductCard({
           )}
         </div>
 
-        {product.stock <= 0 ? (
-          <span className="text-[11px] font-medium text-danger-600 mt-0.5">Sin stock</span>
-        ) : product.stock <= 3 ? (
-          <span className="text-[11px] font-medium text-amber-600 mt-0.5">
-            ¡Últimas {product.stock} unidades!
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {product.stock <= 0 ? (
+            <span className="rounded bg-danger-600/10 px-2 py-0.5 text-[10px] font-semibold text-danger-600">
+              Sin stock
+            </span>
+          ) : product.stock <= 3 ? (
+            <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              ¡Últimas {product.stock} unidades!
+            </span>
+          ) : (
+            <span className="rounded bg-plate-100 px-2 py-0.5 text-[10px] font-medium text-steel-500">
+              Retirá en local
+            </span>
+          )}
+          <span className="rounded bg-plate-100 px-2 py-0.5 text-[10px] font-medium text-steel-500">
+            Enviamos por Andreani
           </span>
-        ) : null}
+        </div>
 
         <div className="mt-3 flex gap-2">
           <button
