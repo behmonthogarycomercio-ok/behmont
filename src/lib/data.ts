@@ -166,11 +166,12 @@ export async function getRelatedProducts(
 
 export async function searchProducts(query: string): Promise<Product[]> {
   const supabase = createServerSupabase();
+  const safeQuery = query.replace(/[,()%]/g, ' ').trim();
   const { data } = await supabase
     .from('products')
     .select('*, category:categories(*), brand:brands(*)')
     .eq('active', true)
-    .ilike('name', `%${query}%`)
+    .or(`name.ilike.%${safeQuery}%,sku.ilike.%${safeQuery}%,specs::text.ilike.%${safeQuery}%`)
     .limit(40);
   return data || [];
 }

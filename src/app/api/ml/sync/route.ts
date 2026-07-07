@@ -70,10 +70,23 @@ async function runSync(request: Request, fromCron: boolean) {
       (categoryRows || []).map((c: { id: string; slug: string }) => [c.slug, c.id])
     );
 
+    // Productos ya sincronizados antes — para no pisar el código SKU que el
+    // dueño haya cargado a mano en el admin. El SKU de ML solo se usa una vez,
+    // al crear el producto por primera vez.
+    const { data: existingRows } = await supabase
+      .from('products')
+      .select('ml_item_id')
+      .not('ml_item_id', 'is', null);
+    const existingMlItemIds = new Set((existingRows || []).map((r: { ml_item_id: string }) => r.ml_item_id));
+
     let synced = 0;
     for (const item of items) {
-      const image = item.pictures?.[0]?.secure_url || item.thumbnail;
-      const sku = item.seller_custom_field?.trim() || item.id;
+      const images =
+        item.pictures && item.pictures.length > 0
+          ? item.pictures.map((p) => p.secure_url)
+          : item.thumbnail
+            ? [item.thumbnail]
+            : [];
 
       // Descripción y características: se traen de ML pero NUNCA pisan lo que ya
       // esté cargado con contenido vacío — si ML no tiene nada, se omite el campo
@@ -84,7 +97,6 @@ async function runSync(request: Request, fromCron: boolean) {
         .map((a) => ({ label: a.name || a.id, value: a.value_name as string }));
 
       const payload: Record<string, unknown> = {
-        sku,
         ml_item_id: item.id,
         ml_permalink: item.permalink,
         ml_last_synced_at: new Date().toISOString(),
@@ -92,9 +104,15 @@ async function runSync(request: Request, fromCron: boolean) {
         slug: slugify(item.title, item.id),
         price: item.price,
         stock: item.available_quantity,
-        images: image ? [image] : [],
+        images,
         active: true,
       };
+      // El código SKU solo se completa la primera vez que se sincroniza este
+      // item (producto nuevo) — en syncs siguientes se deja intacto el valor
+      // que ya esté en la base, sea el original de ML o uno editado a mano.
+      if (!existingMlItemIds.has(item.id)) {
+        payload.sku = item.seller_custom_field?.trim() || item.id;
+      }
       if (description) payload.description = description;
       if (specs.length > 0) payload.specs = specs;
 

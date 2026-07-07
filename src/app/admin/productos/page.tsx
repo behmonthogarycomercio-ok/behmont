@@ -19,7 +19,8 @@ export default async function ProductosPage({
     .order('created_at', { ascending: false });
 
   if (q) {
-    productsQuery = productsQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+    const safeQ = q.replace(/[,()%]/g, ' ').trim();
+    productsQuery = productsQuery.or(`name.ilike.%${safeQ}%,sku.ilike.%${safeQ}%,specs::text.ilike.%${safeQ}%`);
   }
 
   const [{ data: products }, { data: categories }, { data: brands }] = await Promise.all([
