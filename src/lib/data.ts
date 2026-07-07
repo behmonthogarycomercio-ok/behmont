@@ -167,11 +167,25 @@ export async function getRelatedProducts(
 export async function searchProducts(query: string): Promise<Product[]> {
   const supabase = createServerSupabase();
   const safeQuery = query.replace(/[,()%]/g, ' ').trim();
+
+  const { data: matchingBrands } = await supabase
+    .from('brands')
+    .select('id')
+    .ilike('name', `%${safeQuery}%`);
+  const brandIds = (matchingBrands || []).map((b) => b.id);
+
+  const filters = [
+    `name.ilike.%${safeQuery}%`,
+    `sku.ilike.%${safeQuery}%`,
+    `specs_text.ilike.%${safeQuery}%`,
+  ];
+  if (brandIds.length) filters.push(`brand_id.in.(${brandIds.join(',')})`);
+
   const { data } = await supabase
     .from('products')
     .select('*, category:categories(*), brand:brands(*)')
     .eq('active', true)
-    .or(`name.ilike.%${safeQuery}%,sku.ilike.%${safeQuery}%,specs::text.ilike.%${safeQuery}%`)
+    .or(filters.join(','))
     .limit(40);
   return data || [];
 }

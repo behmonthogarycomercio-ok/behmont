@@ -20,7 +20,21 @@ export default async function ProductosPage({
 
   if (q) {
     const safeQ = q.replace(/[,()%]/g, ' ').trim();
-    productsQuery = productsQuery.or(`name.ilike.%${safeQ}%,sku.ilike.%${safeQ}%,specs::text.ilike.%${safeQ}%`);
+
+    const { data: matchingBrands } = await supabase
+      .from('brands')
+      .select('id')
+      .ilike('name', `%${safeQ}%`);
+    const brandIds = (matchingBrands || []).map((b) => b.id);
+
+    const filters = [
+      `name.ilike.%${safeQ}%`,
+      `sku.ilike.%${safeQ}%`,
+      `specs_text.ilike.%${safeQ}%`,
+    ];
+    if (brandIds.length) filters.push(`brand_id.in.(${brandIds.join(',')})`);
+
+    productsQuery = productsQuery.or(filters.join(','));
   }
 
   const [{ data: products }, { data: categories }, { data: brands }] = await Promise.all([
