@@ -20,8 +20,13 @@ export default function BrandStrip({ brands, topBrands }: { brands: Brand[]; top
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-5">
-        <h2 className="font-display text-xl font-semibold text-steel-900">Buscar por marca</h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-5">
+        <div>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
+            Catálogo por fabricante
+          </p>
+          <h2 className="font-display text-xl font-semibold text-steel-900">Buscar por marca</h2>
+        </div>
         <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-steel-400" />
           <input

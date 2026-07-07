@@ -8,7 +8,6 @@ import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import { getProductCode } from '@/lib/product-display';
 import { clsx } from 'clsx';
-import Badge from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import type { Product } from '@/lib/types';
 
@@ -34,9 +33,11 @@ export default function ProductCard({
   );
 
   return (
-    <div className="group relative flex flex-col rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
+    <div className="group relative flex flex-col rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden transition-shadow hover:shadow-[0_4px_20px_-4px_rgba(11,18,32,0.18)]">
       {discountPct && (
-        <Badge className="absolute left-3 top-3 z-10">{discountPct}% OFF</Badge>
+        <span className="absolute left-3 top-3 z-10 -rotate-2 rounded bg-amber-500 px-2 py-0.5 font-mono text-[10px] font-bold text-white shadow">
+          {discountPct}% OFF
+        </span>
       )}
       <button
         onClick={(e) => {
@@ -48,54 +49,61 @@ export default function ProductCard({
         aria-pressed={favorite}
       >
         <Heart
-          className={clsx('h-4 w-4', favorite ? 'fill-amber-500 text-amber-500' : 'text-steel-700')}
+          className={clsx('h-4 w-4', favorite ? 'fill-amber-500 text-amber-500' : 'text-steel-400')}
         />
       </button>
 
-      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-plate-50">
+      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-plate-50 overflow-hidden">
         {product.images?.[0] ? (
           <Image
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+            className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="grid h-full place-items-center text-steel-300 font-display text-xs">
+          <div className="grid h-full place-items-center text-steel-300 font-mono text-[10px] uppercase tracking-widest">
             Sin imagen
           </div>
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-1 p-4">
-        {product.brand && (
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-steel-500">
-            {product.brand.name}
-          </span>
-        )}
+      <div className="flex flex-1 flex-col gap-0.5 p-4">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          {product.brand && (
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-steel-400">
+              {product.brand.name}
+            </span>
+          )}
+          {code && (
+            <span className="ml-auto shrink-0 font-mono text-[10px] text-steel-300">
+              {code}
+            </span>
+          )}
+        </div>
+
         <Link
           href={`/producto/${product.slug}`}
-          className="font-medium text-steel-900 text-sm leading-snug line-clamp-2 hover:text-amber-600"
+          className="font-medium text-steel-900 text-sm leading-snug line-clamp-2 hover:text-amber-600 transition-colors"
         >
           {product.name}
         </Link>
 
-        <div className="mt-1 flex items-baseline gap-2">
-          <span className="font-display font-bold text-lg text-steel-950">
+        <div className="mt-2 flex items-baseline gap-2">
+          <span className="font-display font-bold text-xl text-steel-950 tracking-tight">
             ${product.price.toLocaleString('es-AR')}
           </span>
           {product.compare_at_price && discountPct && (
-            <span className="text-xs text-steel-400 line-through">
+            <span className="text-xs text-steel-350 line-through">
               ${product.compare_at_price.toLocaleString('es-AR')}
             </span>
           )}
         </div>
 
-        {code && <span className="mt-1 text-xs text-steel-500">Código: {code}</span>}
         {product.stock <= 0 ? (
-          <span className="text-xs font-medium text-danger-600">Sin stock</span>
+          <span className="text-[11px] font-medium text-danger-600 mt-0.5">Sin stock</span>
         ) : product.stock <= 3 ? (
-          <span className="text-xs font-medium text-amber-600">
+          <span className="text-[11px] font-medium text-amber-600 mt-0.5">
             ¡Últimas {product.stock} unidades!
           </span>
         ) : null}

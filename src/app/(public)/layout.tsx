@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PromoBar from '@/components/PromoBar';
 import { getCategories, getSiteSettings } from '@/lib/data';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -7,6 +8,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
+      <PromoBar />
       <Navbar categories={categories} />
       {children}
       <Footer

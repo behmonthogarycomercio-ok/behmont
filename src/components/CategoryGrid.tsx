@@ -57,8 +57,13 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-display text-xl font-semibold text-steel-900">Categorías</h2>
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
+            Índice de pasillos
+          </p>
+          <h2 className="font-display text-xl font-semibold text-steel-900">Categorías</h2>
+        </div>
         <div className="hidden sm:flex gap-2">
           <button
             onClick={() => scroll('left')}
@@ -78,24 +83,27 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
       </div>
       <div
         ref={scrollerRef}
-        className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {categories.map((cat) => {
+        {categories.map((cat, i) => {
           const Icon = CATEGORY_ICONS[cat.slug] || Tag;
           return (
             <Link
               key={cat.id}
               href={`/categoria/${cat.slug}`}
-              className="group flex w-20 shrink-0 snap-start flex-col items-center gap-2 text-center"
+              className="group flex w-28 shrink-0 snap-start flex-col gap-2 rounded-xl2 border border-plate-200 bg-white p-3 text-center shadow-card transition-colors hover:border-amber-500 hover:bg-amber-50"
             >
-              <span className="relative grid h-20 w-20 place-items-center rounded-full bg-white border border-plate-200 shadow-card overflow-hidden transition-colors group-hover:border-amber-500 group-hover:bg-amber-50">
+              <span className="block text-left font-mono text-[10px] font-semibold text-steel-300 transition-colors group-hover:text-amber-500">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="relative mx-auto grid h-11 w-11 place-items-center overflow-hidden rounded-full">
                 {cat.icon_url ? (
                   <Image src={cat.icon_url} alt={cat.name} fill className="object-cover" />
                 ) : (
-                  <Icon className="h-7 w-7 text-steel-700 transition-colors group-hover:text-amber-600" strokeWidth={1.75} />
+                  <Icon className="h-7 w-7 text-steel-700 transition-colors group-hover:text-amber-600" strokeWidth={1.5} />
                 )}
               </span>
-              <span className="text-sm font-medium text-steel-800 line-clamp-2 group-hover:text-amber-600">
+              <span className="text-xs font-medium leading-snug text-steel-800 line-clamp-2 group-hover:text-amber-700">
                 {cat.name}
               </span>
             </Link>

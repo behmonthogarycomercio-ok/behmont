@@ -15,14 +15,16 @@ export default function FlashOffers({
   return (
     <section className="bg-steel-900 py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-amber-500">
+        <div className="flex items-end justify-between mb-6 pb-5 border-b border-dashed border-white/15">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 shrink-0 -rotate-6 place-items-center rounded-md bg-amber-500 shadow-lg">
               <Zap className="h-5 w-5 text-white" fill="currentColor" />
             </span>
             <div>
-              <h2 className="font-display text-xl font-semibold text-white leading-tight">Ofertas Flash</h2>
-              <p className="text-xs text-plate-100/70">Precios especiales por tiempo limitado</p>
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-amber-400/90">
+                Tiempo limitado
+              </p>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-white leading-tight">Ofertas Flash</h2>
             </div>
           </div>
           <Link

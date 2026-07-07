@@ -21,7 +21,12 @@ export default function LocationSection({
 
   return (
     <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 scroll-mt-20">
-      <h2 className="font-display text-xl font-semibold text-steel-900 mb-5">Dónde estamos</h2>
+      <div className="mb-5">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
+          San Lorenzo Oeste 380, Concordia
+        </p>
+        <h2 className="font-display text-xl font-semibold text-steel-900">Dónde estamos</h2>
+      </div>
       <div className="grid gap-4 md:grid-cols-[1fr_1.3fr] rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
         <div className="p-6 sm:p-8 flex flex-col justify-center">
           <div className="flex items-start gap-2 text-steel-800">

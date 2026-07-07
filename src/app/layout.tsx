@@ -12,7 +12,7 @@ const body = Inter({ subsets: ['latin'], variable: '--font-body' });
 const mono = IBM_Plex_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
-  weight: ['400', '500'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
