@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import FaqAccordion, { type FaqCategory } from '@/components/FaqAccordion';
 import { getSiteSettings } from '@/lib/data';
 
 const FAQ_CATEGORIES: FaqCategory[] = [
   {
-    title: '📦 Envíos y Entregas',
+    title: 'Envíos y Entregas',
     items: [
       {
         q: '¿Hacen envíos?',
@@ -17,7 +18,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     ],
   },
   {
-    title: '💳 Métodos de Pago y Facturación',
+    title: 'Métodos de Pago y Facturación',
     items: [
       {
         q: '¿Cuáles son las formas de pago?',
@@ -30,7 +31,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     ],
   },
   {
-    title: '🛠️ Garantía, Cambios y Soporte',
+    title: 'Garantía, Cambios y Soporte',
     items: [
       {
         q: '¿Los productos tienen garantía?',
@@ -43,7 +44,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     ],
   },
   {
-    title: '🕒 Horarios de Atención',
+    title: 'Horarios de Atención',
     items: [
       {
         q: '¿En qué horarios puedo encontrarlos?',
@@ -57,15 +58,27 @@ export default async function FaqPage() {
   const settings = await getSiteSettings();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
-      <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mb-2">
-        Preguntas frecuentes
-      </h1>
-      <p className="text-steel-500 text-sm mb-8">
-        Todo lo que necesitás saber antes de comprar. Si tenés otra duda, escribinos por
-        WhatsApp y te respondemos al toque.
-      </p>
-      <FaqAccordion categories={FAQ_CATEGORIES} />
+    <main>
+      <div className="border-b border-plate-200 bg-white">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+          <nav className="font-mono text-[11px] text-steel-400 mb-4">
+            <Link href="/" className="hover:text-steel-700 transition-colors">Inicio</Link>
+            <span className="mx-2 text-steel-300">/</span>
+            <span className="font-semibold text-steel-700">Preguntas frecuentes</span>
+          </nav>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-steel-950 tracking-tight">
+            Preguntas frecuentes
+          </h1>
+          <p className="mt-2 text-sm text-steel-400 leading-relaxed">
+            Si tenés otra duda, escribinos por WhatsApp y te respondemos al toque.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
+        <FaqAccordion categories={FAQ_CATEGORIES} />
+      </div>
+
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </main>
   );
