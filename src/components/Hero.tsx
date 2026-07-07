@@ -15,23 +15,32 @@ function HeroFallback() {
           }}
         />
         <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl" />
-        <div className="relative z-10 px-8 sm:px-14 py-12 max-w-xl">
+        <div className="relative z-10 px-8 sm:px-14 py-14 sm:py-20 max-w-2xl">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400">
             Concordia · Entre Ríos · Desde 1995
           </p>
-          <h1 className="mt-3 font-display text-3xl sm:text-5xl font-bold text-white leading-[1.05] tracking-tight">
-            Equipamiento comercial y de hogar
+          <h1 className="mt-4 font-display text-5xl sm:text-7xl font-bold text-white leading-none tracking-tighter">
+            Equipamiento comercial<br className="hidden sm:block" /> y de hogar
           </h1>
-          <span className="mt-4 block h-1 w-14 rounded-full bg-amber-500" />
-          <p className="mt-4 text-plate-100/80 text-sm sm:text-base max-w-sm">
-            Gastronomía, barbería, hogar, electrónica y más. Financiación diaria · Factura A y B.
+          <span className="mt-6 block h-1 w-14 rounded-full bg-amber-500" />
+          <p className="mt-5 text-plate-100/70 text-sm sm:text-lg max-w-sm leading-relaxed">
+            Gastronomía, barbería, hogar, electrónica y más.<br />
+            Financiación diaria · Factura A y B.
           </p>
-          <Link
-            href="/buscar"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-amber-600 active:scale-[0.97]"
-          >
-            Ver catálogo completo <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-8 flex items-center gap-4">
+            <Link
+              href="/buscar"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-steel-950 shadow transition hover:bg-plate-100 active:scale-[0.97]"
+            >
+              Ver catálogo <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/#ubicacion"
+              className="text-sm font-medium text-plate-100/70 hover:text-white transition-colors"
+            >
+              Cómo llegar →
+            </Link>
+          </div>
         </div>
       </div>
     </section>

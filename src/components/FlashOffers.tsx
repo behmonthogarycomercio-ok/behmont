@@ -13,7 +13,7 @@ export default function FlashOffers({
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-steel-900 py-10">
+    <section className="bg-steel-900 py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-end justify-between mb-6 pb-5 border-b border-dashed border-white/15">
           <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export default function FlashOffers({
               <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-amber-400/90">
                 Tiempo limitado
               </p>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-white leading-tight">Ofertas Flash</h2>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight">Ofertas Flash</h2>
             </div>
           </div>
           <Link

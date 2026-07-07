@@ -56,13 +56,13 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
-      <div className="flex items-end justify-between mb-5">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-14">
+      <div className="flex items-end justify-between mb-6">
         <div>
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
             Índice de pasillos
           </p>
-          <h2 className="font-display text-xl font-semibold text-steel-900">Categorías</h2>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-steel-900 tracking-tight">Categorías</h2>
         </div>
         <div className="hidden sm:flex gap-2">
           <button
