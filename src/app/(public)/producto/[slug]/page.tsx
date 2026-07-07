@@ -27,10 +27,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
       : null;
 
   const code = getProductCode(product);
+  const filteredSpecs = product.specs?.filter(
+    (s) => s.label.trim().toLowerCase() !== 'sku'
+  ) ?? [];
 
   return (
     <main>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
+      {/* Breadcrumb */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-7">
         <Breadcrumbs
           items={[
             { label: 'Inicio', href: '/' },
@@ -42,84 +46,131 @@ export default async function ProductPage({ params }: { params: { slug: string }
         />
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-10 grid gap-10 md:grid-cols-2">
+      {/* Product layout */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-14 grid gap-10 md:gap-16 md:grid-cols-2">
         <ProductGallery images={product.images} name={product.name} />
 
-        <div>
-          {product.brand && (
-            <span className="text-xs font-semibold uppercase tracking-wide text-steel-500">
-              {product.brand.name}
-            </span>
-          )}
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 mt-1">
+        {/* Right panel */}
+        <div className="flex flex-col">
+          {/* Brand + code */}
+          <div className="flex items-center justify-between gap-3">
+            {product.brand && (
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-steel-400">
+                {product.brand.name}
+              </span>
+            )}
+            {code && (
+              <span className="font-mono text-[11px] text-steel-300">
+                {code}
+              </span>
+            )}
+          </div>
+
+          <h1 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-steel-950 leading-tight tracking-tight">
             {product.name}
           </h1>
-          {code && <p className="text-sm text-steel-500 mt-1">Código: {code}</p>}
 
-          <div className="mt-4 flex items-baseline gap-3">
-            <span className="font-display font-bold text-3xl text-steel-950">
+          {/* Price block */}
+          <div className="mt-5 flex items-baseline gap-3">
+            <span className="font-display font-bold text-4xl text-steel-950 tracking-tight">
               ${product.price.toLocaleString('es-AR')}
             </span>
-            {discountPct && (
+            {discountPct && product.compare_at_price && (
               <>
-                <span className="text-steel-400 line-through text-lg">
-                  ${product.compare_at_price!.toLocaleString('es-AR')}
+                <span className="text-steel-350 line-through text-lg">
+                  ${product.compare_at_price.toLocaleString('es-AR')}
                 </span>
-                <span className="rounded-full bg-amber-500 text-white text-xs font-bold px-2.5 py-1">
+                <span className="-rotate-1 rounded bg-amber-500 px-2 py-0.5 font-mono text-[11px] font-bold text-white">
                   {discountPct}% OFF
                 </span>
               </>
             )}
           </div>
 
-          <p className="mt-2 text-sm">
+          {/* Stock */}
+          <div className="mt-2">
             {product.stock > 0 ? (
-              <span className="text-success-600 font-medium">
-                Stock disponible ({product.stock} unidades)
-              </span>
+              product.stock <= 3 ? (
+                <span className="font-mono text-[11px] font-semibold text-amber-700">
+                  ¡Últimas {product.stock} unidades!
+                </span>
+              ) : (
+                <span className="font-mono text-[11px] font-semibold text-success-600">
+                  En stock · {product.stock} unidades
+                </span>
+              )
             ) : (
-              <span className="text-danger-600 font-medium">Sin stock</span>
+              <span className="font-mono text-[11px] font-semibold text-danger-600">Sin stock</span>
             )}
-          </p>
+          </div>
 
+          {/* Description */}
           {product.description && (
-            <p className="mt-4 text-steel-700 leading-relaxed whitespace-pre-line">
+            <p className="mt-5 text-steel-600 leading-relaxed text-sm whitespace-pre-line border-t border-plate-200 pt-5">
               {product.description}
             </p>
           )}
 
-          {product.specs && product.specs.filter((s) => s.label.trim().toLowerCase() !== 'sku').length > 0 && (
-            <div className="mt-6">
-              <h2 className="font-display font-semibold text-steel-900 mb-3">Características</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {product.specs.filter((s) => s.label.trim().toLowerCase() !== 'sku').map((spec, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-plate-200 bg-plate-50 px-3 py-2 text-sm"
-                  >
-                    <span className="text-steel-500">{spec.label}</span>
-                    <span className="text-steel-800 font-medium text-right">{spec.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+          {/* CTA actions */}
           <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
 
+          {/* Trust strip */}
+          <div className="mt-5 grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden text-center">
+            <div className="bg-plate-50 px-3 py-3">
+              <p className="font-mono text-[10px] font-semibold text-steel-700 leading-tight">Envíos</p>
+              <p className="font-mono text-[10px] text-steel-400 mt-0.5">por Andreani</p>
+            </div>
+            <div className="bg-plate-50 px-3 py-3">
+              <p className="font-mono text-[10px] font-semibold text-steel-700 leading-tight">Retirá</p>
+              <p className="font-mono text-[10px] text-steel-400 mt-0.5">en local</p>
+            </div>
+            <div className="bg-plate-50 px-3 py-3">
+              <p className="font-mono text-[10px] font-semibold text-steel-700 leading-tight">Factura</p>
+              <p className="font-mono text-[10px] text-steel-400 mt-0.5">A y B</p>
+            </div>
+          </div>
+
+          {/* ML link */}
           {product.ml_permalink && (
             <a
               href={product.ml_permalink}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-block text-xs text-steel-500 underline hover:text-steel-700"
+              className="mt-4 font-mono text-[11px] text-steel-400 hover:text-steel-700 transition-colors"
             >
-              Ver también en MercadoLibre →
+              Ver en MercadoLibre →
             </a>
           )}
         </div>
       </div>
 
+      {/* Specs */}
+      {filteredSpecs.length > 0 && (
+        <div className="border-t border-plate-200 bg-plate-50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+            <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
+              Características técnicas
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-plate-200 rounded-xl overflow-hidden">
+              {filteredSpecs.map((spec, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-6 px-5 py-3.5 bg-white border-b border-plate-200 last:border-b-0 even:sm:border-l"
+                >
+                  <span className="font-mono text-[11px] uppercase tracking-wide text-steel-400 shrink-0">
+                    {spec.label}
+                  </span>
+                  <span className="text-sm font-semibold text-steel-900 text-right">
+                    {spec.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Related products */}
       {related.length > 0 && (
         <ProductGrid
           title="También te puede interesar"
