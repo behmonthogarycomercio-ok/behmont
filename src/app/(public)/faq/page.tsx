@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import FaqAccordion, { type FaqCategory } from '@/components/FaqAccordion';
 import { getSiteSettings } from '@/lib/data';
+
+export const metadata: Metadata = {
+  title: 'Preguntas frecuentes | BEHMONT',
+  description: 'Envíos, formas de pago, garantías y horarios de atención. Todo lo que necesitás saber antes de comprar en BEHMONT, Concordia.',
+};
 
 const FAQ_CATEGORIES: FaqCategory[] = [
   {

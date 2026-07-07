@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import ProductActions from '@/components/ProductActions';
 import ProductGallery from '@/components/ProductGallery';
@@ -8,6 +9,15 @@ import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/dat
 import { getProductCode } from '@/lib/product-display';
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = await getProductBySlug(params.slug);
+  if (!product) return {};
+  return {
+    title: `${product.name} | BEHMONT`,
+    description: `${product.name}${product.brand ? ` — ${product.brand.name}` : ''}. Consultá precio y stock en BEHMONT, Concordia. Financiación diaria y envíos por Andreani.`,
+  };
+}
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const [settings, product] = await Promise.all([

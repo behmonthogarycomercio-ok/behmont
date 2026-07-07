@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import MayoristaForm from '@/components/MayoristaForm';
+
+export const metadata: Metadata = {
+  title: 'Canal Mayorista | BEHMONT',
+  description: 'Precios y condiciones especiales para comercios, revendedores e instituciones. Financiación y factura A y B. Concordia, Entre Ríos.',
+};
 
 const BENEFICIOS = [
   { value: 'Precios especiales', label: 'Por volumen y frecuencia de compra' },

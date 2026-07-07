@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import OrderForm from '@/components/OrderForm';
+
+export const metadata: Metadata = {
+  title: 'Tu pedido | BEHMONT',
+  description: 'Revisá y enviá tu pedido directamente por WhatsApp. BEHMONT, Concordia.',
+};
 
 export default function PedidoPage() {
   return (

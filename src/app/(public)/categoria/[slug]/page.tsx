@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
@@ -7,6 +8,15 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { getProductsByCategory, getSiteSettings } from '@/lib/data';
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { category } = await getProductsByCategory(params.slug);
+  if (!category) return {};
+  return {
+    title: `${category.name} | BEHMONT`,
+    description: `Comprá ${category.name} en BEHMONT, Concordia. Stock disponible, financiación y envíos por Andreani.`,
+  };
+}
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const [settings, { category, products }] = await Promise.all([

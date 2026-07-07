@@ -1,8 +1,18 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import SearchInput from '@/components/SearchInput';
 import { getSiteSettings, searchProducts, getCategories } from '@/lib/data';
+
+export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }): Promise<Metadata> {
+  const q = searchParams.q?.trim();
+  if (!q) return { title: 'Buscar productos | BEHMONT' };
+  return {
+    title: `Resultados para "${q}" | BEHMONT`,
+    description: `Buscás "${q}" en el catálogo de BEHMONT, Concordia. Más de 2.500 productos con stock.`,
+  };
+}
 
 export default async function SearchPage({
   searchParams,

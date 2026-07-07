@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import FaqAccordion, { type FaqCategory } from '@/components/FaqAccordion';
 import { getSiteSettings } from '@/lib/data';
+
+export const metadata: Metadata = {
+  title: 'Guía de compras | BEHMONT',
+  description: 'Medios de pago, financiación propia, envíos y políticas de venta de BEHMONT, Concordia, Entre Ríos.',
+};
 
 const POLICY_FAQ: FaqCategory[] = [
   {

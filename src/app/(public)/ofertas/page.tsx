@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import ProductCard from '@/components/ProductCard';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { getDiscountedProducts, getSiteSettings } from '@/lib/data';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Ofertas | BEHMONT',
+  description: 'Productos con descuento en BEHMONT, Concordia. Stock disponible, financiación y envíos a todo el país por Andreani.',
+};
 
 export default async function OfertasPage() {
   const [settings, products] = await Promise.all([

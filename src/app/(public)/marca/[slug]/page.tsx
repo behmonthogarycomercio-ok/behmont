@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
@@ -6,6 +7,15 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { getProductsByBrand, getSiteSettings } from '@/lib/data';
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { brand } = await getProductsByBrand(params.slug);
+  if (!brand) return {};
+  return {
+    title: `${brand.name} | BEHMONT`,
+    description: `Productos ${brand.name} en BEHMONT, Concordia. Stock disponible, financiación y envíos a todo el país.`,
+  };
+}
 
 export default async function BrandPage({ params }: { params: { slug: string } }) {
   const [settings, { brand, products }] = await Promise.all([
