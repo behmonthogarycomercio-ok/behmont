@@ -1,8 +1,10 @@
 import Hero from '@/components/Hero';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryGrid from '@/components/CategoryGrid';
+import BusinessSection from '@/components/BusinessSection';
 import ProductGrid from '@/components/ProductGrid';
 import FlashOffers from '@/components/FlashOffers';
+import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
 import BrandStrip from '@/components/BrandStrip';
 import LocationSection from '@/components/LocationSection';
@@ -36,12 +38,14 @@ export default async function HomePage() {
       <Hero promotions={heroPromos} />
       <TrustBadges />
       <CategoryGrid categories={categories} />
+      <BusinessSection />
       <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
       <ProductGrid
         title="El mejor precio de contado"
         products={featured}
         whatsappNumber={settings.whatsappNumber}
       />
+      <WhatsAppSection whatsappNumber={settings.whatsappNumber} />
       <PromoStrip promotions={stripPromos} />
       <BrandStrip brands={brands} topBrands={topBrands} />
       <LocationSection

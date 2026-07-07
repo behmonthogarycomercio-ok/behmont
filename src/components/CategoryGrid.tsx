@@ -3,50 +3,8 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  ChefHat,
-  ShoppingBasket,
-  Beef,
-  Croissant,
-  Snowflake,
-  Home,
-  Scissors,
-  Sparkles,
-  Palette,
-  Archive,
-  Briefcase,
-  Wrench,
-  Smartphone,
-  Sofa,
-  WashingMachine,
-  Wind,
-  Bike,
-  Tag,
-  ChevronLeft,
-  ChevronRight,
-  type LucideIcon,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Category } from '@/lib/types';
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  gastronomia: ChefHat,
-  almacen: ShoppingBasket,
-  carniceria: Beef,
-  panaderia: Croissant,
-  frio: Snowflake,
-  hogar: Home,
-  'peluqueria-barberia': Scissors,
-  estetica: Sparkles,
-  decoracion: Palette,
-  almacenamiento: Archive,
-  oficina: Briefcase,
-  herramientas: Wrench,
-  electronica: Smartphone,
-  muebles: Sofa,
-  electrodomesticos: WashingMachine,
-  climatizacion: Wind,
-  'deportes-aire-libre': Bike,
-};
 
 export default function CategoryGrid({ categories }: { categories: Category[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -83,32 +41,29 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
       </div>
       <div
         ref={scrollerRef}
-        className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-2.5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {categories.map((cat, i) => {
-          const Icon = CATEGORY_ICONS[cat.slug] || Tag;
-          return (
-            <Link
-              key={cat.id}
-              href={`/categoria/${cat.slug}`}
-              className="group flex w-28 shrink-0 snap-start flex-col gap-2 rounded-xl2 border border-plate-200 bg-white p-3 text-center shadow-card transition-colors hover:border-amber-500 hover:bg-amber-50"
-            >
-              <span className="block text-left font-mono text-[10px] font-semibold text-steel-300 transition-colors group-hover:text-amber-500">
+        {categories.map((cat, i) => (
+          <Link
+            key={cat.id}
+            href={`/categoria/${cat.slug}`}
+            className="group flex w-32 shrink-0 snap-start flex-col justify-between gap-3 rounded-xl border border-plate-200 bg-white p-4 transition-all hover:border-steel-900 hover:shadow-md"
+          >
+            {cat.icon_url && (
+              <span className="relative block h-10 w-10 overflow-hidden rounded-md">
+                <Image src={cat.icon_url} alt={cat.name} fill className="object-cover" />
+              </span>
+            )}
+            <div>
+              <span className="block font-mono text-[10px] text-steel-300 mb-1 group-hover:text-amber-500 transition-colors">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <span className="relative mx-auto grid h-11 w-11 place-items-center overflow-hidden rounded-full">
-                {cat.icon_url ? (
-                  <Image src={cat.icon_url} alt={cat.name} fill className="object-cover" />
-                ) : (
-                  <Icon className="h-7 w-7 text-steel-700 transition-colors group-hover:text-amber-600" strokeWidth={1.5} />
-                )}
-              </span>
-              <span className="text-xs font-medium leading-snug text-steel-800 line-clamp-2 group-hover:text-amber-700">
+              <span className="block text-sm font-semibold leading-snug text-steel-900 line-clamp-2">
                 {cat.name}
               </span>
-            </Link>
-          );
-        })}
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );
