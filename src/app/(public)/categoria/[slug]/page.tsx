@@ -12,9 +12,18 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { category } = await getProductsByCategory(params.slug);
   if (!category) return {};
+  const description = `Comprá ${category.name} en BEHMONT, Concordia. Stock disponible, financiación y envíos por Andreani.`;
   return {
     title: `${category.name} | BEHMONT`,
-    description: `Comprá ${category.name} en BEHMONT, Concordia. Stock disponible, financiación y envíos por Andreani.`,
+    description,
+    openGraph: {
+      title: `${category.name} | BEHMONT`,
+      description,
+      ...(category.icon_url && { images: [{ url: category.icon_url, alt: category.name }] }),
+      type: 'website',
+      locale: 'es_AR',
+      siteName: 'BEHMONT — Comercio y Hogar',
+    },
   };
 }
 

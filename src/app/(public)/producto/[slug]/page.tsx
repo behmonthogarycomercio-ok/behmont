@@ -13,9 +13,19 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProductBySlug(params.slug);
   if (!product) return {};
+  const description = `${product.name}${product.brand ? ` — ${product.brand.name}` : ''}. Consultá precio y stock en BEHMONT, Concordia. Financiación diaria y envíos por Andreani.`;
+  const image = product.images?.[0];
   return {
     title: `${product.name} | BEHMONT`,
-    description: `${product.name}${product.brand ? ` — ${product.brand.name}` : ''}. Consultá precio y stock en BEHMONT, Concordia. Financiación diaria y envíos por Andreani.`,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      ...(image && { images: [{ url: image, width: 800, height: 800, alt: product.name }] }),
+      type: 'website',
+      locale: 'es_AR',
+      siteName: 'BEHMONT — Comercio y Hogar',
+    },
   };
 }
 
@@ -41,8 +51,32 @@ export default async function ProductPage({ params }: { params: { slug: string }
     (s) => s.label.trim().toLowerCase() !== 'sku'
   ) ?? [];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description ?? undefined,
+    image: product.images,
+    sku: product.sku,
+    ...(product.brand && { brand: { '@type': 'Brand', name: product.brand.name } }),
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'ARS',
+      price: product.price,
+      availability:
+        product.stock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'BEHMONT' },
+    },
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Breadcrumb */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-7">
         <Breadcrumbs
