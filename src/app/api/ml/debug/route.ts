@@ -108,15 +108,20 @@ export async function GET() {
     images,
     active: true,
   };
+  // 4) EL PASO CLAVE: mismo fix que el sync real — insert (con sku) si es
+  // nuevo, update explícito (sin tocar sku) si ya existe. Devuelve el error
+  // de Supabase tal cual si algo falla.
+  let upsertData, upsertError;
   if (!existing) {
     payload.sku = item.seller_custom_field?.trim() || item.id;
+    ({ data: upsertData, error: upsertError } = await supabase.from('products').insert(payload).select());
+  } else {
+    ({ data: upsertData, error: upsertError } = await supabase
+      .from('products')
+      .update(payload)
+      .eq('ml_item_id', item.id)
+      .select());
   }
-
-  // 4) EL PASO CLAVE: intentar el upsert real y devolver el error tal cual.
-  const { data: upsertData, error: upsertError } = await supabase
-    .from('products')
-    .upsert(payload, { onConflict: 'ml_item_id', ignoreDuplicates: false })
-    .select();
 
   return NextResponse.json(
     {

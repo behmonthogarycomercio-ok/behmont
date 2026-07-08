@@ -114,18 +114,30 @@ async function runSync(request: Request, fromCron: boolean) {
         images,
         active: true,
       };
-      // El código SKU solo se completa la primera vez que se sincroniza este
-      // item (producto nuevo) — en syncs siguientes se deja intacto el valor
-      // que ya esté en la base, sea el original de ML o uno editado a mano.
-      if (!existingMlItemIds.has(item.id)) {
-        payload.sku = item.seller_custom_field?.trim() || item.id;
-      }
       if (description) payload.description = description;
       if (specs.length > 0) payload.specs = specs;
 
-      const { error } = await supabase
-        .from('products')
-        .upsert(payload, { onConflict: 'ml_item_id', ignoreDuplicates: false });
+      // El código SKU solo se completa la primera vez que se sincroniza este
+      // item (producto nuevo) — en syncs siguientes se deja intacto el valor
+      // que ya esté en la base, sea el original de ML o uno editado a mano.
+      //
+      // Importante: para productos ya existentes NO se puede usar upsert()
+      // omitiendo "sku" del payload. Postgres arma la fila completa del
+      // INSERT antes de resolver el ON CONFLICT, así que si "sku" es
+      // NOT NULL y no viene en el payload, upsert() revienta con
+      // "null value in column sku violates not-null constraint" — pasaba
+      // en el 100% de los productos ya sincronizados (0 productos
+      // sincronizados de 188, sin ningún error visible porque antes no se
+      // logueaba). Por eso acá se separa en insert (nuevo, con sku) vs
+      // update explícito (existente, sin tocar sku para nada).
+      const isNew = !existingMlItemIds.has(item.id);
+      let error;
+      if (isNew) {
+        payload.sku = item.seller_custom_field?.trim() || item.id;
+        ({ error } = await supabase.from('products').insert(payload));
+      } else {
+        ({ error } = await supabase.from('products').update(payload).eq('ml_item_id', item.id));
+      }
       if (!error) {
         synced++;
       } else {
