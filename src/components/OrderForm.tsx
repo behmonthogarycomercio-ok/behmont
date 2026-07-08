@@ -20,6 +20,8 @@ export default function OrderForm() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [sentName, setSentName] = useState('');
+  const [mpLoading, setMpLoading] = useState(false);
+  const [mpError, setMpError] = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -209,6 +211,58 @@ export default function OrderForm() {
         <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
           {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
         </Button>
+
+        {/* MercadoPago */}
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex-1 border-t border-plate-200" />
+          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
+          <div className="flex-1 border-t border-plate-200" />
+        </div>
+
+        {mpError && <p className="text-xs text-red-600">{mpError}</p>}
+
+        <button
+          type="button"
+          disabled={mpLoading}
+          onClick={async () => {
+            if (!form.name || !form.phone) {
+              setMpError('Completá tu nombre y teléfono antes de continuar.');
+              return;
+            }
+            setMpError('');
+            setMpLoading(true);
+            try {
+              const res = await fetch('/api/mp/create-preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
+                  payer: { name: form.name, phone: form.phone, email: form.email },
+                }),
+              });
+              const data = await res.json();
+              if (!res.ok || !data.init_point) throw new Error(data.error ?? 'Error');
+              window.location.href = data.init_point;
+            } catch (err: unknown) {
+              setMpError(err instanceof Error ? err.message : 'No se pudo iniciar el pago. Intentá de nuevo.');
+            } finally {
+              setMpLoading(false);
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#009EE3] py-3.5 text-sm font-bold text-white hover:bg-[#0088c7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {mpLoading ? (
+            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M10.509 14.342H8.295l1.374-8.634h2.214l-1.374 8.634zm9.801-8.43a5.411 5.411 0 00-1.956-.36c-2.155 0-3.672 1.142-3.682 2.779-.018 1.206 1.087 1.877 1.915 2.28.847.411 1.133.679 1.133 1.046-.009.563-.681.822-1.31.822-.874 0-1.338-.134-2.052-.447l-.285-.134-.304 1.876c.509.232 1.445.438 2.418.447 2.285 0 3.771-1.124 3.789-2.869.009-.956-.572-1.681-1.832-2.28-.759-.386-1.224-.644-1.224-1.037.009-.357.394-.723 1.25-.723.705-.018 1.222.151 1.614.322l.196.089.295-1.812zm5.58-.204h-1.685c-.518 0-.911.15-1.138.697l-3.227 7.937h2.283s.375-.999.456-1.214h2.79c.063.286.259 1.214.259 1.214h2.016L25.89 5.708zm-2.66 5.834c.179-.483.867-2.332.867-2.332-.009.018.179-.492.286-.804l.151.724s.411 1.989.5 2.412h-1.804zM6.995 5.708L4.858 11.87l-.232-1.161C4.22 9.056 2.987 7.394 1.594 6.555l1.949 7.778h2.302l3.44-8.625H6.995z"/>
+            </svg>
+          )}
+          {mpLoading ? 'Redirigiendo...' : 'Pagar con MercadoPago'}
+        </button>
       </form>
 
       {/* Financing option — only for enabled zones */}
