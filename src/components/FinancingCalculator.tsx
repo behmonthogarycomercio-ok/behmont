@@ -17,9 +17,9 @@ type AnyPlan = DailyPlan | MonthlyPlan;
 const STEP_LABELS = ['Requisitos', 'Calculadora', 'Solicitud'];
 
 const REQS = [
-  { key: 'dni',     text: 'Foto de DNI — frente y dorso',           fileLabel: 'Subir foto de DNI (frente y dorso)' },
-  { key: 'service', text: 'Servicio a tu nombre: luz, agua o internet', fileLabel: 'Subir foto del servicio' },
-  { key: 'income',  text: 'Recibo de sueldo o garantía (factura a proveedor)', fileLabel: 'Subir foto del comprobante' },
+  { key: 'dni',     text: 'Foto de DNI — frente y dorso (2 fotos)',          fileLabel: 'Arrastrá o seleccioná las fotos del DNI',   maxFiles: 2 },
+  { key: 'service', text: 'Servicio a tu nombre: luz, agua o internet',       fileLabel: 'Arrastrá o seleccioná la foto del servicio', maxFiles: 2 },
+  { key: 'income',  text: 'Últimos 2 recibos de sueldo o garantía',          fileLabel: 'Arrastrá o seleccioná los comprobantes',    maxFiles: 2 },
 ];
 
 const FREQ_OPTIONS: { key: Freq; label: string }[] = [
@@ -42,11 +42,21 @@ export default function FinancingCalculator({
 
   // Step 1
   const [reqs, setReqs] = useState({ dni: false, service: false, income: false });
-  const [files, setFiles] = useState<Record<string, File | null>>({ dni: null, service: null, income: null });
-  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
+  const [files, setFiles]       = useState<Record<string, File[]>>({ dni: [], service: [], income: [] });
+  const [fileUrls, setFileUrls] = useState<Record<string, string[]>>({});
+  const [dragActive, setDragActive] = useState<Record<string, boolean>>({ dni: false, service: false, income: false });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileRefs = { dni: useRef<HTMLInputElement>(null), service: useRef<HTMLInputElement>(null), income: useRef<HTMLInputElement>(null) };
+
+  function addFiles(key: string, incoming: FileList | File[], maxFiles: number) {
+    const allowed = [...incoming].filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+    setFiles(prev => ({ ...prev, [key]: [...prev[key], ...allowed].slice(0, maxFiles) }));
+  }
+
+  function removeFile(key: string, idx: number) {
+    setFiles(prev => ({ ...prev, [key]: prev[key].filter((_, i) => i !== idx) }));
+  }
 
   // Step 2
   const [amount, setAmount] = useState(initialAmount ? String(initialAmount) : '');
@@ -79,19 +89,23 @@ export default function FinancingCalculator({
   const totalDevolver = principal * (1 + currentPlan.surcharge);
   const freqLabel = freq === 'daily' ? 'día' : freq === 'weekly' ? 'semana' : 'mes';
 
-  async function uploadFiles(): Promise<Record<string, string>> {
+  async function uploadFiles(): Promise<Record<string, string[]>> {
     const supabase = createClient();
     const sessionId = crypto.randomUUID();
-    const urls: Record<string, string> = {};
+    const urls: Record<string, string[]> = {};
     for (const key of ['dni', 'service', 'income'] as const) {
-      const file = files[key];
-      if (!file) continue;
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const path = `${sessionId}/${key}.${ext}`;
-      const { error } = await supabase.storage.from('financing-docs').upload(path, file, { upsert: true });
-      if (!error) {
-        const { data } = supabase.storage.from('financing-docs').getPublicUrl(path);
-        urls[key] = data.publicUrl;
+      const keyFiles = files[key];
+      if (!keyFiles.length) continue;
+      urls[key] = [];
+      for (let i = 0; i < keyFiles.length; i++) {
+        const file = keyFiles[i];
+        const ext = file.name.split('.').pop() ?? 'jpg';
+        const path = `${sessionId}/${key}_${i + 1}.${ext}`;
+        const { error } = await supabase.storage.from('financing-docs').upload(path, file, { upsert: true });
+        if (!error) {
+          const { data } = supabase.storage.from('financing-docs').getPublicUrl(path);
+          urls[key].push(data.publicUrl);
+        }
       }
     }
     return urls;
@@ -107,13 +121,16 @@ export default function FinancingCalculator({
       ...(city ? [`🏙️ ${city}`] : []),
       '',
       ...(productsSummary ? [`🛒 Productos: ${productsSummary}`, ''] : []),
-      ...(Object.keys(fileUrls).length > 0 ? [
-        '📎 *Documentación adjunta:*',
-        ...(fileUrls.dni     ? [`• DNI: ${fileUrls.dni}`]     : []),
-        ...(fileUrls.service ? [`• Servicio: ${fileUrls.service}`] : []),
-        ...(fileUrls.income  ? [`• Comprobante: ${fileUrls.income}`] : []),
-        '',
-      ] : []),
+      ...(Object.keys(fileUrls).length > 0 ? (() => {
+        const docLines: string[] = ['📎 *Documentación adjunta:*'];
+        const labels: Record<string, string> = { dni: 'DNI', service: 'Servicio', income: 'Comprobante' };
+        for (const key of ['dni', 'service', 'income']) {
+          const urls = fileUrls[key] ?? [];
+          if (urls.length === 1) docLines.push(`• ${labels[key]}: ${urls[0]}`);
+          else urls.forEach((url, i) => docLines.push(`• ${labels[key]} ${i + 1}: ${url}`));
+        }
+        return [...docLines, ''];
+      })() : []),
       `💰 Monto: $${fmtARS(principal)}`,
       `📋 Plan: ${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%)`,
       `💵 Total a devolver: $${fmtARS(totalDevolver)}`,
@@ -153,10 +170,12 @@ export default function FinancingCalculator({
               <h2 className="font-display text-lg font-bold text-steel-950">Requisitos necesarios</h2>
               <p className="mt-1 text-sm text-steel-400">Confirmá que tenés toda la documentación antes de continuar.</p>
             </div>
-            {REQS.map(({ key, text, fileLabel }) => {
+            {REQS.map(({ key, text, fileLabel, maxFiles }) => {
               const k = key as keyof typeof reqs;
               const checked = reqs[k];
-              const file = files[k];
+              const keyFiles = files[k];
+              const isDrag = dragActive[k];
+              const canAddMore = keyFiles.length < maxFiles;
               return (
                 <div key={key} className="space-y-2">
                   <label className="flex items-start gap-3 cursor-pointer">
@@ -171,39 +190,47 @@ export default function FinancingCalculator({
                     </span>
                   </label>
                   {checked && (
-                    <div className="ml-7">
-                      {file ? (
-                        <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                    <div className="ml-7 space-y-1.5">
+                      {/* Files already selected */}
+                      {keyFiles.map((f, idx) => (
+                        <div key={idx} className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
                           <Paperclip className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                          <span className="text-xs text-amber-800 font-medium truncate flex-1">{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => { setFiles(f => ({ ...f, [key]: null })); if (fileRefs[k]?.current) fileRefs[k].current!.value = ''; }}
-                            className="text-amber-400 hover:text-amber-700"
-                          >
+                          <span className="text-xs text-amber-800 font-medium truncate flex-1">{f.name}</span>
+                          <button type="button" onClick={() => removeFile(key, idx)} className="text-amber-400 hover:text-amber-700">
                             <X className="h-3 w-3" />
                           </button>
                         </div>
-                      ) : (
+                      ))}
+                      {/* Drop zone — shown while under the limit */}
+                      {canAddMore && (
                         <>
                           <input
                             ref={fileRefs[k]}
                             type="file"
                             accept="image/*,application/pdf"
-                            capture="environment"
+                            multiple
                             className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0] ?? null;
-                              setFiles(prev => ({ ...prev, [key]: f }));
-                            }}
+                            onChange={(e) => { if (e.target.files) addFiles(key, e.target.files, maxFiles); e.target.value = ''; }}
                           />
                           <button
                             type="button"
                             onClick={() => fileRefs[k]?.current?.click()}
-                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-plate-300 bg-plate-50 px-3 py-2 text-xs font-medium text-steel-500 hover:border-amber-400 hover:text-amber-700 transition-colors"
+                            onDragOver={(e) => { e.preventDefault(); setDragActive(d => ({ ...d, [key]: true })); }}
+                            onDragLeave={() => setDragActive(d => ({ ...d, [key]: false }))}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setDragActive(d => ({ ...d, [key]: false }));
+                              addFiles(key, e.dataTransfer.files, maxFiles);
+                            }}
+                            className={`w-full flex items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-2.5 text-xs font-medium transition-colors ${
+                              isDrag
+                                ? 'border-amber-400 bg-amber-50 text-amber-700'
+                                : 'border-plate-300 bg-plate-50 text-steel-500 hover:border-amber-400 hover:text-amber-700'
+                            }`}
                           >
                             <Paperclip className="h-3.5 w-3.5" />
-                            {fileLabel} <span className="text-steel-300">(opcional)</span>
+                            {keyFiles.length === 0 ? fileLabel : `Agregar otra (${keyFiles.length}/${maxFiles})`}
+                            {keyFiles.length === 0 && <span className="text-steel-300 ml-1">(opcional)</span>}
                           </button>
                         </>
                       )}
@@ -240,7 +267,7 @@ export default function FinancingCalculator({
             disabled={!allReqsMet || uploading}
             onClick={async () => {
               setUploadError('');
-              const hasFiles = Object.values(files).some(Boolean);
+              const hasFiles = Object.values(files).some(arr => arr.length > 0);
               if (hasFiles) {
                 setUploading(true);
                 try {
