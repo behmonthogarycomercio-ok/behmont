@@ -5,11 +5,12 @@ import { refreshMLToken } from '@/lib/mercadolibre';
 const ML_API = 'https://api.mercadolibre.com';
 
 /**
- * Endpoint de solo lectura para diagnosticar por qué el sync trae 0
- * productos aunque la cuenta tenga publicaciones activas en MercadoLibre.
- * No sincroniza ni modifica nada — solo repregunta a la API de ML con el
- * token guardado y devuelve la respuesta cruda para poder comparar contra
- * lo que se ve en el panel de MercadoLibre.
+ * Endpoint de solo lectura para diagnosticar por qué el sync no guarda
+ * productos aunque la API de ML devuelva las publicaciones activas bien
+ * (esto último ya se confirmó: 188 activas, coincide con el panel de ML).
+ * Ahora el foco es el segundo paso: intenta el mismo upsert que hace el
+ * sync real contra la tabla `products`, con UN item real, y devuelve el
+ * error de Supabase tal cual si falla — para no seguir adivinando.
  *
  * Uso: entrar logueado como admin a /api/ml/debug
  * Borrar este archivo una vez resuelto el problema de sync (no es para
@@ -41,8 +42,6 @@ export async function GET() {
   try {
     const refreshed = await refreshMLToken(settings.ml_refresh_token);
     accessToken = refreshed.access_token;
-    // Persistimos el token refrescado como hace el sync real, para no dejar
-    // el refresh_token viejo invalidado sin el nuevo guardado.
     await supabase.from('site_settings').upsert([
       { key: 'ml_access_token', value: refreshed.access_token },
       { key: 'ml_refresh_token', value: refreshed.refresh_token },
@@ -54,40 +53,79 @@ export async function GET() {
     );
   }
 
-  const result: Record<string, unknown> = { seller_id_guardado: settings.ml_seller_id };
-
-  // 1) ¿Quién es esta cuenta según ML?
-  const meRes = await fetch(`${ML_API}/users/${settings.ml_seller_id}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  result.cuenta = {
-    http_status: meRes.status,
-    body: meRes.ok ? await meRes.json() : await meRes.text(),
-  };
-
-  // 2) Conteo de publicaciones por estado
-  const estados = ['active', 'paused', 'under_review', 'closed', 'inactive'];
-  const porEstado: Record<string, unknown> = {};
-  for (const status of estados) {
-    const res = await fetch(
-      `${ML_API}/users/${settings.ml_seller_id}/items/search?status=${status}&limit=1`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-    porEstado[status] = {
-      http_status: res.status,
-      body: res.ok ? await res.json() : await res.text(),
-    };
+  // 1) Traer UN item activo real
+  const searchRes = await fetch(
+    `${ML_API}/users/${settings.ml_seller_id}/items/search?status=active&limit=1`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!searchRes.ok) {
+    return NextResponse.json({ step: 'items/search', http_status: searchRes.status, body: await searchRes.text() }, { status: 500 });
   }
-  result.publicaciones_por_estado = porEstado;
+  const searchBody = await searchRes.json();
+  const itemId = searchBody.results?.[0];
+  if (!itemId) {
+    return NextResponse.json({ step: 'items/search', error: 'No devolvió ningún item activo', body: searchBody }, { status: 500 });
+  }
 
-  // 3) Búsqueda sin filtro de estado (para comparar contra el total del panel)
-  const anyRes = await fetch(`${ML_API}/users/${settings.ml_seller_id}/items/search?limit=1`, {
+  // 2) Traer el detalle completo de ese item (mismo endpoint que usa el sync real)
+  const detailRes = await fetch(`${ML_API}/items?ids=${itemId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  result.busqueda_sin_filtro = {
-    http_status: anyRes.status,
-    body: anyRes.ok ? await anyRes.json() : await anyRes.text(),
-  };
+  const detailBody = await detailRes.json();
+  const entry = detailBody[0];
+  if (!detailRes.ok || entry?.code !== 200) {
+    return NextResponse.json(
+      { step: 'items multiget', http_status: detailRes.status, body: detailBody },
+      { status: 500 }
+    );
+  }
+  const item = entry.body;
 
-  return NextResponse.json(result, { status: 200 });
+  // 3) Armar el mismo payload que arma el sync real (versión simplificada)
+  const images =
+    item.pictures && item.pictures.length > 0
+      ? item.pictures.map((p: { secure_url: string }) => p.secure_url)
+      : item.thumbnail
+        ? [item.thumbnail]
+        : [];
+
+  const { data: existing } = await supabase
+    .from('products')
+    .select('id, slug')
+    .eq('ml_item_id', item.id)
+    .maybeSingle();
+
+  const payload: Record<string, unknown> = {
+    ml_item_id: item.id,
+    ml_permalink: item.permalink,
+    ml_last_synced_at: new Date().toISOString(),
+    name: item.title,
+    // Si ya existe, reusamos su slug para no romper la URL pública de este
+    // producto de prueba; si es nuevo, uno provisorio alcanza para el test.
+    slug: existing?.slug || `producto-${item.id}`.toLowerCase(),
+    price: item.price,
+    stock: item.available_quantity,
+    images,
+    active: true,
+  };
+  if (!existing) {
+    payload.sku = item.seller_custom_field?.trim() || item.id;
+  }
+
+  // 4) EL PASO CLAVE: intentar el upsert real y devolver el error tal cual.
+  const { data: upsertData, error: upsertError } = await supabase
+    .from('products')
+    .upsert(payload, { onConflict: 'ml_item_id', ignoreDuplicates: false })
+    .select();
+
+  return NextResponse.json(
+    {
+      item_probado: item.id,
+      ya_existia_en_productos: !!existing,
+      payload_enviado: payload,
+      upsert_resultado: upsertData,
+      upsert_error: upsertError,
+    },
+    { status: 200 }
+  );
 }

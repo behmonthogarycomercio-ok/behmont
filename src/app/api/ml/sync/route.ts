@@ -126,7 +126,15 @@ async function runSync(request: Request, fromCron: boolean) {
       const { error } = await supabase
         .from('products')
         .upsert(payload, { onConflict: 'ml_item_id', ignoreDuplicates: false });
-      if (!error) synced++;
+      if (!error) {
+        synced++;
+      } else {
+        // Antes esto se descartaba en silencio total — si TODOS los upserts
+        // fallaban (ej. por una restricción de esquema), el sync terminaba
+        // "sin errores" pero con 0 productos sincronizados y sin ninguna
+        // pista de por qué.
+        console.error(`[ml/sync] no se pudo guardar el item ${item.id}:`, error);
+      }
 
       // Categorización automática por palabra clave — SOLO si el producto todavía
       // no tiene categoría asignada (no pisa una categoría puesta a mano en el admin).
