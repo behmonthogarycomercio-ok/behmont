@@ -16,6 +16,8 @@ export default function OrderForm() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', note: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [sentName, setSentName] = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,10 +49,58 @@ export default function OrderForm() {
       }
 
       window.open(data.whatsappUrl, '_blank');
+      setSentName(form.name.split(' ')[0]);
       clear();
+      setSent(true);
     } finally {
       setSending(false);
     }
+  }
+
+  if (sent) {
+    return (
+      <div className="flex flex-col items-center text-center py-12 px-4 space-y-5">
+        <div className="h-16 w-16 rounded-full bg-emerald-100 grid place-items-center">
+          <svg className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="font-display text-2xl font-bold text-steel-950 tracking-tight">
+            ¡Pedido enviado, {sentName}!
+          </h2>
+          <p className="mt-2 text-sm text-steel-400 leading-relaxed max-w-sm mx-auto">
+            Se abrió WhatsApp con el detalle de tu pedido. En cuanto lo enviés, lo procesamos y te confirmamos a la brevedad.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden w-full max-w-sm text-center mt-2">
+          <div className="bg-plate-50 px-3 py-3">
+            <p className="font-mono text-[10px] font-bold text-steel-700 uppercase tracking-wide">1</p>
+            <p className="font-mono text-[10px] text-steel-400 mt-0.5">Pedido enviado</p>
+          </div>
+          <div className="bg-plate-50 px-3 py-3">
+            <p className="font-mono text-[10px] font-bold text-steel-400 uppercase tracking-wide">2</p>
+            <p className="font-mono text-[10px] text-steel-300 mt-0.5">Confirmación</p>
+          </div>
+          <div className="bg-plate-50 px-3 py-3">
+            <p className="font-mono text-[10px] font-bold text-steel-400 uppercase tracking-wide">3</p>
+            <p className="font-mono text-[10px] text-steel-300 mt-0.5">Entrega</p>
+          </div>
+        </div>
+        <Link
+          href="/"
+          className="mt-2 rounded-xl bg-steel-950 px-8 py-3 text-sm font-bold text-white hover:bg-steel-800 transition-colors"
+        >
+          Seguir comprando
+        </Link>
+        <button
+          onClick={() => setSent(false)}
+          className="font-mono text-[11px] text-steel-300 hover:text-steel-600 transition-colors"
+        >
+          Hacer otro pedido
+        </button>
+      </div>
+    );
   }
 
   if (items.length === 0) {

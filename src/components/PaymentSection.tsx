@@ -1,19 +1,29 @@
+import Link from 'next/link';
+
 const METHODS = [
   {
-    value: 'Cuotas sin interés',
-    label: 'Financiación diaria y semanal para tu negocio',
+    value: 'Financiación en cuotas',
+    label: 'Diaria, semanal o mensual. Sin tarjeta.',
+    href: '/financiacion',
+    cta: 'Calculá tu cuota →',
+  },
+  {
+    value: 'Préstamos en efectivo',
+    label: 'Crédito personal rápido para Concordia y zona.',
+    href: '/prestamos',
+    cta: 'Ver condiciones →',
   },
   {
     value: 'Mercado Pago',
-    label: 'Pagá con tu cuenta, transferencia o QR',
-  },
-  {
-    value: 'Débito y crédito',
-    label: 'Todas las tarjetas sin recargo adicional',
+    label: 'Pagá con tu cuenta, transferencia o QR.',
+    href: null,
+    cta: null,
   },
   {
     value: 'Factura A y B',
-    label: 'Facturación completa para empresa o consumidor final',
+    label: 'Facturación completa para empresa o consumidor final.',
+    href: null,
+    cta: null,
   },
 ];
 
@@ -26,19 +36,35 @@ export default function PaymentSection() {
             Todos los medios de pago
           </h2>
           <p className="text-sm text-steel-400 max-w-xs leading-snug">
-            Consultá opciones de financiación para tu compra por WhatsApp.
+            Financiación propia sin banco ni tarjeta. Entrega sin cargo en las zonas habilitadas.
           </p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-plate-200">
-          {METHODS.map(({ value, label }) => (
-            <div key={value} className="bg-white px-6 py-7">
-              <p className="font-display text-lg font-bold text-steel-950 leading-tight">
-                {value}
-              </p>
-              <p className="mt-2 text-sm text-steel-400 leading-snug">{label}</p>
-            </div>
-          ))}
+          {METHODS.map(({ value, label, href, cta }) => {
+            const inner = (
+              <>
+                <p className="font-display text-lg font-bold text-steel-950 leading-tight group-hover:text-amber-700 transition-colors">
+                  {value}
+                </p>
+                <p className="mt-2 text-sm text-steel-400 leading-snug">{label}</p>
+                {cta && (
+                  <p className="mt-3 font-mono text-[11px] font-semibold text-amber-600 group-hover:text-amber-700 transition-colors">
+                    {cta}
+                  </p>
+                )}
+              </>
+            );
+            return href ? (
+              <Link key={value} href={href} className="group bg-white px-6 py-7 hover:bg-amber-50 transition-colors">
+                {inner}
+              </Link>
+            ) : (
+              <div key={value} className="bg-white px-6 py-7">
+                {inner}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
