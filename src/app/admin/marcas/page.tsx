@@ -30,7 +30,8 @@ export default async function MarcasPage({
         <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
           <h2 className="font-display font-semibold text-steel-900 mb-1">MercadoLibre</h2>
           <p className="text-sm text-steel-500 mb-4">
-            Sincronización automática de precio y stock de tus publicaciones cada 30 minutos.
+            Sincronización automática de precio, stock e imágenes de tus publicaciones una vez por día
+            (además, podés forzarla en cualquier momento con el botón de abajo).
           </p>
 
           {searchParams.ml_connected && (

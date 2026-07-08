@@ -3,6 +3,13 @@ import { createServiceSupabase, createServerSupabase } from '@/lib/supabase/serv
 import { fetchAllSellerItems, fetchItemDescription, refreshMLToken } from '@/lib/mercadolibre';
 import { guessCategorySlug } from '@/lib/categorize';
 
+// El sync recorre todas las publicaciones activas de forma secuencial
+// (una consulta de descripción por producto) — con catálogos grandes puede
+// tardar más que el timeout por defecto de las funciones serverless. Sube
+// el límite explícitamente (en plan Hobby de Vercel el techo real es 60s
+// igual, pero no hace daño declararlo).
+export const maxDuration = 60;
+
 /**
  * Sincroniza precio, stock y datos básicos de todas las publicaciones activas
  * de MercadoLibre hacia la tabla `products` (match por ml_item_id).
@@ -134,16 +141,24 @@ async function runSync(request: Request, fromCron: boolean) {
       }
     }
 
-    await supabase.from('ml_sync_log').insert({
+    const { error: logError } = await supabase.from('ml_sync_log').insert({
       status: 'ok',
       items_synced: synced,
       detail: isCron ? 'Sincronización automática (cron)' : 'Sincronización manual',
     });
+    // El insert al log no debe tirar abajo un sync que ya funcionó, pero si
+    // falla queremos verlo en los logs de Vercel en vez de perderlo en
+    // silencio (antes no se chequeaba el resultado de este insert).
+    if (logError) console.error('[ml/sync] no se pudo escribir ml_sync_log:', logError);
 
     return NextResponse.json({ synced, total: items.length });
   } catch (err) {
     const detail = err instanceof Error ? err.message : 'Error desconocido';
-    await supabase.from('ml_sync_log').insert({ status: 'error', items_synced: 0, detail });
+    console.error('[ml/sync] fallo la sincronización:', detail);
+    const { error: logError } = await supabase
+      .from('ml_sync_log')
+      .insert({ status: 'error', items_synced: 0, detail });
+    if (logError) console.error('[ml/sync] no se pudo escribir ml_sync_log (error path):', logError);
     return NextResponse.json({ error: detail }, { status: 500 });
   }
 }

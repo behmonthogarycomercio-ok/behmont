@@ -151,7 +151,15 @@ async function fetchItemsDetail(ids: string[], accessToken: string): Promise<MLI
     if (!res.ok) throw new Error(`ML items multiget failed: ${await res.text()}`);
     const data = await res.json();
     for (const entry of data) {
-      if (entry.code === 200) items.push(entry.body);
+      if (entry.code === 200) {
+        items.push(entry.body);
+      } else {
+        // No lo tiramos ni cortamos el sync de los demás, pero antes esto
+        // se descartaba en silencio total — sin este log era imposible
+        // saber por qué una publicación puntual "no traía imagen" (en
+        // realidad ni siquiera se estaba sincronizando).
+        console.warn(`[ml] item ${entry.body?.id ?? '?'} excluido del sync, code=${entry.code}`);
+      }
     }
   }
   return items;
