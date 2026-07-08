@@ -242,6 +242,10 @@ export default function OrderForm() {
               });
               const data = await res.json();
               if (!res.ok || !data.init_point) throw new Error(data.error ?? 'Error');
+              sessionStorage.setItem('behmont-mp-pending', JSON.stringify({
+                items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
+                payer: { name: form.name, phone: form.phone },
+              }));
               window.location.href = data.init_point;
             } catch (err: unknown) {
               setMpError(err instanceof Error ? err.message : 'No se pudo iniciar el pago. Intentá de nuevo.');

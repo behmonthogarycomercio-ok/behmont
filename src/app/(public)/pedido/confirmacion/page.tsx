@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import MpConfirmCTA from '@/components/MpConfirmCTA';
 
 export const metadata: Metadata = { title: 'Confirmación de pago | BEHMONT' };
 
@@ -53,6 +54,9 @@ export default async function ConfirmacionPage({
         </div>
 
         <div className="flex flex-col gap-2">
+          {(status === 'approved' || status === 'pending') && (
+            <MpConfirmCTA paymentId={paymentId} status={status} />
+          )}
           <Link
             href="/"
             className="w-full rounded-xl bg-steel-950 py-3.5 text-sm font-bold text-white hover:bg-steel-800 transition-colors text-center block"

@@ -113,16 +113,16 @@ export default function FinancingCalculator({
 
   function buildMessage(): string {
     const lines: string[] = [
-      '💳 *Solicitud de Financiación — BEHMONT*',
+      '*Solicitud de Financiacion — BEHMONT*',
       '',
-      `👤 ${form.name}`,
-      `📞 ${form.phone}`,
-      `📍 ${form.address || 'No indicó dirección'}`,
-      ...(city ? [`🏙️ ${city}`] : []),
+      `Nombre: ${form.name}`,
+      `Telefono: ${form.phone}`,
+      `Direccion: ${form.address || 'No indico direccion'}`,
+      ...(city ? [`Ciudad: ${city}`] : []),
       '',
-      ...(productsSummary ? [`🛒 Productos: ${productsSummary}`, ''] : []),
+      ...(productsSummary ? [`Productos: ${productsSummary}`, ''] : []),
       ...(Object.keys(fileUrls).length > 0 ? (() => {
-        const docLines: string[] = ['📎 *Documentación adjunta:*'];
+        const docLines: string[] = ['Documentacion adjunta:'];
         const labels: Record<string, string> = { dni: 'DNI', service: 'Servicio', income: 'Comprobante' };
         for (const key of ['dni', 'service', 'income']) {
           const urls = fileUrls[key] ?? [];
@@ -131,10 +131,10 @@ export default function FinancingCalculator({
         }
         return [...docLines, ''];
       })() : []),
-      `💰 Monto: $${fmtARS(principal)}`,
-      `📋 Plan: ${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%)`,
-      `💵 Total a devolver: $${fmtARS(totalDevolver)}`,
-      `💵 Cuota por ${freqLabel}: $${fmtARS(cuota)}`,
+      `Monto: $${fmtARS(principal)}`,
+      `Plan: ${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%)`,
+      `Total a devolver: $${fmtARS(totalDevolver)}`,
+      `Cuota por ${freqLabel}: $${fmtARS(cuota)}`,
       '',
       '_Solicitud desde behmont.com.ar_',
     ];
