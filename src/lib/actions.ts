@@ -260,3 +260,15 @@ export async function updateSiteSetting(key: string, value: string): Promise<Act
   revalidatePath('/');
   return {};
 }
+
+// ── PEDIDOS ──────────────────────────────────────────────
+export async function updateOrderStatus(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const status = formData.get('status') as string;
+  const { error } = await supabase.from('whatsapp_orders').update({ status }).eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/pedidos');
+  revalidatePath('/admin/dashboard');
+  return {};
+}

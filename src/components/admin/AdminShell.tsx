@@ -13,17 +13,19 @@ import {
   BarChart3,
   LogOut,
   ExternalLink,
+  ShoppingBag,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const NAV = [
-  { href: '/admin/dashboard', label: 'Inicio', icon: LayoutDashboard },
-  { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 },
-  { href: '/admin/productos', label: 'Productos', icon: Package },
-  { href: '/admin/categorias', label: 'Categorías', icon: FolderTree },
-  { href: '/admin/promociones', label: 'Promociones', icon: Megaphone },
-  { href: '/admin/stock', label: 'Stock y precios', icon: Boxes },
-  { href: '/admin/marcas', label: 'Marcas y MercadoLibre', icon: Tag },
+  { href: '/admin/dashboard',   label: 'Inicio',               icon: LayoutDashboard },
+  { href: '/admin/pedidos',     label: 'Pedidos',               icon: ShoppingBag },
+  { href: '/admin/metricas',    label: 'Métricas',              icon: BarChart3 },
+  { href: '/admin/productos',   label: 'Productos',             icon: Package },
+  { href: '/admin/categorias',  label: 'Categorías',            icon: FolderTree },
+  { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
+  { href: '/admin/stock',       label: 'Stock y precios',       icon: Boxes },
+  { href: '/admin/marcas',      label: 'Marcas y MercadoLibre', icon: Tag },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
