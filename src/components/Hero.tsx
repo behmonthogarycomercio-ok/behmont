@@ -64,6 +64,7 @@ export default function Hero({ promotions }: { promotions: Promotion[] }) {
               alt={main.title}
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 60vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           )}
@@ -99,6 +100,7 @@ export default function Hero({ promotions }: { promotions: Promotion[] }) {
                   src={promo.image_url}
                   alt={promo.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, 40vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               )}

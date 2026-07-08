@@ -59,6 +59,7 @@ export default function ProductCard({
             src={product.images[0]}
             alt={product.name}
             fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
             className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04]"
           />
         ) : (

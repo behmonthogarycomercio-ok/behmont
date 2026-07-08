@@ -104,7 +104,7 @@ export default async function ProductosPage({
                   <td className="p-3 flex items-center gap-3">
                     <div className="relative h-10 w-10 rounded-md bg-plate-50 overflow-hidden shrink-0">
                       {p.images?.[0] && (
-                        <Image src={p.images[0]} alt={p.name} fill className="object-contain" />
+                        <Image src={p.images[0]} alt={p.name} fill sizes="40px" className="object-contain" />
                       )}
                     </div>
                     <span className="font-medium text-steel-900 line-clamp-1">{p.name}</span>

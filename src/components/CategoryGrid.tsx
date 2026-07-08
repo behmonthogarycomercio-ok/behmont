@@ -32,6 +32,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
                   src={cat.icon_url}
                   alt={cat.name}
                   fill
+                  sizes="56px"
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               </span>

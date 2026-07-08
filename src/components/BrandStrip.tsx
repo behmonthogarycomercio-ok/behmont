@@ -63,7 +63,7 @@ export default function BrandStrip({ brands, topBrands }: { brands: Brand[]; top
                 href={`/marca/${slugify(brand.name)}`}
                 className="relative h-9 w-24 shrink-0 grayscale transition hover:grayscale-0"
               >
-                <Image src={brand.logo_url} alt={brand.name} fill className="object-contain object-left" />
+                <Image src={brand.logo_url} alt={brand.name} fill sizes="96px" className="object-contain object-left" />
               </Link>
             ) : (
               <Link

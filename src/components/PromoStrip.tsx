@@ -21,6 +21,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
               src={first.image_url}
               alt={first.title}
               fill
+              sizes="100vw"
               className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-steel-950 via-steel-950/70 to-steel-950/10" />
@@ -57,6 +58,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
                 src={second.image_url}
                 alt={second.title}
                 fill
+                sizes="100vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-steel-950/90 via-steel-950/60 to-transparent" />

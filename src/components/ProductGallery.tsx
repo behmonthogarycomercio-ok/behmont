@@ -18,7 +18,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
   return (
     <div>
       <div className="relative aspect-square rounded-xl2 bg-plate-50 border border-plate-200">
-        <Image src={images[active]} alt={name} fill priority className="object-contain p-8" />
+        <Image src={images[active]} alt={name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-8" />
       </div>
       {images.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto">
@@ -32,7 +32,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
               )}
               aria-label={`Ver imagen ${i + 1}`}
             >
-              <Image src={src} alt="" fill className="object-contain p-1.5" />
+              <Image src={src} alt="" fill sizes="64px" className="object-contain p-1.5" />
             </button>
           ))}
         </div>
