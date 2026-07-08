@@ -22,7 +22,7 @@ export function generatePKCEPair() {
   return { codeVerifier, codeChallenge };
 }
 
-export async function exchangeMLCode(code: string): Promise<MLTokenResponse> {
+export async function exchangeMLCode(code: string, codeVerifier: string): Promise<MLTokenResponse> {
   const res = await fetch(`${ML_API}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -32,6 +32,7 @@ export async function exchangeMLCode(code: string): Promise<MLTokenResponse> {
       client_secret: process.env.ML_CLIENT_SECRET!,
       code,
       redirect_uri: process.env.ML_REDIRECT_URI!,
+      code_verifier: codeVerifier,
     }),
   });
   if (!res.ok) throw new Error(`ML OAuth exchange failed: ${await res.text()}`);

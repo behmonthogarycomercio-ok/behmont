@@ -1,29 +1,27 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { exchangeMLCode } from '@/lib/mercadolibre';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const stateParam = searchParams.get('state');
+  const stateB64 = searchParams.get('state');
 
   if (!code) {
     return NextResponse.redirect(`${origin}/admin/marcas?ml_error=sin_codigo`);
   }
 
-  // Verificar CSRF: el estado debe coincidir con la cookie
-  const cookieStore = cookies();
-  const savedState = cookieStore.get('ml_oauth_state')?.value;
+  // El verifier viaja en el parámetro state (base64url) que ML devuelve intacto
+  const codeVerifier = stateB64
+    ? Buffer.from(stateB64, 'base64url').toString('utf-8')
+    : undefined;
 
-  // Si no hay cookie (ej. ya expiró) lo dejamos pasar igualmente,
-  // pero si hay cookie y no coincide bloqueamos.
-  if (savedState && stateParam !== savedState) {
-    return NextResponse.redirect(`${origin}/admin/marcas?ml_error=estado_invalido`);
+  if (!codeVerifier) {
+    return NextResponse.redirect(`${origin}/admin/marcas?ml_error=sesion_expirada`);
   }
 
   try {
-    const tokens = await exchangeMLCode(code);
+    const tokens = await exchangeMLCode(code, codeVerifier);
     const supabase = createServiceSupabase();
 
     await supabase.from('site_settings').upsert([
@@ -32,10 +30,7 @@ export async function GET(request: Request) {
       { key: 'ml_seller_id', value: String(tokens.user_id) },
     ]);
 
-    const res = NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
-    // Limpiamos la cookie de estado
-    res.cookies.set('ml_oauth_state', '', { maxAge: 0, path: '/' });
-    return res;
+    return NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'error_desconocido';
     return NextResponse.redirect(
