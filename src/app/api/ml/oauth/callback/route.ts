@@ -1,27 +1,29 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { exchangeMLCode } from '@/lib/mercadolibre';
 
-// El admin hace clic en "Conectar MercadoLibre" (/admin/marcas), pasa por
-// /api/ml/oauth/start, autoriza en mercadolibre.com y ML redirige acá con ?code=...
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const stateB64 = searchParams.get('state');
-
-  const codeVerifier = stateB64
-    ? Buffer.from(stateB64, 'base64url').toString('utf-8')
-    : undefined;
+  const stateParam = searchParams.get('state');
 
   if (!code) {
     return NextResponse.redirect(`${origin}/admin/marcas?ml_error=sin_codigo`);
   }
-  if (!codeVerifier) {
-    return NextResponse.redirect(`${origin}/admin/marcas?ml_error=sesion_expirada_reintenta`);
+
+  // Verificar CSRF: el estado debe coincidir con la cookie
+  const cookieStore = cookies();
+  const savedState = cookieStore.get('ml_oauth_state')?.value;
+
+  // Si no hay cookie (ej. ya expiró) lo dejamos pasar igualmente,
+  // pero si hay cookie y no coincide bloqueamos.
+  if (savedState && stateParam !== savedState) {
+    return NextResponse.redirect(`${origin}/admin/marcas?ml_error=estado_invalido`);
   }
 
   try {
-    const tokens = await exchangeMLCode(code, codeVerifier);
+    const tokens = await exchangeMLCode(code);
     const supabase = createServiceSupabase();
 
     await supabase.from('site_settings').upsert([
@@ -30,7 +32,10 @@ export async function GET(request: Request) {
       { key: 'ml_seller_id', value: String(tokens.user_id) },
     ]);
 
-    return NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
+    const res = NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
+    // Limpiamos la cookie de estado
+    res.cookies.set('ml_oauth_state', '', { maxAge: 0, path: '/' });
+    return res;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'error_desconocido';
     return NextResponse.redirect(

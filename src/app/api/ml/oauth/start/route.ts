@@ -1,17 +1,26 @@
 import { NextResponse } from 'next/server';
-import { generatePKCEPair } from '@/lib/mercadolibre';
+import { randomBytes } from 'crypto';
 
 export async function GET() {
-  const { codeVerifier, codeChallenge } = generatePKCEPair();
+  // Estado CSRF — sin PKCE para máxima compatibilidad con ambas versiones de la app ML
+  const state = randomBytes(16).toString('hex');
 
   const authUrl = new URL('https://auth.mercadolibre.com.ar/authorization');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', process.env.ML_CLIENT_ID!);
   authUrl.searchParams.set('redirect_uri', process.env.ML_REDIRECT_URI!);
-  authUrl.searchParams.set('code_challenge', codeChallenge);
-  authUrl.searchParams.set('code_challenge_method', 'S256');
-  // Pasamos el verifier en `state` para evitar problemas con cookies cross-site en Vercel
-  authUrl.searchParams.set('state', Buffer.from(codeVerifier).toString('base64url'));
+  authUrl.searchParams.set('state', state);
 
-  return NextResponse.redirect(authUrl.toString());
+  const res = NextResponse.redirect(authUrl.toString());
+
+  // SameSite=lax: se envía en navegaciones GET cross-site (el redirect de ML hacia acá)
+  res.cookies.set('ml_oauth_state', state, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 300,
+    path: '/',
+  });
+
+  return res;
 }
