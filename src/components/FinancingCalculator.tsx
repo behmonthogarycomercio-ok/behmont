@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import {
-  DAILY_PLANS, MONTHLY_PLANS, LOAN_PLANS, ALLOWED_ZONES,
-  getZoneFromPostalCode, calcDaily, calcWeekly, calcMonthly, fmtARS,
+  DAILY_PLANS, MONTHLY_PLANS, ALLOWED_ZONES,
+  calcDaily, calcWeekly, calcMonthly, fmtARS,
   type DailyPlan, type MonthlyPlan,
 } from '@/lib/financing';
+import { useLocation } from '@/lib/location-context';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
-type Mode = 'financing' | 'loan';
 type Freq = 'daily' | 'weekly' | 'monthly';
 type AnyPlan = DailyPlan | MonthlyPlan;
 
@@ -20,24 +20,26 @@ const REQS = [
   { key: 'income',  text: 'Factura de compra a proveedor, garante con recibo de sueldo, o recibo de sueldo propio' },
 ];
 
+const FREQ_OPTIONS: { key: Freq; label: string }[] = [
+  { key: 'daily',   label: 'Por día' },
+  { key: 'weekly',  label: 'Por semana' },
+  { key: 'monthly', label: 'Por mes' },
+];
+
 export default function FinancingCalculator({
-  mode,
   initialAmount,
   productsSummary,
   whatsappNumber,
 }: {
-  mode: Mode;
   initialAmount?: number;
   productsSummary?: string;
   whatsappNumber: string;
 }) {
+  const { city } = useLocation();
   const [step, setStep] = useState(1);
 
   // Step 1
   const [reqs, setReqs] = useState({ dni: false, service: false, income: false });
-  const [postalCode, setPostalCode] = useState('');
-  const [city, setCity] = useState<string | null>(null);
-  const [cpError, setCpError] = useState('');
 
   // Step 2
   const [amount, setAmount] = useState(initialAmount ? String(initialAmount) : '');
@@ -50,8 +52,7 @@ export default function FinancingCalculator({
   const allReqsMet = reqs.dni && reqs.service && reqs.income;
   const principal = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
 
-  const basePlans: DailyPlan[] = mode === 'loan' ? LOAN_PLANS : DAILY_PLANS;
-  const activePlans: AnyPlan[] = freq === 'monthly' ? MONTHLY_PLANS : basePlans;
+  const activePlans: AnyPlan[] = freq === 'monthly' ? MONTHLY_PLANS : DAILY_PLANS;
   const safeIdx = Math.min(planIdx, activePlans.length - 1);
   const currentPlan = activePlans[safeIdx];
 
@@ -71,33 +72,16 @@ export default function FinancingCalculator({
   const totalDevolver = principal * (1 + currentPlan.surcharge);
   const freqLabel = freq === 'daily' ? 'día' : freq === 'weekly' ? 'semana' : 'mes';
 
-  function checkPostalCode() {
-    const cp = postalCode.trim();
-    if (!cp) { setCpError('Ingresá tu código postal'); return; }
-    const found = getZoneFromPostalCode(cp);
-    if (!found) {
-      setCpError('Solo financiamos en: Concordia, Federación, Federal, Chajarí, Concepción del Uruguay y Gualeguaychú.');
-      setCity(null);
-    } else {
-      setCpError('');
-      setCity(found);
-    }
-  }
-
   function buildMessage(): string {
     const lines: string[] = [
-      mode === 'financing'
-        ? '💳 *Solicitud de Financiación — BEHMONT*'
-        : '💵 *Solicitud de Préstamo en Efectivo — BEHMONT*',
+      '💳 *Solicitud de Financiación — BEHMONT*',
       '',
       `👤 ${form.name}`,
       `📞 ${form.phone}`,
       `📍 ${form.address || 'No indicó dirección'}`,
-      `📮 CP ${postalCode} — ${city}`,
+      ...(city ? [`🏙️ ${city}`] : []),
       '',
-      ...(mode === 'financing' && productsSummary
-        ? [`🛒 Productos: ${productsSummary}`, '']
-        : []),
+      ...(productsSummary ? [`🛒 Productos: ${productsSummary}`, ''] : []),
       `💰 Monto: $${fmtARS(principal)}`,
       `📋 Plan: ${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%)`,
       `💵 Total a devolver: $${fmtARS(totalDevolver)}`,
@@ -107,12 +91,6 @@ export default function FinancingCalculator({
     ];
     return buildWhatsAppLink(whatsappNumber, lines.join('\n'));
   }
-
-  const freqOptions: { key: Freq; label: string }[] = [
-    { key: 'daily',   label: 'Por día' },
-    { key: 'weekly',  label: 'Por semana' },
-    ...(mode === 'financing' ? [{ key: 'monthly' as Freq, label: 'Por mes' }] : []),
-  ];
 
   return (
     <div className="space-y-5">
@@ -135,7 +113,7 @@ export default function FinancingCalculator({
         })}
       </div>
 
-      {/* ── STEP 1: Requirements + Zone ── */}
+      {/* ── STEP 1: Requirements ── */}
       {step === 1 && (
         <div className="space-y-4">
           <div className="rounded-xl border border-plate-200 bg-white p-6 space-y-4">
@@ -158,48 +136,31 @@ export default function FinancingCalculator({
             ))}
           </div>
 
-          <div className="rounded-xl border border-plate-200 bg-white p-6 space-y-3">
-            <div>
-              <h2 className="font-display text-lg font-bold text-steel-950">Zona de entrega</h2>
-              <p className="mt-1 text-sm text-steel-400">
-                Financiamos y entregamos sin cargo en:{' '}
-                <span className="font-medium text-steel-700">
-                  {ALLOWED_ZONES.map((z) => z.city).join(', ')}.
-                </span>
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={5}
-                placeholder="Código postal · Ej: 3200"
-                value={postalCode}
-                onChange={(e) => { setPostalCode(e.target.value); setCpError(''); setCity(null); }}
-                onKeyDown={(e) => e.key === 'Enter' && checkPostalCode()}
-                className="flex-1 rounded-lg border border-plate-200 px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-steel-400"
-              />
-              <button
-                onClick={checkPostalCode}
-                className="rounded-lg bg-steel-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-steel-800 transition-colors"
-              >
-                Verificar
-              </button>
-            </div>
-            {cpError && <p className="text-xs text-red-600 leading-snug">{cpError}</p>}
-            {city && (
-              <p className="text-xs font-mono font-semibold text-green-700">
-                ✓ Zona habilitada — {city}
-              </p>
-            )}
+          {/* Zone info */}
+          <div className="rounded-xl border border-plate-100 bg-plate-50 px-5 py-4">
+            <p className="text-xs text-steel-500 leading-snug">
+              {city ? (
+                <>
+                  <span className="font-semibold text-green-700">✓ Zona habilitada — {city}.</span>{' '}
+                  Entregamos sin cargo y financiamos en tu zona.
+                </>
+              ) : (
+                <>
+                  Financiamos y entregamos sin cargo en:{' '}
+                  <span className="font-medium text-steel-700">
+                    {ALLOWED_ZONES.map((z) => z.city).join(', ')}.
+                  </span>
+                </>
+              )}
+            </p>
           </div>
 
           <button
-            disabled={!allReqsMet || !city}
+            disabled={!allReqsMet}
             onClick={() => setStep(2)}
             className="w-full rounded-xl bg-steel-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-steel-800 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Ver opciones de {mode === 'financing' ? 'financiación' : 'préstamo'} →
+            Ver opciones de financiación →
           </button>
         </div>
       )}
@@ -210,7 +171,7 @@ export default function FinancingCalculator({
           {/* Amount input */}
           <div className="rounded-xl border border-plate-200 bg-white p-5 space-y-2">
             <label className="font-mono text-[11px] font-semibold uppercase tracking-wide text-steel-400 block">
-              {mode === 'financing' ? 'Monto del pedido' : 'Monto del préstamo'}
+              Monto del pedido
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-sm text-steel-400 pointer-events-none">$</span>
@@ -226,8 +187,8 @@ export default function FinancingCalculator({
           </div>
 
           {/* Frequency tabs */}
-          <div className={`grid gap-2 grid-cols-${freqOptions.length}`}>
-            {freqOptions.map(({ key, label }) => (
+          <div className="grid grid-cols-3 gap-2">
+            {FREQ_OPTIONS.map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => { setFreq(key); setPlanIdx(0); }}
@@ -244,7 +205,6 @@ export default function FinancingCalculator({
 
           {/* Plans table */}
           <div className="rounded-xl border border-plate-200 overflow-hidden">
-            {/* Header */}
             <div className="grid grid-cols-3 bg-plate-50 border-b border-plate-200">
               {['Plazo', 'Recargo', 'Cuota'].map((h, i) => (
                 <div key={h} className={`px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-steel-400 ${i === 2 ? 'text-right' : ''}`}>
@@ -294,7 +254,7 @@ export default function FinancingCalculator({
                 <span className="font-display text-2xl font-bold">${fmtARS(cuota)}</span>
               </div>
               <p className="font-mono text-[10px] text-white/30 mt-1">
-                Primera cuota ("de bajada") al recibir el {mode === 'financing' ? 'producto' : 'efectivo'}. Podés adelantar cuotas cuando quieras.
+                Primera cuota ("de bajada") al recibir el producto. Podés adelantar cuotas cuando quieras.
               </p>
             </div>
           )}
@@ -337,9 +297,9 @@ export default function FinancingCalculator({
           <div className="rounded-xl border border-plate-200 bg-white p-6 space-y-4">
             <h2 className="font-display text-lg font-bold text-steel-950">Tus datos</h2>
             {[
-              { key: 'name',    label: 'Nombre y apellido *', type: 'text',  placeholder: 'Juan Pérez',        required: true  },
-              { key: 'phone',   label: 'Teléfono / WhatsApp *', type: 'tel', placeholder: '+54 9 3454...',     required: true  },
-              { key: 'address', label: 'Dirección de entrega',  type: 'text', placeholder: 'Calle, número, localidad', required: false },
+              { key: 'name',    label: 'Nombre y apellido *',      type: 'text', placeholder: 'Juan Pérez',              required: true  },
+              { key: 'phone',   label: 'Teléfono / WhatsApp *',    type: 'tel',  placeholder: '+54 9 3454...',            required: true  },
+              { key: 'address', label: 'Dirección de entrega',     type: 'text', placeholder: 'Calle, número, localidad', required: false },
             ].map(({ key, label, type, placeholder, required }) => (
               <div key={key} className="space-y-1.5">
                 <label className="font-mono text-[11px] font-semibold uppercase tracking-wide text-steel-400 block">

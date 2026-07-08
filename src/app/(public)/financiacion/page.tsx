@@ -54,7 +54,6 @@ export default async function FinanciacionPage({
 
       <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
         <FinancingCalculator
-          mode="financing"
           initialAmount={initialAmount}
           productsSummary={productsSummary}
           whatsappNumber={settings.whatsappNumber}

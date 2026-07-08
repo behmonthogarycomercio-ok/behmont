@@ -42,13 +42,6 @@ export const MONTHLY_PLANS: MonthlyPlan[] = Array.from({ length: 10 }, (_, i) =>
   return { months, surcharge: months * 0.08 };
 });
 
-// Personal cash loans — daily & weekly only
-export const LOAN_PLANS: DailyPlan[] = [
-  { days: 30,  weeks: Math.round(30 / 6),  surcharge: 0.35 },
-  { days: 60,  weeks: Math.round(60 / 6),  surcharge: 0.70 },
-  { days: 90,  weeks: Math.round(90 / 6),  surcharge: 1.05 },
-  { days: 100, weeks: Math.round(100 / 6), surcharge: 1.15 },
-];
 
 export function calcDaily(principal: number, surcharge: number, days: number): number {
   return (principal * (1 + surcharge)) / days;

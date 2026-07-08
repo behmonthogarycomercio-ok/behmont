@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Minus, Plus, MessageCircle, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
+import { useLocation } from '@/lib/location-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import { buttonClasses } from '@/components/ui/Button';
 import type { Product } from '@/lib/types';
@@ -17,6 +18,7 @@ export default function ProductActions({
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { allowed } = useLocation();
 
   const inquiryLink = buildWhatsAppLink(
     whatsappNumber,
@@ -65,12 +67,14 @@ export default function ProductActions({
         <MessageCircle className="h-4 w-4" /> Consultar
       </a>
 
-      <a
-        href={`/financiacion?amount=${product.price}&products=${encodeURIComponent(product.name)}`}
-        className="flex items-center justify-center gap-1.5 rounded-xl border border-steel-200 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
-      >
-        Financiar
-      </a>
+      {allowed && (
+        <a
+          href={`/financiacion?amount=${product.price}&products=${encodeURIComponent(product.name)}`}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-steel-200 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
+        >
+          Financiar
+        </a>
+      )}
     </div>
   );
 }

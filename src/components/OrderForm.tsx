@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
+import { useLocation } from '@/lib/location-context';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import FormField from '@/components/ui/FormField';
@@ -13,6 +14,7 @@ import Button from '@/components/ui/Button';
 export default function OrderForm() {
   const { items, updateQty, removeItem, total, clear } = useCart();
   const router = useRouter();
+  const { allowed } = useLocation();
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', note: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
@@ -209,21 +211,25 @@ export default function OrderForm() {
         </Button>
       </form>
 
-      {/* Financing option */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 border-t border-plate-200" />
-        <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o</span>
-        <div className="flex-1 border-t border-plate-200" />
-      </div>
-      <button
-        onClick={() => {
-          const productsSummary = items.map((i) => `${i.name} (x${i.qty})`).join(', ');
-          router.push(`/financiacion?amount=${total}&products=${encodeURIComponent(productsSummary)}`);
-        }}
-        className="w-full rounded-xl border border-steel-200 py-3.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
-      >
-        Financiar este pedido →
-      </button>
+      {/* Financing option — only for enabled zones */}
+      {allowed && (
+        <>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 border-t border-plate-200" />
+            <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o</span>
+            <div className="flex-1 border-t border-plate-200" />
+          </div>
+          <button
+            onClick={() => {
+              const productsSummary = items.map((i) => `${i.name} (x${i.qty})`).join(', ');
+              router.push(`/financiacion?amount=${total}&products=${encodeURIComponent(productsSummary)}`);
+            }}
+            className="w-full rounded-xl border border-steel-200 py-3.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
+          >
+            Financiar este pedido →
+          </button>
+        </>
+      )}
     </div>
   );
 }

@@ -98,12 +98,6 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           >
             Financiación
           </Link>
-          <Link
-            href="/prestamos"
-            className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-          >
-            Préstamos
-          </Link>
         </nav>
       </div>
 
@@ -154,13 +148,6 @@ export default function Navbar({ categories }: { categories: Category[] }) {
                 className="flex-1 rounded-lg bg-plate-100 px-3 py-2.5 text-center text-sm font-semibold text-steel-800"
               >
                 Financiación
-              </Link>
-              <Link
-                href="/prestamos"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 rounded-lg bg-plate-100 px-3 py-2.5 text-center text-sm font-semibold text-steel-800"
-              >
-                Préstamos
               </Link>
             </div>
           </div>

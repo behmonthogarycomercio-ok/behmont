@@ -8,14 +8,14 @@ const METHODS = [
     cta: 'Calculá tu cuota →',
   },
   {
-    value: 'Préstamos en efectivo',
-    label: 'Crédito personal rápido para Concordia y zona.',
-    href: '/prestamos',
-    cta: 'Ver condiciones →',
-  },
-  {
     value: 'Mercado Pago',
     label: 'Pagá con tu cuenta, transferencia o QR.',
+    href: null,
+    cta: null,
+  },
+  {
+    value: 'Débito y crédito',
+    label: 'Todas las tarjetas sin recargo adicional.',
     href: null,
     cta: null,
   },
