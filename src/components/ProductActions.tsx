@@ -64,6 +64,13 @@ export default function ProductActions({
       >
         <MessageCircle className="h-4 w-4" /> Consultar
       </a>
+
+      <a
+        href={`/financiacion?amount=${product.price}&products=${encodeURIComponent(product.name)}`}
+        className="flex items-center justify-center gap-1.5 rounded-xl border border-steel-200 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
+      >
+        Financiar
+      </a>
     </div>
   );
 }

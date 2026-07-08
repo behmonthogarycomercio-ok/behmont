@@ -80,6 +80,8 @@ export default function Footer({
           </h3>
           <ul className="space-y-2.5 text-sm">
             <li><a href="/mayorista" className="text-plate-100/70 hover:text-amber-400 transition-colors">Ventas mayoristas</a></li>
+            <li><a href="/financiacion" className="text-plate-100/70 hover:text-amber-400 transition-colors">Financiación en cuotas</a></li>
+            <li><a href="/prestamos" className="text-plate-100/70 hover:text-amber-400 transition-colors">Préstamos en efectivo</a></li>
             <li><a href="/#ubicacion" className="text-plate-100/70 hover:text-amber-400 transition-colors">Cómo llegar</a></li>
             <li><a href="/faq" className="text-plate-100/70 hover:text-amber-400 transition-colors">Preguntas frecuentes</a></li>
             <li><a href="/guia-de-compras" className="text-plate-100/70 hover:text-amber-400 transition-colors">Guía de compras</a></li>
