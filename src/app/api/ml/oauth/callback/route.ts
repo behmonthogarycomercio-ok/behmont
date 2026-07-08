@@ -7,11 +7,11 @@ import { exchangeMLCode } from '@/lib/mercadolibre';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const codeVerifier = request.headers
-    .get('cookie')
-    ?.split('; ')
-    .find((c) => c.startsWith('ml_pkce_verifier='))
-    ?.split('=')[1];
+  const stateB64 = searchParams.get('state');
+
+  const codeVerifier = stateB64
+    ? Buffer.from(stateB64, 'base64url').toString('utf-8')
+    : undefined;
 
   if (!code) {
     return NextResponse.redirect(`${origin}/admin/marcas?ml_error=sin_codigo`);
@@ -30,15 +30,11 @@ export async function GET(request: Request) {
       { key: 'ml_seller_id', value: String(tokens.user_id) },
     ]);
 
-    const response = NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
-    response.cookies.delete('ml_pkce_verifier');
-    return response;
+    return NextResponse.redirect(`${origin}/admin/marcas?ml_connected=1`);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'error_desconocido';
-    const response = NextResponse.redirect(
+    return NextResponse.redirect(
       `${origin}/admin/marcas?ml_error=${encodeURIComponent(message)}`
     );
-    response.cookies.delete('ml_pkce_verifier');
-    return response;
   }
 }

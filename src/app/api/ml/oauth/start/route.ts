@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generatePKCEPair } from '@/lib/mercadolibre';
 
-// El admin hace clic en "Conectar con MercadoLibre" (/admin/marcas) → llega acá →
-// lo mandamos a auth.mercadolibre.com.ar con PKCE → ML redirige a /api/ml/oauth/callback
 export async function GET() {
   const { codeVerifier, codeChallenge } = generatePKCEPair();
 
@@ -12,15 +10,8 @@ export async function GET() {
   authUrl.searchParams.set('redirect_uri', process.env.ML_REDIRECT_URI!);
   authUrl.searchParams.set('code_challenge', codeChallenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
+  // Pasamos el verifier en `state` para evitar problemas con cookies cross-site en Vercel
+  authUrl.searchParams.set('state', Buffer.from(codeVerifier).toString('base64url'));
 
-  const response = NextResponse.redirect(authUrl.toString());
-  // Cookie de corta duración: solo sobrevive el ida-y-vuelta del login en ML (~10 min alcanza).
-  response.cookies.set('ml_pkce_verifier', codeVerifier, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    maxAge: 60 * 10,
-    path: '/',
-  });
-  return response;
+  return NextResponse.redirect(authUrl.toString());
 }
