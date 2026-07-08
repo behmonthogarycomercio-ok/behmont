@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const { businessName, contactName, phone, email, address, rubro, volume, message } = parsed.data;
 
   const lines = [
-    '🏢 *Consulta mayorista — BEHMONT*',
+    '*Consulta mayorista — BEHMONT*',
     '',
     `Negocio: ${businessName}`,
     `Contacto: ${contactName}`,

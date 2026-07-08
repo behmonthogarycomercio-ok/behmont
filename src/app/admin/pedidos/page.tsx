@@ -112,6 +112,12 @@ export default async function PedidosPage({
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge.classes}`}>
                     {badge.label}
                   </span>
+                  {/* Payment method badge */}
+                  {order.customer_note?.startsWith('[MP]') && (
+                    <span className="shrink-0 rounded-full bg-[#009EE3] px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      MP
+                    </span>
+                  )}
                   {/* Name + date */}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-steel-900 text-sm">{order.customer_name}</p>
@@ -136,7 +142,12 @@ export default async function PedidosPage({
                       <p><span className="text-steel-400">Tel:</span> <span className="font-medium">{order.customer_phone || '—'}</span></p>
                       {order.customer_email && <p><span className="text-steel-400">Email:</span> <span className="font-medium">{order.customer_email}</span></p>}
                       {order.customer_address && <p><span className="text-steel-400">Dirección:</span> <span className="font-medium">{order.customer_address}</span></p>}
-                      {order.customer_note && <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{order.customer_note}</span></p>}
+                      {order.customer_note && !order.customer_note.startsWith('[MP]') && (
+                        <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{order.customer_note}</span></p>
+                      )}
+                      {order.customer_note?.startsWith('[MP]') && (
+                        <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-[#009EE3]">MercadoPago — {order.customer_note.replace('[MP] ', '').replace('[MP]', '').trim()}</span></p>
+                      )}
                     </div>
 
                     {/* Items */}

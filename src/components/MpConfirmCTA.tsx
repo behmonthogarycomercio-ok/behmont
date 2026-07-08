@@ -21,6 +21,14 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
         items: { name: string; price: number; qty: number }[];
         payer: { name: string; phone: string };
       };
+
+      // Save order to DB (fire and forget — don't block the UI)
+      fetch('/api/mp/save-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId, status, items, payer }),
+      }).catch(() => {});
+
       const message = buildMpOrderMessage({
         customerName: payer.name,
         customerPhone: payer.phone,
