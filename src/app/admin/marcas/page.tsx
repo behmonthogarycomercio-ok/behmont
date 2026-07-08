@@ -50,7 +50,15 @@ export default async function MarcasPage({
               <p className="text-sm text-steel-700">
                 ✓ Conectado — seller ID <span className="font-mono">{settings.ml_seller_id}</span>
               </p>
-              <SyncButton />
+              <div className="flex flex-wrap gap-2">
+                <SyncButton />
+                <a
+                  href="/api/ml/oauth/start"
+                  className="inline-block rounded-lg border border-plate-300 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50"
+                >
+                  Reconectar (genera un token nuevo)
+                </a>
+              </div>
               <div>
                 <p className="text-xs font-semibold text-steel-500 mb-1">Últimas sincronizaciones</p>
                 <ul className="text-xs text-steel-600 space-y-1">
