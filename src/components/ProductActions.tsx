@@ -68,12 +68,18 @@ export default function ProductActions({
       </a>
 
       {allowed && (
-        <a
-          href={`/financiacion?amount=${product.price}&products=${encodeURIComponent(product.name)}`}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-steel-200 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
-        >
-          Financiar
-        </a>
+        <div className="flex flex-col gap-1">
+          <a
+            href={`/financiacion?amount=${product.price}&products=${encodeURIComponent(product.name)}`}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-steel-200 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
+          >
+            Financiar
+          </a>
+          <p className="font-mono text-[10px] text-steel-400 text-center leading-snug">
+            Concordia · Federación · Federal · Chajarí<br />
+            Concepción del Uruguay · Gualeguaychú
+          </p>
+        </div>
       )}
     </div>
   );

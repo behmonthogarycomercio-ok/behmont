@@ -1,8 +1,41 @@
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Category } from '@/lib/types';
 
 export default function CategoryGrid({ categories }: { categories: Category[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft]   = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  function updateArrows() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
+
+  useEffect(() => {
+    updateArrows();
+    const el = scrollRef.current;
+    el?.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows, { passive: true });
+    return () => {
+      el?.removeEventListener('scroll', updateArrows);
+      window.removeEventListener('resize', updateArrows);
+    };
+  }, [categories]);
+
+  function scroll(dir: 'left' | 'right') {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardW = el.querySelector('a')?.getBoundingClientRect().width ?? 120;
+    el.scrollBy({ left: dir === 'left' ? -(cardW * 3) : cardW * 3 });
+  }
+
   if (categories.length === 0) return null;
 
   return (
@@ -11,20 +44,41 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 tracking-tight">
           Categorías
         </h2>
-        <Link
-          href="/buscar"
-          className="text-sm font-semibold text-steel-500 hover:text-amber-600 transition-colors"
-        >
-          Ver todo →
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canLeft}
+            aria-label="Categorías anteriores"
+            className="grid h-9 w-9 place-items-center rounded-full border-2 border-plate-200 bg-white text-steel-600 shadow-sm transition hover:border-steel-700 hover:bg-steel-950 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canRight}
+            aria-label="Más categorías"
+            className="grid h-9 w-9 place-items-center rounded-full border-2 border-steel-700 bg-steel-950 text-white shadow-sm transition hover:border-steel-900 hover:bg-black disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+          <Link
+            href="/buscar"
+            className="ml-2 text-sm font-semibold text-steel-500 hover:text-amber-600 transition-colors"
+          >
+            Ver todo →
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {categories.map((cat, i) => (
           <Link
             key={cat.id}
             href={`/categoria/${cat.slug}`}
-            className="group flex flex-col items-center gap-3 rounded-xl border border-plate-200 bg-white px-3 py-5 text-center transition-all duration-150 hover:border-steel-900 hover:shadow-md"
+            className="group flex shrink-0 w-[calc(50%-6px)] sm:w-[calc(25%-9px)] lg:w-[calc(16.666%-10px)] flex-col items-center gap-3 rounded-xl border border-plate-200 bg-white px-3 py-5 text-center transition-all duration-150 hover:border-steel-900 hover:shadow-md"
           >
             {cat.icon_url ? (
               <span className="relative h-14 w-14 overflow-hidden rounded-xl">

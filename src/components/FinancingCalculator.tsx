@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Paperclip, X, Loader2 } from 'lucide-react';
 import {
   DAILY_PLANS, MONTHLY_PLANS, ALLOWED_ZONES,
   calcDaily, calcWeekly, calcMonthly, fmtARS,
@@ -8,6 +9,7 @@ import {
 } from '@/lib/financing';
 import { useLocation } from '@/lib/location-context';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { createClient } from '@/lib/supabase/client';
 
 type Freq = 'daily' | 'weekly' | 'monthly';
 type AnyPlan = DailyPlan | MonthlyPlan;
@@ -15,9 +17,9 @@ type AnyPlan = DailyPlan | MonthlyPlan;
 const STEP_LABELS = ['Requisitos', 'Calculadora', 'Solicitud'];
 
 const REQS = [
-  { key: 'dni',     text: 'Foto de DNI — frente y dorso' },
-  { key: 'service', text: 'Servicio a tu nombre: luz, agua o internet (o titular del domicilio de entrega)' },
-  { key: 'income',  text: 'Factura de compra a proveedor, garante con recibo de sueldo, o recibo de sueldo propio' },
+  { key: 'dni',     text: 'Foto de DNI — frente y dorso',           fileLabel: 'Subir foto de DNI (frente y dorso)' },
+  { key: 'service', text: 'Servicio a tu nombre: luz, agua o internet', fileLabel: 'Subir foto del servicio' },
+  { key: 'income',  text: 'Recibo de sueldo o garantía (factura a proveedor)', fileLabel: 'Subir foto del comprobante' },
 ];
 
 const FREQ_OPTIONS: { key: Freq; label: string }[] = [
@@ -40,6 +42,11 @@ export default function FinancingCalculator({
 
   // Step 1
   const [reqs, setReqs] = useState({ dni: false, service: false, income: false });
+  const [files, setFiles] = useState<Record<string, File | null>>({ dni: null, service: null, income: null });
+  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileRefs = { dni: useRef<HTMLInputElement>(null), service: useRef<HTMLInputElement>(null), income: useRef<HTMLInputElement>(null) };
 
   // Step 2
   const [amount, setAmount] = useState(initialAmount ? String(initialAmount) : '');
@@ -72,6 +79,24 @@ export default function FinancingCalculator({
   const totalDevolver = principal * (1 + currentPlan.surcharge);
   const freqLabel = freq === 'daily' ? 'día' : freq === 'weekly' ? 'semana' : 'mes';
 
+  async function uploadFiles(): Promise<Record<string, string>> {
+    const supabase = createClient();
+    const sessionId = crypto.randomUUID();
+    const urls: Record<string, string> = {};
+    for (const key of ['dni', 'service', 'income'] as const) {
+      const file = files[key];
+      if (!file) continue;
+      const ext = file.name.split('.').pop() ?? 'jpg';
+      const path = `${sessionId}/${key}.${ext}`;
+      const { error } = await supabase.storage.from('financing-docs').upload(path, file, { upsert: true });
+      if (!error) {
+        const { data } = supabase.storage.from('financing-docs').getPublicUrl(path);
+        urls[key] = data.publicUrl;
+      }
+    }
+    return urls;
+  }
+
   function buildMessage(): string {
     const lines: string[] = [
       '💳 *Solicitud de Financiación — BEHMONT*',
@@ -82,6 +107,13 @@ export default function FinancingCalculator({
       ...(city ? [`🏙️ ${city}`] : []),
       '',
       ...(productsSummary ? [`🛒 Productos: ${productsSummary}`, ''] : []),
+      ...(Object.keys(fileUrls).length > 0 ? [
+        '📎 *Documentación adjunta:*',
+        ...(fileUrls.dni     ? [`• DNI: ${fileUrls.dni}`]     : []),
+        ...(fileUrls.service ? [`• Servicio: ${fileUrls.service}`] : []),
+        ...(fileUrls.income  ? [`• Comprobante: ${fileUrls.income}`] : []),
+        '',
+      ] : []),
       `💰 Monto: $${fmtARS(principal)}`,
       `📋 Plan: ${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%)`,
       `💵 Total a devolver: $${fmtARS(totalDevolver)}`,
@@ -121,19 +153,65 @@ export default function FinancingCalculator({
               <h2 className="font-display text-lg font-bold text-steel-950">Requisitos necesarios</h2>
               <p className="mt-1 text-sm text-steel-400">Confirmá que tenés toda la documentación antes de continuar.</p>
             </div>
-            {REQS.map(({ key, text }) => (
-              <label key={key} className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={reqs[key as keyof typeof reqs]}
-                  onChange={(e) => setReqs((r) => ({ ...r, [key]: e.target.checked }))}
-                  className="mt-0.5 h-4 w-4 rounded accent-amber-500 shrink-0"
-                />
-                <span className={`text-sm leading-snug transition-colors ${reqs[key as keyof typeof reqs] ? 'text-steel-900 font-medium' : 'text-steel-500'}`}>
-                  {text}
-                </span>
-              </label>
-            ))}
+            {REQS.map(({ key, text, fileLabel }) => {
+              const k = key as keyof typeof reqs;
+              const checked = reqs[k];
+              const file = files[k];
+              return (
+                <div key={key} className="space-y-2">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) => setReqs((r) => ({ ...r, [key]: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded accent-amber-500 shrink-0"
+                    />
+                    <span className={`text-sm leading-snug transition-colors ${checked ? 'text-steel-900 font-medium' : 'text-steel-500'}`}>
+                      {text}
+                    </span>
+                  </label>
+                  {checked && (
+                    <div className="ml-7">
+                      {file ? (
+                        <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                          <Paperclip className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                          <span className="text-xs text-amber-800 font-medium truncate flex-1">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => { setFiles(f => ({ ...f, [key]: null })); if (fileRefs[k]?.current) fileRefs[k].current!.value = ''; }}
+                            className="text-amber-400 hover:text-amber-700"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            ref={fileRefs[k]}
+                            type="file"
+                            accept="image/*,application/pdf"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0] ?? null;
+                              setFiles(prev => ({ ...prev, [key]: f }));
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileRefs[k]?.current?.click()}
+                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-plate-300 bg-plate-50 px-3 py-2 text-xs font-medium text-steel-500 hover:border-amber-400 hover:text-amber-700 transition-colors"
+                          >
+                            <Paperclip className="h-3.5 w-3.5" />
+                            {fileLabel} <span className="text-steel-300">(opcional)</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Zone info */}
@@ -155,12 +233,30 @@ export default function FinancingCalculator({
             </p>
           </div>
 
+          {uploadError && (
+            <p className="text-xs text-red-600 leading-snug">{uploadError}</p>
+          )}
           <button
-            disabled={!allReqsMet}
-            onClick={() => setStep(2)}
-            className="w-full rounded-xl bg-steel-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-steel-800 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={!allReqsMet || uploading}
+            onClick={async () => {
+              setUploadError('');
+              const hasFiles = Object.values(files).some(Boolean);
+              if (hasFiles) {
+                setUploading(true);
+                try {
+                  const urls = await uploadFiles();
+                  setFileUrls(urls);
+                } catch {
+                  setUploadError('No se pudieron subir los archivos. Podés continuar sin ellos.');
+                } finally {
+                  setUploading(false);
+                }
+              }
+              setStep(2);
+            }}
+            className="w-full rounded-xl bg-steel-950 py-3.5 text-sm font-bold text-white transition-colors hover:bg-steel-800 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Ver opciones de financiación →
+            {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Subiendo archivos...</> : 'Ver opciones de financiación →'}
           </button>
         </div>
       )}
