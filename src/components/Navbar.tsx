@@ -161,12 +161,6 @@ export default function Navbar({ categories }: { categories: Category[] }) {
             >
               Mayorista
             </Link>
-            <Link
-              href="/financiacion"
-              className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-            >
-              Financiación
-            </Link>
           </nav>
           {canRight && (
             <>
@@ -215,9 +209,6 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           </Link>
           <Link href="/mayorista" className="whitespace-nowrap rounded-full border border-plate-200 px-3 py-1 text-xs font-medium text-steel-700 transition-colors hover:border-steel-700 hover:bg-steel-950 hover:text-white active:scale-[0.95]">
             Mayorista
-          </Link>
-          <Link href="/financiacion" className="whitespace-nowrap rounded-full border border-plate-200 px-3 py-1 text-xs font-medium text-steel-700 transition-colors hover:border-steel-700 hover:bg-steel-950 hover:text-white active:scale-[0.95]">
-            Financiación
           </Link>
         </div>
         {mobileCanRight && (
@@ -272,15 +263,6 @@ export default function Navbar({ categories }: { categories: Category[] }) {
                 className="flex-1 rounded-lg bg-plate-100 px-3 py-2.5 text-center text-sm font-semibold text-steel-800"
               >
                 Mayorista
-              </Link>
-            </div>
-            <div className="flex gap-2 border-t border-plate-100 pt-1">
-              <Link
-                href="/financiacion"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 rounded-lg bg-plate-100 px-3 py-2.5 text-center text-sm font-semibold text-steel-800"
-              >
-                Financiación
               </Link>
             </div>
           </div>
