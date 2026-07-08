@@ -2,15 +2,42 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
-import { Search, ShoppingCart, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import type { Category } from '@/lib/types';
 
 export default function Navbar({ categories }: { categories: Category[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
+  const navScrollRef = useRef<HTMLElement>(null);
+  const [canLeft, setCanLeft]   = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  function updateNavArrows() {
+    const el = navScrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
+
+  useEffect(() => {
+    updateNavArrows();
+    const el = navScrollRef.current;
+    el?.addEventListener('scroll', updateNavArrows, { passive: true });
+    window.addEventListener('resize', updateNavArrows, { passive: true });
+    return () => {
+      el?.removeEventListener('scroll', updateNavArrows);
+      window.removeEventListener('resize', updateNavArrows);
+    };
+  }, [categories]);
+
+  function scrollNav(dir: 'left' | 'right') {
+    const el = navScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -240 : 240 });
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/97 backdrop-blur-md border-b border-plate-200 shadow-[0_1px_0_0_rgba(11,18,32,0.06)]">
@@ -70,35 +97,61 @@ export default function Navbar({ categories }: { categories: Category[] }) {
           </div>
         </div>
 
-        <nav className="hidden md:flex items-center gap-1 h-10 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {categories.map((cat) => (
+        <div className="hidden md:flex items-center relative">
+          {canLeft && (
+            <>
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+              <button
+                onClick={() => scrollNav('left')}
+                aria-label="Categorías anteriores"
+                className="absolute left-0 z-20 grid h-7 w-7 place-items-center rounded-full border border-plate-200 bg-white text-steel-500 shadow-sm transition hover:bg-steel-950 hover:text-white hover:border-steel-950"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
+          <nav ref={navScrollRef} className="flex items-center gap-1 h-10 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/categoria/${cat.slug}`}
+                className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
+              >
+                {cat.name}
+              </Link>
+            ))}
             <Link
-              key={cat.id}
-              href={`/categoria/${cat.slug}`}
+              href="/ofertas"
+              className="relative whitespace-nowrap px-2.5 py-1 text-sm font-semibold text-amber-600 rounded transition-colors hover:text-amber-700 hover:bg-amber-50 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
+            >
+              Ofertas
+            </Link>
+            <Link
+              href="/mayorista"
               className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
             >
-              {cat.name}
+              Mayorista
             </Link>
-          ))}
-          <Link
-            href="/ofertas"
-            className="relative whitespace-nowrap px-2.5 py-1 text-sm font-semibold text-amber-600 rounded transition-colors hover:text-amber-700 hover:bg-amber-50 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-          >
-            Ofertas
-          </Link>
-          <Link
-            href="/mayorista"
-            className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-          >
-            Mayorista
-          </Link>
-          <Link
-            href="/financiacion"
-            className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-          >
-            Financiación
-          </Link>
-        </nav>
+            <Link
+              href="/financiacion"
+              className="relative whitespace-nowrap px-2.5 py-1 text-sm font-medium text-steel-700 rounded transition-colors hover:text-steel-950 hover:bg-plate-100 after:absolute after:bottom-0 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-amber-500 after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
+            >
+              Financiación
+            </Link>
+          </nav>
+          {canRight && (
+            <>
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+              <button
+                onClick={() => scrollNav('right')}
+                aria-label="Más categorías"
+                className="absolute right-0 z-20 grid h-7 w-7 place-items-center rounded-full border border-steel-700 bg-steel-950 text-white shadow-sm transition hover:bg-black"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div
