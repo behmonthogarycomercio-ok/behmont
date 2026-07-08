@@ -11,16 +11,28 @@ import type { Category } from '@/lib/types';
 export default function Navbar({ categories }: { categories: Category[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
-  const navScrollRef = useRef<HTMLElement>(null);
-  const [canLeft, setCanLeft]   = useState(false);
-  const [canRight, setCanRight] = useState(false);
+  const navScrollRef    = useRef<HTMLElement>(null);
+  const mobileNavRef    = useRef<HTMLDivElement>(null);
+  const [canLeft,       setCanLeft]       = useState(false);
+  const [canRight,      setCanRight]      = useState(false);
+  const [mobileCanLeft,  setMobileCanLeft]  = useState(false);
+  const [mobileCanRight, setMobileCanRight] = useState(false);
 
-  function updateNavArrows() {
-    const el = navScrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  function makeArrowUpdater(
+    ref: React.RefObject<HTMLElement | HTMLDivElement>,
+    setL: (v: boolean) => void,
+    setR: (v: boolean) => void
+  ) {
+    return () => {
+      const el = ref.current;
+      if (!el) return;
+      setL(el.scrollLeft > 4);
+      setR(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    };
   }
+
+  const updateNavArrows    = makeArrowUpdater(navScrollRef,  setCanLeft,       setCanRight);
+  const updateMobileArrows = makeArrowUpdater(mobileNavRef,  setMobileCanLeft, setMobileCanRight);
 
   useEffect(() => {
     updateNavArrows();
@@ -33,10 +45,27 @@ export default function Navbar({ categories }: { categories: Category[] }) {
     };
   }, [categories]);
 
+  useEffect(() => {
+    updateMobileArrows();
+    const el = mobileNavRef.current;
+    el?.addEventListener('scroll', updateMobileArrows, { passive: true });
+    window.addEventListener('resize', updateMobileArrows, { passive: true });
+    return () => {
+      el?.removeEventListener('scroll', updateMobileArrows);
+      window.removeEventListener('resize', updateMobileArrows);
+    };
+  }, [categories]);
+
   function scrollNav(dir: 'left' | 'right') {
     const el = navScrollRef.current;
     if (!el) return;
     el.scrollBy({ left: dir === 'left' ? -240 : 240 });
+  }
+
+  function scrollMobileNav(dir: 'left' | 'right') {
+    const el = mobileNavRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -180 : 180 });
   }
 
   return (
@@ -152,6 +181,57 @@ export default function Navbar({ categories }: { categories: Category[] }) {
             </>
           )}
         </div>
+      </div>
+
+      {/* Mobile category strip */}
+      <div className="md:hidden relative border-t border-plate-100">
+        {mobileCanLeft && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+            <button
+              onClick={() => scrollMobileNav('left')}
+              aria-label="Categorías anteriores"
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-20 grid h-6 w-6 place-items-center rounded-full border border-plate-200 bg-white text-steel-500 shadow-sm transition hover:bg-steel-950 hover:text-white"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
+          </>
+        )}
+        <div
+          ref={mobileNavRef}
+          className="flex items-center gap-1.5 h-9 px-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/categoria/${cat.slug}`}
+              className="whitespace-nowrap rounded-full border border-plate-200 px-3 py-1 text-xs font-medium text-steel-700 transition-colors hover:border-steel-700 hover:bg-steel-950 hover:text-white active:scale-[0.95]"
+            >
+              {cat.name}
+            </Link>
+          ))}
+          <Link href="/ofertas" className="whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-500 hover:text-white hover:border-amber-500 active:scale-[0.95]">
+            Ofertas
+          </Link>
+          <Link href="/mayorista" className="whitespace-nowrap rounded-full border border-plate-200 px-3 py-1 text-xs font-medium text-steel-700 transition-colors hover:border-steel-700 hover:bg-steel-950 hover:text-white active:scale-[0.95]">
+            Mayorista
+          </Link>
+          <Link href="/financiacion" className="whitespace-nowrap rounded-full border border-plate-200 px-3 py-1 text-xs font-medium text-steel-700 transition-colors hover:border-steel-700 hover:bg-steel-950 hover:text-white active:scale-[0.95]">
+            Financiación
+          </Link>
+        </div>
+        {mobileCanRight && (
+          <>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+            <button
+              onClick={() => scrollMobileNav('right')}
+              aria-label="Más categorías"
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-20 grid h-6 w-6 place-items-center rounded-full border border-steel-700 bg-steel-950 text-white shadow-sm transition hover:bg-black"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </>
+        )}
       </div>
 
       <div
