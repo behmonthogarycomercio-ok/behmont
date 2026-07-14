@@ -9,10 +9,6 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
   const [href, setHref] = useState('');
 
   useEffect(() => {
-    if (status === 'approved' || status === 'pending') {
-      clear();
-    }
-
     const raw = sessionStorage.getItem('behmont-mp-pending');
     if (!raw) return;
 
@@ -21,6 +17,14 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
         items: { name: string; price: number; qty: number }[];
         payer: { name: string; phone: string };
       };
+
+      // Solo vaciar el carrito si esta pagina corresponde a un checkout de MP
+      // que arranco realmente en este navegador (existe el sessionStorage) —
+      // evita vaciarlo si se llega a esta URL por "atras" del navegador o por
+      // cualquier otra via sin haber pagado nada.
+      if (status === 'approved' || status === 'pending') {
+        clear();
+      }
 
       // Save order to DB (fire and forget — don't block the UI)
       fetch('/api/mp/save-order', {
