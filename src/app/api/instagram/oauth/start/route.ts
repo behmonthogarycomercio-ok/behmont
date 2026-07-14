@@ -11,7 +11,7 @@ export async function GET() {
   authUrl.searchParams.set('redirect_uri', process.env.IG_REDIRECT_URI!);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', state);
-  authUrl.searchParams.set('scope', 'instagram_business_basic,instagram_manage_insights');
+  authUrl.searchParams.set('scope', 'instagram_business_basic,instagram_business_manage_insights');
 
   const response = NextResponse.redirect(authUrl.toString());
   // httpOnly + sameSite:'lax' (no 'strict' — el callback vuelve como navegación
