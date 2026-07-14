@@ -421,7 +421,7 @@ function ConexionView({
       {connection ? (
         <div className="space-y-3">
           <p className="text-sm text-steel-700">
-            ✓ Conectado — @{connection.ig_username} (página: {connection.page_name})
+            ✓ Conectado — @{connection.ig_username}
           </p>
           <div className="flex flex-wrap gap-2">
             <InstagramSyncButton />

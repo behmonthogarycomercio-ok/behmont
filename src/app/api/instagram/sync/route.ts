@@ -44,14 +44,14 @@ async function runSync(request: Request, fromCron: boolean) {
     }
 
     const [profile, insights, media] = await Promise.all([
-      fetchIgProfile(conn.igUserId, conn.pageAccessToken),
-      fetchIgInsights(conn.igUserId, conn.pageAccessToken, [
+      fetchIgProfile(conn.igUserId, conn.accessToken),
+      fetchIgInsights(conn.igUserId, conn.accessToken, [
         'reach',
         'profile_views',
         'accounts_engaged',
         'total_interactions',
       ]),
-      fetchIgMedia(conn.igUserId, conn.pageAccessToken, 25),
+      fetchIgMedia(conn.igUserId, conn.accessToken, 25),
     ]);
 
     const today = new Date().toISOString().slice(0, 10);
