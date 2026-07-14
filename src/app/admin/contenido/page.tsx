@@ -403,7 +403,7 @@ function ConexionView({
     <div className="max-w-xl rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
       <h2 className="font-display font-semibold text-steel-900 mb-1">Instagram</h2>
       <p className="text-sm text-steel-500 mb-4">
-        Conexión real vía la Instagram API de Meta (Instagram API with Facebook Login for Business).
+        Conexión real vía la Instagram API de Meta (Instagram API with Instagram Login).
         Solo lectura de perfil, media e insights — no publica contenido ni gestiona comentarios/DMs.
       </p>
 
