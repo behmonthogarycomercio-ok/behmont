@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -33,6 +34,22 @@ const NAV = [
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [pendingOrders, setPendingOrders] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createClient();
+    supabase
+      .from('whatsapp_orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pendiente')
+      .then(({ count }) => {
+        if (!cancelled) setPendingOrders(count ?? 0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -64,6 +81,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 }`}
               >
                 <Icon className="h-4 w-4" /> {label}
+                {href === '/admin/pedidos' && pendingOrders > 0 && (
+                  <span className="ml-auto rounded-full bg-danger-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                    {pendingOrders}
+                  </span>
+                )}
               </Link>
             );
           })}

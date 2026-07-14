@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     ].filter(Boolean).join('\n');
 
     const supabase = createServiceSupabase();
-    await supabase.from('whatsapp_orders').insert({
+    const { error } = await supabase.from('whatsapp_orders').insert({
       customer_name: payer?.name || 'Cliente MP',
       customer_phone: payer?.phone || '',
       customer_note: note,
@@ -47,6 +47,11 @@ export async function POST(req: NextRequest) {
       status: status === 'approved' ? 'completado' : 'pendiente',
       message_text: messageText,
     });
+
+    if (error) {
+      console.error('[mp/save-order] insert falló:', error);
+      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
