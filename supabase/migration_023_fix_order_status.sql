@@ -13,20 +13,16 @@
 -- silencio) y el boton "Cambiar estado" del panel tampoco funcionaba nunca
 -- para ningun pedido.
 --
--- Nota: la primera version de esta migracion asumia mal el nombre del
--- constraint (whatsapp_orders_status_check) y el "drop ... if exists" no
--- borro nada porque el nombre real era otro -- por eso el ALTER anterior
--- fallo. Esta version busca y borra el constraint real por su definicion
--- en vez de adivinar el nombre.
+-- Nota sobre los intentos anteriores de esta misma migracion: el primero
+-- asumia mal el nombre del constraint viejo. El segundo lo buscaba bien por
+-- definicion, pero borraba el constraint DESPUES de intentar actualizar los
+-- datos -- y esa misma actualizacion (enviado -> pendiente) ya violaba el
+-- constraint viejo, todavia activo en ese momento. Esta version borra el
+-- constraint viejo PRIMERO, antes de tocar ningun dato.
 
--- Mapear los datos existentes a los valores nuevos (no hace nada si ya se
--- corrio antes, son updates idempotentes).
-update whatsapp_orders set status = 'pendiente' where status = 'enviado';
-update whatsapp_orders set status = 'completado' where status = 'cerrado';
-update whatsapp_orders set status = 'procesando' where status = 'contactado';
-
--- Buscar y borrar CUALQUIER check constraint existente sobre whatsapp_orders
--- que mencione los valores viejos, sin depender de adivinar su nombre.
+-- 1) Borrar primero cualquier check constraint existente sobre
+--    whatsapp_orders que mencione los valores viejos (sin depender de
+--    adivinar su nombre).
 do $$
 declare
   r record;
@@ -42,6 +38,12 @@ begin
   end loop;
 end $$;
 
+-- 2) Recien ahora, con el constraint viejo afuera, migrar los datos existentes.
+update whatsapp_orders set status = 'pendiente' where status = 'enviado';
+update whatsapp_orders set status = 'completado' where status = 'cerrado';
+update whatsapp_orders set status = 'procesando' where status = 'contactado';
+
+-- 3) Agregar el constraint nuevo y el default correcto.
 alter table whatsapp_orders add constraint whatsapp_orders_status_check_v2
   check (status in ('pendiente','procesando','completado','cancelado'));
 alter table whatsapp_orders alter column status set default 'pendiente';
