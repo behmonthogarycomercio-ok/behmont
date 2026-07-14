@@ -12,13 +12,36 @@
 -- (el insert nunca se verificaba por error en el codigo, asi que fallaba en
 -- silencio) y el boton "Cambiar estado" del panel tampoco funcionaba nunca
 -- para ningun pedido.
+--
+-- Nota: la primera version de esta migracion asumia mal el nombre del
+-- constraint (whatsapp_orders_status_check) y el "drop ... if exists" no
+-- borro nada porque el nombre real era otro -- por eso el ALTER anterior
+-- fallo. Esta version busca y borra el constraint real por su definicion
+-- en vez de adivinar el nombre.
 
--- Mapear el unico dato existente con el valor viejo a uno valido nuevo.
+-- Mapear los datos existentes a los valores nuevos (no hace nada si ya se
+-- corrio antes, son updates idempotentes).
 update whatsapp_orders set status = 'pendiente' where status = 'enviado';
 update whatsapp_orders set status = 'completado' where status = 'cerrado';
 update whatsapp_orders set status = 'procesando' where status = 'contactado';
 
-alter table whatsapp_orders drop constraint if exists whatsapp_orders_status_check;
-alter table whatsapp_orders add constraint whatsapp_orders_status_check
+-- Buscar y borrar CUALQUIER check constraint existente sobre whatsapp_orders
+-- que mencione los valores viejos, sin depender de adivinar su nombre.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select conname
+    from pg_constraint
+    where conrelid = 'whatsapp_orders'::regclass
+      and contype = 'c'
+      and pg_get_constraintdef(oid) ilike '%enviado%'
+  loop
+    execute format('alter table whatsapp_orders drop constraint %I', r.conname);
+  end loop;
+end $$;
+
+alter table whatsapp_orders add constraint whatsapp_orders_status_check_v2
   check (status in ('pendiente','procesando','completado','cancelado'));
 alter table whatsapp_orders alter column status set default 'pendiente';
