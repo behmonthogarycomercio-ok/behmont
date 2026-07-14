@@ -14,6 +14,7 @@ import {
   LogOut,
   ExternalLink,
   ShoppingBag,
+  Instagram,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -26,6 +27,7 @@ const NAV = [
   { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
   { href: '/admin/stock',       label: 'Stock y precios',       icon: Boxes },
   { href: '/admin/marcas',      label: 'Marcas y MercadoLibre', icon: Tag },
+  { href: '/admin/contenido',   label: 'Contenido',             icon: Instagram },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

@@ -6,6 +6,8 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.supabase.co' },
       { protocol: 'https', hostname: 'http2.mlstatic.com' },
       { protocol: 'https', hostname: '**.mlstatic.com' },
+      { protocol: 'https', hostname: '**.cdninstagram.com' },
+      { protocol: 'https', hostname: '**.fbcdn.net' },
     ],
   },
 };

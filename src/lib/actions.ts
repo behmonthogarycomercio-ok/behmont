@@ -272,3 +272,96 @@ export async function updateOrderStatus(formData: FormData): Promise<ActionResul
   revalidatePath('/admin/dashboard');
   return {};
 }
+
+// ── CONTENIDO / INSTAGRAM ────────────────────────────────
+export async function upsertContentSource(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+
+  const payload = {
+    type: formData.get('type') as string,
+    title: formData.get('title') as string,
+    url: (formData.get('url') as string) || null,
+    summary: (formData.get('summary') as string) || null,
+  };
+
+  if (id) {
+    const { error } = await supabase.from('content_sources').update(payload).eq('id', id);
+    if (error) return { error: friendlyDbError(error) };
+  } else {
+    const { error } = await supabase.from('content_sources').insert(payload);
+    if (error) return { error: friendlyDbError(error) };
+  }
+
+  revalidatePath('/admin/contenido');
+  return {};
+}
+
+export async function deleteContentSource(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('content_sources').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/contenido');
+  return {};
+}
+
+export async function upsertContentPiece(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const scheduledAt = formData.get('scheduled_at') as string;
+
+  const payload = {
+    title: formData.get('title') as string,
+    format: formData.get('format') as string,
+    stage: (formData.get('stage') as string) || 'idea',
+    objective: (formData.get('objective') as string) || null,
+    hook: (formData.get('hook') as string) || null,
+    diagnostico: (formData.get('diagnostico') as string) || null,
+    reframe: (formData.get('reframe') as string) || null,
+    cta: (formData.get('cta') as string) || null,
+    script: (formData.get('script') as string) || null,
+    source_id: (formData.get('source_id') as string) || null,
+    owner: (formData.get('owner') as string) || null,
+    scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+    notes: (formData.get('notes') as string) || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (id) {
+    const { error } = await supabase.from('content_pieces').update(payload).eq('id', id);
+    if (error) return { error: friendlyDbError(error) };
+  } else {
+    const { error } = await supabase.from('content_pieces').insert(payload);
+    if (error) return { error: friendlyDbError(error) };
+  }
+
+  revalidatePath('/admin/contenido');
+  return {};
+}
+
+export async function deleteContentPiece(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('content_pieces').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/contenido');
+  return {};
+}
+
+export async function updateContentPieceStage(id: string, stage: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase
+    .from('content_pieces')
+    .update({ stage, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/contenido');
+  return {};
+}
+
+export async function disconnectInstagram(): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('instagram_connection').delete().eq('id', 'main');
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/contenido');
+  return {};
+}
