@@ -77,7 +77,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
                 fill
                 priority
                 sizes="144px"
-                className="object-contain object-left brightness-0 invert"
+                className="object-contain object-left"
               />
             </Link>
 
