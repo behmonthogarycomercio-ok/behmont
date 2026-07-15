@@ -6,7 +6,6 @@ import { Heart, MessageCircle, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
-import { getProductCode } from '@/lib/product-display';
 import type { Product } from '@/lib/types';
 
 const CUOTAS = 3;
@@ -15,7 +14,6 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
   const { addItem }   = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav           = isFavorite(product.sku);
-  const code          = getProductCode(product);
 
   const discountPct = product.compare_at_price && product.compare_at_price > product.price
     ? Math.round(100 - (product.price / product.compare_at_price) * 100) : null;
@@ -24,7 +22,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
 
   return (
-    <div className="group flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-gray-300 transition-shadow duration-200">
+    <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
 
       {/* Imagen */}
       <Link href={`/producto/${product.slug}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '100%' }}>
@@ -41,12 +39,12 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         </div>
         {/* Badges */}
         {discountPct && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">
+          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
             -{discountPct}%
           </span>
         )}
         {product.stock > 0 && product.stock <= 3 && (
-          <span className="absolute bottom-2 left-2 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded">
+          <span className="absolute bottom-3 left-3 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
             Últimas {product.stock}
           </span>
         )}
@@ -91,12 +89,12 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           <button
             onClick={() => addItem({ sku: product.sku, name: product.name, qty: 1, price: product.price })}
             disabled={product.stock <= 0}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-[#0B1C3A] hover:bg-[#162040] text-white text-xs font-bold py-2.5 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed active:scale-[.97]">
+            className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#182548] to-[#0B1C3A] hover:from-[#213262] hover:to-[#182548] text-white text-xs font-bold py-2.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_6px_14px_-6px_rgba(10,18,38,0.5)] transition-all hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:translate-y-px active:scale-[.98]">
             <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
             Agregar al carrito
           </button>
           <a href={inquiryLink} target="_blank" rel="noopener noreferrer"
-            className="h-9 w-9 shrink-0 rounded-lg bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
+            className="h-9 w-9 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
             aria-label="WhatsApp">
             <MessageCircle className="h-4 w-4" />
           </a>

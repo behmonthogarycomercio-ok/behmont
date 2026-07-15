@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    body { margin: 0; background: #F5F6F9; }
+    ::selection { background: #ED3237; color: #fff; }
+    a { color: #111C38; }
+    a:hover { color: #ED3237; }
+  </style>
+</helmet>
+
+<div style="font-family: Inter, system-ui, sans-serif; background: #F5F6F9; color: #0A1226; min-height: 100vh;">
+
+  <div style="position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; gap: 2px; background: #0A1226; border-radius: 999px; padding: 4px; box-shadow: 0 12px 32px -8px rgba(10,18,38,0.45);">
+    <button onClick="{{ goTo_home }}" style="{{ tabStyle_home }}">Home</button>
+    <button onClick="{{ goTo_categoria }}" style="{{ tabStyle_categoria }}">Categoría</button>
+    <button onClick="{{ goTo_producto }}" style="{{ tabStyle_producto }}">Producto</button>
+  </div>
+
+  <header style="position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid #E8EAF1;">
+    <div style="max-width: 1360px; margin: 0 auto; padding: 0 32px; height: 88px; display: flex; align-items: center; gap: 40px;">
+      <a href="#" onClick="{{ goTo_home }}" style="display: flex; align-items: center; height: 40px; width: 168px; flex-shrink: 0; text-decoration: none;">
+        <img src="assets/logo-behmont.png" alt="BEHMONT" style="height: 100%; width: 100%; object-fit: contain; object-position: left;" />
+      </a>
+      <nav style="display: flex; align-items: center; gap: 32px; flex: 1;">
+        <a href="#" onClick="{{ goTo_categoria }}" style="font-size: 14.5px; font-weight: 600; color: #111C38; text-decoration: none;">Categorías</a>
+        <a href="#" style="font-size: 14.5px; font-weight: 600; color: #ED3237; text-decoration: none;">Ofertas</a>
+        <a href="#" style="font-size: 14.5px; font-weight: 500; color: #52649C; text-decoration: none;">Mayorista</a>
+        <a href="#" style="font-size: 14.5px; font-weight: 500; color: #52649C; text-decoration: none;">Financiación</a>
+        <div style="flex: 1; max-width: 420px; margin-left: auto; display: flex; align-items: center; height: 46px; border-radius: 999px; border: 1.5px solid #E8EAF1; background: #F5F6F9; padding: 0 8px 0 18px;">
+          <input placeholder="¿Qué estás buscando?" style="flex: 1; border: none; background: transparent; outline: none; font-family: Inter; font-size: 14px; color: #0A1226;" />
+          <span style="width: 34px; height: 34px; border-radius: 999px; background: #111C38; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </span>
+        </div>
+      </nav>
+      <button style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 999px; background: linear-gradient(180deg, #182548 0%, #111C38 100%); color: white; font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: Inter; box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 16px -6px rgba(10,18,38,0.5); transition: transform .12s, box-shadow .12s, background .15s;" style-hover="background: linear-gradient(180deg, #213262 0%, #182548 100%); transform: translateY(-1px);" style-active="transform: translateY(1px) scale(0.96); box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 2px 6px -2px rgba(10,18,38,0.5);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        Pedido
+      </button>
+    </div>
+    <div style="border-top: 1px solid #F0F1F5; overflow-x: auto;">
+      <div style="max-width: 1360px; margin: 0 auto; padding: 0 32px; display: flex; gap: 4px; height: 46px; align-items: center;">
+        <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="12">
+          <a href="#" onClick="{{ goTo_categoria }}" style="flex-shrink: 0; font-size: 13px; font-weight: 500; color: #52649C; text-decoration: none; padding: 6px 12px; border-radius: 999px; white-space: nowrap; transition: background .15s, color .15s;" style-hover="background: #F5F6F9; color: #111C38;">{{ cat.name }}</a>
+        </sc-for>
+      </div>
+    </div>
+  </header>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <main data-screen-label="Home">
+
+    <section style="position: relative; background: #0A1226; overflow: hidden; min-height: 640px; display: flex; align-items: stretch;">
+      <div style="flex: 1.1; display: flex; flex-direction: column; justify-content: center; padding: 100px 32px 100px 64px; max-width: 640px; z-index: 2;">
+        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #F15458; background: rgba(237,50,55,0.12); padding: 8px 14px; border-radius: 999px; margin-bottom: 28px;">
+          Concordia, Entre Ríos · Desde 1995
+        </span>
+        <h1 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(44px, 5.2vw, 84px); line-height: 0.98; letter-spacing: -0.02em; color: white; margin: 0;">
+          Equipamiento<br/>para cada<br/><span style="color: #F15458;">rincón del negocio.</span>
+        </h1>
+        <p style="margin: 28px 0 0; font-size: 18px; line-height: 1.6; color: rgba(255,255,255,0.55); max-width: 420px;">
+          Gastronomía, hogar, barbería y electrónica. Financiación propia y stock real, actualizado todos los días.
+        </p>
+        <div style="margin-top: 40px; display: flex; gap: 14px;">
+          <a href="#" onClick="{{ goTo_categoria }}" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(180deg, #F15458 0%, #ED3237 100%); color: white; font-weight: 700; font-size: 15px; padding: 16px 30px; border-radius: 999px; text-decoration: none; box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 10px 20px -6px rgba(237,50,55,0.5); transition: transform .15s, box-shadow .15s, background .15s;" style-hover="background: linear-gradient(180deg, #F15458 0%, #D62A2F 100%); transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 16px 28px -6px rgba(237,50,55,0.55);" style-active="transform: translateY(1px) scale(0.98); box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 4px 10px -4px rgba(237,50,55,0.5);">
+            Ver catálogo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a href="#" style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); color: white; font-weight: 600; font-size: 15px; padding: 16px 26px; border-radius: 999px; text-decoration: none; border: 1px solid rgba(255,255,255,0.15); transition: background .15s;" style-hover="background: rgba(255,255,255,0.16);">
+            Cómo llegar
+          </a>
+        </div>
+      </div>
+      <div style="flex: 1; position: relative; overflow: hidden;">
+        <img src="uploads/WhatsApp Image 2026-05-30 at 12.02.50.jpeg" alt="Local BEHMONT" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;" />
+        <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,18,38,0.55), rgba(10,18,38,0.05));"></div>
+      </div>
+    </section>
+
+    <section style="background: white; border-bottom: 1px solid #E8EAF1;">
+      <div style="max-width: 1360px; margin: 0 auto; padding: 0 32px; display: grid; grid-template-columns: repeat(4, 1fr);">
+        <sc-for list="{{ stats }}" as="stat" hint-placeholder-count="4">
+          <div style="padding: 36px 8px; border-left: 1px solid #F0F1F5;">
+            <p style="font-family: 'Manrope', sans-serif; font-size: 30px; font-weight: 700; color: #0A1226; margin: 0; letter-spacing: -0.01em;">{{ stat.value }}</p>
+            <p style="font-family: 'Inter', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #7886AD; margin: 8px 0 0;">{{ stat.label }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="max-width: 1360px; margin: 0 auto; padding: 72px 32px 0;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+        <div style="border-radius: 20px; overflow: hidden; border: 1px solid #E8EAF1; background: white;">
+          <div style="aspect-ratio: 1/1;"><img src="uploads/FINCIA.png" alt="Financiación" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+          <p style="padding: 16px 18px; margin: 0; font-size: 14.5px; font-weight: 600; color: #111C38;">Financiación propia</p>
+        </div>
+        <div style="border-radius: 20px; overflow: hidden; border: 1px solid #E8EAF1; background: white;">
+          <div style="aspect-ratio: 1/1;"><img src="uploads/HORARIOS.png" alt="Horarios" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+          <p style="padding: 16px 18px; margin: 0; font-size: 14.5px; font-weight: 600; color: #111C38;">Horarios de atención</p>
+        </div>
+        <div style="border-radius: 20px; overflow: hidden; border: 1px solid #E8EAF1; background: white;">
+          <div style="aspect-ratio: 1/1;"><img src="uploads/METODOS DE PAGO.png" alt="Métodos de pago" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+          <p style="padding: 16px 18px; margin: 0; font-size: 14.5px; font-weight: 600; color: #111C38;">Métodos de pago</p>
+        </div>
+        <div style="border-radius: 20px; overflow: hidden; border: 1px solid #E8EAF1; background: white;">
+          <div style="aspect-ratio: 1/1;"><img src="uploads/PROMOS.png" alt="Promociones" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+          <p style="padding: 16px 18px; margin: 0; font-size: 14.5px; font-weight: 600; color: #111C38;">Promociones activas</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="max-width: 1360px; margin: 0 auto; padding: 96px 32px 80px;">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 44px;">
+        <div>
+          <p style="font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #9DA7C4; margin: 0 0 10px;">Explorá</p>
+          <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(30px, 3vw, 44px); font-weight: 700; letter-spacing: -0.02em; margin: 0; color: #0A1226;">Categorías</h2>
+        </div>
+        <a href="#" onClick="{{ goTo_categoria }}" style="font-size: 14px; font-weight: 600; color: #52649C; text-decoration: none;">Ver todo →</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+        <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="12">
+          <a href="#" onClick="{{ goTo_categoria }}" style="text-decoration: none; display: block; border-radius: 20px; overflow: hidden; background: white; border: 1px solid #E8EAF1; transition: box-shadow .2s, transform .2s, border-color .2s;" style-hover="box-shadow: 0 16px 32px -12px rgba(10,18,38,0.18); transform: translateY(-3px); border-color: #C3C9DA;">
+            <div style="aspect-ratio: 4/3; background: repeating-linear-gradient(135deg, rgba(17,28,56,0.05) 0px, rgba(17,28,56,0.05) 2px, transparent 2px, transparent 18px), #EEF0F2; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <sc-if value="{{ cat.image }}">
+                <img src="{{ cat.image }}" alt="{{ cat.name }}" style="width: 100%; height: 100%; object-fit: cover;" />
+              </sc-if>
+              <sc-if value="{{ cat.noImage }}">
+                <span style="font-family: 'Inter', sans-serif; font-size: 10px; color: #9DA7C4; text-transform: uppercase; letter-spacing: 0.08em;">Foto categoría</span>
+              </sc-if>
+            </div>
+            <p style="padding: 16px 18px; margin: 0; font-size: 15px; font-weight: 600; color: #111C38;">{{ cat.name }}</p>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="background: #0A1226; padding: 88px 0;">
+      <div style="max-width: 1360px; margin: 0 auto; padding: 0 32px;">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px dashed rgba(255,255,255,0.15);">
+          <div>
+            <p style="font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #F15458; margin: 0 0 10px;">Tiempo limitado</p>
+            <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(30px, 3vw, 44px); font-weight: 700; letter-spacing: -0.02em; margin: 0; color: white;">Ofertas flash</h2>
+          </div>
+          <a href="#" style="font-size: 14px; font-weight: 600; color: #F15458; text-decoration: none;">Ver todas →</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;">
+          <sc-for list="{{ flashProducts }}" as="p" hint-placeholder-count="4">
+            <dc-import name="Product Card" product="{{ p }}" hint-size="100%,380px" style="width: 100%;"></dc-import>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="max-width: 1360px; margin: 0 auto; padding: 96px 32px;">
+      <p style="font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #9DA7C4; margin: 0 0 10px;">Selección destacada</p>
+      <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(30px, 3vw, 44px); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 40px; color: #0A1226;">El mejor precio de contado</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;">
+        <sc-for list="{{ featuredProducts }}" as="p" hint-placeholder-count="8">
+          <dc-import name="Product Card" product="{{ p }}" hint-size="100%,380px" style="width: 100%;"></dc-import>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="background: white; border-top: 1px solid #E8EAF1;">
+      <div style="max-width: 1360px; margin: 0 auto; padding: 88px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+        <div>
+          <p style="font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #9DA7C4; margin: 0 0 10px;">Visitanos</p>
+          <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 24px; color: #0A1226;">San Lorenzo Oeste 380, Concordia</h2>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <p style="margin: 0; font-size: 15px; color: #2D4380;"><strong style="color: #0A1226;">Lun a Vie</strong> · 08:00–12:30 y 16:00–20:00</p>
+            <p style="margin: 0; font-size: 15px; color: #2D4380;"><strong style="color: #0A1226;">Sábados</strong> · 08:00–13:00</p>
+            <p style="margin: 0; font-size: 15px; color: #2D4380;"><strong style="color: #0A1226;">WhatsApp</strong> · +54 345 401-5358</p>
+          </div>
+          <a href="#" style="margin-top: 28px; display: inline-flex; align-items: center; gap: 10px; background: #111C38; color: white; font-weight: 700; font-size: 14px; padding: 15px 26px; border-radius: 999px; text-decoration: none; width: fit-content; transition: background .15s;" style-hover="background: #213262;">
+            Escribinos por WhatsApp
+          </a>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="aspect-ratio: 3/4; border-radius: 20px; overflow: hidden;">
+            <img src="uploads/UBICACION.png" alt="Fachada BEHMONT" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div style="aspect-ratio: 3/4; border-radius: 20px; overflow: hidden; border: 1px solid #E8EAF1;">
+            <iframe title="Mapa BEHMONT" src="https://www.google.com/maps?q=San+Lorenzo+Oeste+380,+Concordia,+Entre+R%C3%ADos&output=embed" style="width: 100%; height: 100%; border: 0;" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  </sc-if>
+
+  <sc-if value="{{ isCategoria }}">
+  <main data-screen-label="Categoria">
+    <div style="background: white; border-bottom: 1px solid #E8EAF1;">
+      <div style="max-width: 1360px; margin: 0 auto; padding: 40px 32px 44px;">
+        <p style="margin: 0 0 18px; font-size: 13px; color: #9DA7C4;"><a href="#" onClick="{{ goTo_home }}" style="color:#9DA7C4; text-decoration:none;">Inicio</a> / Gastronomía</p>
+        <div style="display: flex; align-items: flex-end; gap: 24px;">
+          <div style="width: 84px; height: 84px; border-radius: 20px; overflow: hidden; flex-shrink: 0;"><img src="uploads/IMG_0226.jpg" alt="Gastronomía" style="width: 100%; height: 100%; object-fit: cover;" /></div>
+          <div>
+            <h1 style="font-family: 'Manrope', sans-serif; font-size: clamp(32px, 4vw, 52px); font-weight: 700; letter-spacing: -0.02em; margin: 0; color: #0A1226;">Gastronomía</h1>
+            <p style="font-family: 'Inter', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #7886AD; margin: 8px 0 0;">312 productos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="max-width: 1360px; margin: 0 auto; padding: 56px 32px 100px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;">
+        <sc-for list="{{ featuredProducts }}" as="p" hint-placeholder-count="8">
+          <dc-import name="Product Card" product="{{ p }}" hint-size="100%,380px" style="width: 100%;"></dc-import>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+
+  <sc-if value="{{ isProducto }}">
+  <main data-screen-label="Producto" style="max-width: 1360px; margin: 0 auto; padding: 40px 32px 100px;">
+    <p style="margin: 0 0 32px; font-size: 13px; color: #9DA7C4;">
+      <a href="#" onClick="{{ goTo_home }}" style="color:#9DA7C4; text-decoration:none;">Inicio</a> /
+      <a href="#" onClick="{{ goTo_categoria }}" style="color:#9DA7C4; text-decoration:none;"> Gastronomía</a> / Cocina industrial 6 hornallas
+    </p>
+    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px;">
+      <div>
+        <div style="aspect-ratio: 1/1; border-radius: 24px; overflow: hidden; margin-bottom: 16px;">
+          <img src="uploads/IMG_0226.jpg" alt="Cocina industrial 6 hornallas" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="4">
+            <div style="aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; border: 1.5px solid #E8EAF1;">
+              <img src="{{ t }}" alt="Miniatura" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #7886AD;">Pauna</span>
+          <span style="font-family: 'Inter', sans-serif; font-size: 11px; color: #9DA7C4;">COD. CI-6H</span>
+        </div>
+        <h1 style="font-family: 'Manrope', sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 700; letter-spacing: -0.02em; margin: 12px 0 0; color: #0A1226; line-height: 1.1;">Cocina industrial 6 hornallas — acero inoxidable</h1>
+        <div style="display: flex; align-items: baseline; gap: 14px; margin-top: 28px;">
+          <span style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 44px; color: #0A1226; letter-spacing: -0.02em;">$2.450.000</span>
+        </div>
+        <p style="font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #059669; margin: 10px 0 0;">En stock · 6 unidades</p>
+        <p style="margin: 28px 0 0; font-size: 15.5px; line-height: 1.7; color: #2D4380; border-top: 1px solid #E8EAF1; padding-top: 28px;">
+          Cocina de uso industrial pensada para cocinas de restaurantes, comedores y catering. Estructura y hornallas en acero inoxidable, alta resistencia al uso intensivo diario.
+        </p>
+        <div style="margin-top: 32px; display: flex; gap: 12px;">
+          <button style="flex: 1; height: 56px; border-radius: 14px; background: #111C38; color: white; border: none; font-weight: 700; font-size: 15px; cursor: pointer; font-family: Inter;">Agregar al pedido</button>
+          <button style="width: 56px; height: 56px; border-radius: 14px; background: #25D366; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20z"></path></svg>
+          </button>
+        </div>
+        <div style="margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #E8EAF1; border-radius: 14px; overflow: hidden;">
+          <div style="background: #F5F6F9; padding: 16px; text-align: center;"><p style="margin:0; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:#213262;">Envíos</p><p style="margin:4px 0 0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9DA7C4;">por Andreani</p></div>
+          <div style="background: #F5F6F9; padding: 16px; text-align: center;"><p style="margin:0; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:#213262;">Retirá</p><p style="margin:4px 0 0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9DA7C4;">en local</p></div>
+          <div style="background: #F5F6F9; padding: 16px; text-align: center;"><p style="margin:0; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:#213262;">Factura</p><p style="margin:4px 0 0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9DA7C4;">A y B</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 88px; padding-top: 56px; border-top: 1px solid #E8EAF1;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-size: 26px; font-weight: 700; color: #0A1226; margin: 0 0 28px;">Características técnicas</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #E8EAF1; border-radius: 16px; overflow: hidden; border: 1px solid #E8EAF1;">
+        <sc-for list="{{ specs }}" as="s" hint-placeholder-count="6">
+          <div style="background: white; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #9DA7C4;">{{ s.label }}</span>
+            <span style="font-size: 14.5px; font-weight: 600; color: #111C38;">{{ s.value }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top: 88px;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-size: 26px; font-weight: 700; color: #0A1226; margin: 0 0 28px;">También te puede interesar</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;">
+        <sc-for list="{{ relatedProducts }}" as="p" hint-placeholder-count="4">
+          <dc-import name="Product Card" product="{{ p }}" hint-size="100%,380px" style="width: 100%;"></dc-import>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+
+  <footer style="background: #0A1226; color: rgba(255,255,255,0.6); margin-top: 0;">
+    <div style="max-width: 1360px; margin: 0 auto; padding: 64px 32px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px;">
+      <div>
+        <img src="assets/logo-behmont-dark.png" alt="BEHMONT" style="height: 36px; object-fit: contain; object-position: left;" />
+        <p style="margin: 20px 0 0; font-size: 14px; line-height: 1.6; max-width: 280px; color: rgba(255,255,255,0.4);">Equipamiento comercial, hogar y electrónica en Concordia, Entre Ríos, desde 1995.</p>
+      </div>
+      <div>
+        <p style="font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin: 0 0 18px;">Institucional</p>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+          <a href="#" style="color: rgba(255,255,255,0.7); text-decoration: none;">Ventas mayoristas</a>
+          <a href="#" style="color: rgba(255,255,255,0.7); text-decoration: none;">Preguntas frecuentes</a>
+          <a href="#" style="color: rgba(255,255,255,0.7); text-decoration: none;">Guía de compras</a>
+        </div>
+      </div>
+      <div>
+        <p style="font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin: 0 0 18px;">Contacto</p>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.7);">
+          <span>+54 345 401-5358</span>
+          <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6200070a0f0d0c164c0713170b12030f0b070c160d1122050f030b0e4c010d0f">[email&#160;protected]</a></span>
+          <span>San Lorenzo Oeste 380, Concordia</span>
+        </div>
+      </div>
+      <div>
+        <p style="font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin: 0 0 18px;">Horarios</p>
+        <p style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.7); margin: 0;">Lun a Vie<br/><strong style="color: white;">08:00–12:30 · 16:00–20:00</strong></p>
+        <p style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.7); margin: 10px 0 0;">Sábados<br/><strong style="color: white;">08:00–13:00</strong></p>
+      </div>
+    </div>
+    <div style="border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 32px;">
+      <p style="max-width: 1360px; margin: 0 auto; font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.25);">© 2026 BEHMONT — Comercio y Hogar · Concordia, Entre Ríos</p>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { screen: 'home' };
+  }
+
+  renderVals() {
+    const categories = [
+      { name: 'Gastronomía', image: 'uploads/IMG_0226.jpg' },
+      { name: 'Almacén', image: 'uploads/IMG_0224.jpg' },
+      { name: 'Carnicería', noImage: true },
+      { name: 'Panadería', noImage: true },
+      { name: 'Frío', image: 'uploads/Sistemas De Conservación & Diseño Para Comercios Modernos.jpg' },
+      { name: 'Hogar', image: 'uploads/IMG_0218.jpg' },
+      { name: 'Peluquería y Barbería', noImage: true },
+      { name: 'Estética', noImage: true },
+      { name: 'Decoración', image: 'uploads/IMG_0225.jpg' },
+      { name: 'Almacenamiento', noImage: true },
+      { name: 'Oficina', noImage: true },
+      { name: 'Herramientas', image: 'uploads/IMG_0219.jpg' },
+    ];
+
+    const rawProducts = [
+      { name: 'Heladera exhibidora gastronómica 3 puertas', brand: 'Frimetal', price: 2450000, compareAt: 2890000, image: 'uploads/Sistemas De Conservación & Diseño Para Comercios Modernos.jpg' },
+      { name: 'Smart TV LED 32"', brand: 'Noblex', price: 189900, image: 'uploads/IMG_0225.jpg' },
+      { name: 'Batidora de repostería profesional', brand: 'Smartlife', price: 890000, image: 'uploads/IMG_0224.jpg' },
+      { name: 'Sillón de barbero reclinable', brand: 'BarberPro', price: 410000, lowStock: true, noImage: true },
+      { name: 'Lavarropas carga frontal 6kg', brand: 'Siam', price: 720000, image: 'uploads/IMG_0227.jpg' },
+      { name: 'Microondas digital 25L', brand: 'Philco', price: 128500, compareAt: 159900, image: 'uploads/IMG_0228.jpg' },
+      { name: 'Estantería metálica industrial 5 niveles', brand: 'Ordenity', price: 95400, noImage: true },
+      { name: 'Cafetera espresso automática', brand: 'Oster', price: 310000, image: 'uploads/IMG_0224.jpg' },
+    ];
+
+    const withCalc = (p) => {
+      const discountPct = p.compareAt ? Math.round(100 - (p.price / p.compareAt) * 100) : null;
+      return {
+        name: p.name,
+        brand: p.brand,
+        image: p.image || null,
+        noImage: !p.image,
+        priceLabel: '$' + p.price.toLocaleString('es-AR'),
+        compareAtLabel: p.compareAt ? '$' + p.compareAt.toLocaleString('es-AR') : null,
+        discountLabel: discountPct ? '-' + discountPct + '%' : null,
+        cuotaLabel: '3x $' + Math.ceil(p.price / 3).toLocaleString('es-AR') + ' sin interés',
+        lowStockLabel: p.lowStock ? 'Últimas unidades' : null,
+      };
+    };
+
+    const featuredProducts = rawProducts.map(withCalc);
+    const flashProducts = rawProducts.slice(0, 4).map(withCalc);
+    const relatedProducts = rawProducts.slice(4, 8).map(withCalc);
+
+    const stats = [
+      { value: '2.500+', label: 'Productos en catálogo' },
+      { value: '30 años', label: 'En el mercado' },
+      { value: 'Andreani', label: 'Envíos a todo el país' },
+      { value: 'A y B', label: 'Facturación disponible' },
+    ];
+
+    const specs = [
+      { label: 'Marca', value: 'Pauna' },
+      { label: 'Modelo', value: 'CI-6H' },
+      { label: 'Hornallas', value: '6' },
+      { label: 'Material', value: 'Acero inoxidable' },
+      { label: 'Dimensiones', value: '150 x 90 x 85 cm' },
+      { label: 'Garantía', value: '12 meses' },
+    ];
+
+    const tabBase = 'padding: 10px 22px; border-radius: 999px; border: none; font-family: Inter, sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s;';
+    const tabActive = tabBase + 'background: white; color: #0A1226;';
+    const tabInactive = tabBase + 'background: transparent; color: rgba(255,255,255,0.55);';
+
+    return {
+      categories,
+      featuredProducts,
+      flashProducts,
+      relatedProducts,
+      stats,
+      specs,
+      thumbs: ['uploads/IMG_0226.jpg', 'uploads/IMG_0224.jpg', 'uploads/IMG_0219.jpg', 'uploads/IMG_0228.jpg'],
+      isHome: this.state.screen === 'home',
+      isCategoria: this.state.screen === 'categoria',
+      isProducto: this.state.screen === 'producto',
+      goTo_home: () => this.setState({ screen: 'home' }),
+      goTo_categoria: () => this.setState({ screen: 'categoria' }),
+      goTo_producto: () => this.setState({ screen: 'producto' }),
+      tabStyle_home: this.state.screen === 'home' ? tabActive : tabInactive,
+      tabStyle_categoria: this.state.screen === 'categoria' ? tabActive : tabInactive,
+      tabStyle_producto: this.state.screen === 'producto' ? tabActive : tabInactive,
+    };
+  }
+}
+</script>
+</body>
+</html>

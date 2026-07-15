@@ -1,21 +1,17 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from 'next/font/google';
+import { Manrope, Inter } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 
-const display = Space_Grotesk({
+const display = Manrope({
   subsets: ['latin'],
   variable: '--font-display',
-  weight: ['500', '600', '700'],
+  weight: ['500', '600', '700', '800'],
   display: 'swap',
 });
 const body = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
-const mono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  weight: ['400', '500', '600'],
-  display: 'swap',
-});
+// Las etiquetas que antes usaban IBM Plex Mono ahora usan Inter (mismo tracking/uppercase, tipografia unificada).
+const mono = Inter({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'BEHMONT — Comercio y Hogar | Equipamiento comercial, hogar y electrónica',

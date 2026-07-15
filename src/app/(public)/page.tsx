@@ -1,5 +1,6 @@
 import Hero from '@/components/Hero';
 import TrustBadges from '@/components/TrustBadges';
+import Benefits from '@/components/Benefits';
 import CategoryGrid from '@/components/CategoryGrid';
 import BusinessSection from '@/components/BusinessSection';
 import FlashOffers from '@/components/FlashOffers';
@@ -38,6 +39,7 @@ export default async function HomePage() {
     <main>
       <Hero promotions={heroPromos} />
       <TrustBadges />
+      <Benefits />
       <CategoryGrid categories={categories} />
       <BusinessSection />
       <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />

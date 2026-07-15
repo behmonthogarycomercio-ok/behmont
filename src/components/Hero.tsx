@@ -19,43 +19,35 @@ const ANIM = `
 
 function Fallback() {
   return (
-    <div className="w-full bg-[#0B1C3A] flex flex-col md:flex-row min-h-[360px] sm:min-h-[420px] overflow-hidden">
+    <div className="w-full bg-[#0B1C3A] flex flex-col md:flex-row min-h-[400px] sm:min-h-[480px] overflow-hidden">
       {/* Texto */}
-      <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 py-14 z-10">
-        <span className="inline-block mb-4 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full w-fit">
-          Concordia · Desde 1995
+      <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 py-14 z-10 max-w-2xl">
+        <span className="inline-flex items-center mb-6 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3.5 py-1.5 rounded-full w-fit">
+          Concordia, Entre Ríos · Desde 1995
         </span>
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-white leading-tight">
-          Equipamiento<br />
-          <span className="text-amber-400">comercial</span><br />
-          y de hogar
+        <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white leading-[0.98] tracking-tight">
+          Equipamiento para cada rincón<br />
+          <span className="text-amber-400">del negocio.</span>
         </h1>
-        <p className="mt-5 text-white/60 text-base max-w-xs">
-          Gastronomía, barbería, hogar, electrónica y más. Financiación y factura A/B.
+        <p className="mt-6 text-white/55 text-base sm:text-lg max-w-md leading-relaxed">
+          Gastronomía, hogar, barbería y electrónica. Financiación propia y stock real, actualizado todos los días.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-9 flex flex-wrap gap-3.5">
           <Link href="/buscar"
-            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold px-7 py-3 rounded-lg text-sm transition active:scale-[.97]">
+            className="inline-flex items-center gap-2 bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 text-white font-bold px-7 py-3.5 rounded-full text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_20px_-6px_rgba(237,50,55,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-px active:scale-[.98]">
             Ver catálogo <ArrowRight className="h-4 w-4" />
           </Link>
           <Link href="/#ubicacion"
-            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-7 py-3 rounded-lg text-sm transition">
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-7 py-3.5 rounded-full text-sm border border-white/15 transition-colors">
             Cómo llegar
           </Link>
         </div>
       </div>
-      {/* Panel decorativo derecho */}
-      <div className="hidden md:flex w-[420px] items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-amber-500/10" />
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-amber-500/20" />
-        <div className="absolute -left-8 -bottom-8 h-48 w-48 rounded-full bg-white/5" />
-        <div className="relative z-10 grid grid-cols-2 gap-3 p-8">
-          {['Gastronomía', 'Barbería', 'Electrónica', 'Hogar'].map(cat => (
-            <div key={cat} className="bg-white/10 rounded-xl p-4 text-center">
-              <p className="text-white font-semibold text-sm">{cat}</p>
-            </div>
-          ))}
-        </div>
+      {/* Foto real del local */}
+      <div className="hidden md:block flex-1 relative overflow-hidden">
+        <Image src="/images/hero-local.jpg" alt="Local BEHMONT" fill sizes="50vw"
+          className="object-cover opacity-90" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg,rgba(11,28,58,0.55) 0%,rgba(11,28,58,0.05) 100%)' }} />
       </div>
     </div>
   );
@@ -111,12 +103,12 @@ export default function Hero({ promotions }: { promotions: Promotion[] }) {
                 {slide.subtitle}
               </span>
             )}
-            <h2 className="text-4xl sm:text-6xl font-extrabold text-white leading-tight max-w-2xl">
+            <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-white leading-tight max-w-2xl tracking-tight">
               {slide.title}
             </h2>
             {slide.cta_link && (
               <Link href={slide.cta_link}
-                className="mt-8 inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-3.5 rounded-lg text-sm transition active:scale-[.97] shadow-lg">
+                className="mt-8 inline-flex items-center gap-2 bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 text-white font-bold px-8 py-3.5 rounded-full text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_20px_-6px_rgba(237,50,55,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-px active:scale-[.98]">
                 Ver más <ArrowRight className="h-4 w-4" />
               </Link>
             )}

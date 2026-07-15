@@ -6,6 +6,16 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Category } from '@/lib/types';
 
+// Fotos reales del local para las categorías que ya las tienen (resto sigue con icon_url o el numero).
+const CATEGORY_PHOTOS: Record<string, string> = {
+  gastronomia: '/images/categoria-gastronomia.jpg',
+  almacen: '/images/categoria-almacen.jpg',
+  frio: '/images/categoria-frio.jpg',
+  hogar: '/images/categoria-hogar.jpg',
+  decoracion: '/images/categoria-decoracion.jpg',
+  herramientas: '/images/categoria-herramientas.jpg',
+};
+
 export default function CategoryGrid({ categories }: { categories: Category[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft]   = useState(false);
@@ -74,16 +84,18 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
         ref={scrollRef}
         className="flex gap-3 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {categories.map((cat, i) => (
+        {categories.map((cat, i) => {
+          const photo = CATEGORY_PHOTOS[cat.slug] || cat.icon_url;
+          return (
           <Link
             key={cat.id}
             href={`/categoria/${cat.slug}`}
             className="group flex shrink-0 w-[calc(50%-6px)] sm:w-[calc(25%-9px)] lg:w-[calc(16.666%-10px)] flex-col items-center gap-3 rounded-xl border border-plate-200 bg-white px-3 py-5 text-center transition-all duration-150 hover:border-steel-900 hover:shadow-md"
           >
-            {cat.icon_url ? (
+            {photo ? (
               <span className="relative h-14 w-14 overflow-hidden rounded-xl">
                 <Image
-                  src={cat.icon_url}
+                  src={photo}
                   alt={cat.name}
                   fill
                   sizes="56px"
@@ -99,7 +111,8 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
               {cat.name}
             </span>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

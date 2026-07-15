@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { MapPin, MessageCircle, Clock } from 'lucide-react';
 import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 import { buttonClasses } from '@/components/ui/Button';
@@ -27,7 +28,10 @@ export default function LocationSection({
         </p>
         <h2 className="font-display text-xl font-semibold text-steel-900">Dónde estamos</h2>
       </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_1.3fr] rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
+      <div className="grid gap-4 md:grid-cols-[1fr_1fr_1.1fr] rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
+        <div className="relative hidden md:block min-h-[280px]">
+          <Image src="/images/ubicacion-fachada.png" alt="Fachada BEHMONT" fill sizes="30vw" className="object-cover" />
+        </div>
         <div className="p-6 sm:p-8 flex flex-col justify-center">
           <div className="flex items-start gap-2 text-steel-800">
             <MapPin className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
