@@ -1,13 +1,25 @@
 Retomá la investigación de specs/descripciones de productos de BEHMONT
 (catálogo online, `C:\Users\BEHMONT\Desktop\BEHMONT WEB\behmont-imp`).
 
-## Estado al 2026-07-08 (fin de sesión)
-- Migraciones **confirmadas corridas** en Supabase (verificado por lectura,
-  specs ya no vacías): `migration_007` a `migration_017` (batches 1 a 10,
-  ~241 productos con specs completas). Quedan **2052 productos sin specs**.
-- Tanda 10 (`migration_017`, 30 productos) fue la primera organizada **por
-  categoría**: cubrió parte de "Electrodomésticos". De esa categoría
-  quedan ~270 pendientes todavía.
+## Estado al 2026-07-13 (fin de sesión)
+- Migraciones `migration_007` a `migration_017` (batches 1 a 10, ~241
+  productos) siguen confirmadas corridas de la sesión anterior.
+- **`migration_019_specs_batch11.sql` generada esta sesión (45 productos de
+  Electrodomésticos) — TODAVÍA NO CONFIRMADA CORRIDA.** El dueño tiene que
+  correrla en el SQL Editor de Supabase; no se verificó por lectura porque no
+  llegó a confirmarse en esta sesión. Si retomás y no está corrida, avisar y
+  ofrecer volver a confirmarla por lectura una vez que el dueño la corra.
+  Nota: esta tanda salió más grande que las anteriores (45 en vez de 30)
+  porque se investigó un pool de 60 candidatos en paralelo (dos agentes de 30
+  c/u) para acelerar, y salió ~75% de confirmación; se entregó todo junto en
+  vez de cortar en 30 para no desperdiciar la investigación ya hecha.
+- De Electrodomésticos (300 sin specs al empezar esta sesión, antes de esta
+  tanda) quedan **255 pendientes** después de migration_019 (asumiendo que se
+  corre). 15 de los 60 investigados quedaron excluidos por falta de fuente
+  confiable o contradicción de datos (detalle en el header de
+  `migration_019_specs_batch11.sql`).
+- Tamaño de tanda: en general 30, pero puede variar si se investiga en
+  paralelo con más de un agente (como esta vez).
 - Orden de categorías pendientes (de mayor a menor volumen, relevado
   2026-07-07, los números eran ANTES de la tanda 10 así que Electrodomésticos
   ya bajó ~30): Electrodomésticos (~270 restantes), Electrónica (227),
