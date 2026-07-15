@@ -7,7 +7,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
-      <Navbar categories={categories} />
+      <Navbar categories={categories} contactPhone={settings.contactPhone} whatsappNumber={settings.whatsappNumber} />
       {children}
       <Footer
         whatsappNumber={settings.whatsappNumber}

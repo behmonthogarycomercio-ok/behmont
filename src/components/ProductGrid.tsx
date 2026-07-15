@@ -1,4 +1,5 @@
 import ProductCard from './ProductCard';
+import ProductCarousel from './ProductCarousel';
 import type { Product } from '@/lib/types';
 
 export default function ProductGrid({
@@ -29,11 +30,13 @@ export default function ProductGrid({
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-steel-900 tracking-tight">{title}</h2>
         </div>
       )}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <ProductCarousel>
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} />
+          <div key={product.id} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]">
+            <ProductCard product={product} whatsappNumber={whatsappNumber} />
+          </div>
         ))}
-      </div>
+      </ProductCarousel>
     </section>
   );
 }

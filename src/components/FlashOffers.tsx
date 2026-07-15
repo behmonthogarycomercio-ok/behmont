@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Zap, ArrowRight } from 'lucide-react';
 import ProductCard from './ProductCard';
+import ProductCarousel from './ProductCarousel';
 import type { Product } from '@/lib/types';
 
 export default function FlashOffers({
@@ -34,11 +35,13 @@ export default function FlashOffers({
             Ver todas <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.slice(0, 8).map((product) => (
-            <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} />
+        <ProductCarousel>
+          {products.slice(0, 12).map((product) => (
+            <div key={product.id} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]">
+              <ProductCard product={product} whatsappNumber={whatsappNumber} />
+            </div>
           ))}
-        </div>
+        </ProductCarousel>
         <Link
           href="/ofertas"
           className="sm:hidden mt-5 inline-flex items-center gap-1 text-sm font-semibold text-amber-400"

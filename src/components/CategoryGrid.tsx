@@ -93,7 +93,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
             className="group flex shrink-0 w-[calc(50%-6px)] sm:w-[calc(25%-9px)] lg:w-[calc(16.666%-10px)] flex-col items-center gap-3 rounded-xl border border-plate-200 bg-white px-3 py-5 text-center transition-all duration-150 hover:border-steel-900 hover:shadow-md"
           >
             {photo ? (
-              <span className="relative h-14 w-14 overflow-hidden rounded-xl">
+              <span className="relative h-14 w-14 overflow-hidden rounded-full ring-1 ring-plate-200">
                 <Image
                   src={photo}
                   alt={cat.name}
@@ -103,7 +103,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
                 />
               </span>
             ) : (
-              <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-plate-100 font-display text-lg font-bold text-steel-300 group-hover:bg-steel-900 group-hover:text-white transition-colors duration-150">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-plate-100 font-display text-lg font-bold text-steel-300 group-hover:bg-steel-900 group-hover:text-white transition-colors duration-150">
                 {String(i + 1).padStart(2, '0')}
               </span>
             )}

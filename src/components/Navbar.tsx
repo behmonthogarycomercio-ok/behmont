@@ -3,35 +3,53 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, MapPin, LifeBuoy, Truck, Phone } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
+import { useLocation } from '@/lib/location-context';
 import type { Category } from '@/lib/types';
 
-export default function Navbar({ categories }: { categories: Category[] }) {
+export default function Navbar({
+  categories,
+  contactPhone,
+  whatsappNumber,
+}: {
+  categories: Category[];
+  contactPhone?: string;
+  whatsappNumber?: string;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
   const [q, setQ] = useState('');
   const { count } = useCart();
-  const navRef = useRef<HTMLElement>(null);
+  const { city, clearZone } = useLocation();
+  const megaRef = useRef<HTMLDivElement>(null);
   const mobRef = useRef<HTMLDivElement>(null);
-  const [canL, setCanL] = useState(false);
-  const [canR, setCanR] = useState(false);
   const [mobL, setMobL] = useState(false);
   const [mobR, setMobR] = useState(false);
 
-  function arrows(el: HTMLElement | HTMLDivElement | null, sL: (v:boolean)=>void, sR: (v:boolean)=>void) {
+  const phone = contactPhone || whatsappNumber;
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (megaRef.current && !megaRef.current.contains(e.target as Node)) setMegaOpen(false);
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMegaOpen(false);
+    }
+    document.addEventListener('mousedown', onOutside);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onOutside);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, []);
+
+  function arrows(el: HTMLDivElement | null, sL: (v: boolean) => void, sR: (v: boolean) => void) {
     if (!el) return;
     sL(el.scrollLeft > 4);
     sR(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }
-  const upNav = () => arrows(navRef.current, setCanL, setCanR);
   const upMob = () => arrows(mobRef.current, setMobL, setMobR);
-
-  useEffect(() => {
-    upNav();
-    navRef.current?.addEventListener('scroll', upNav, { passive: true });
-    window.addEventListener('resize', upNav, { passive: true });
-    return () => { navRef.current?.removeEventListener('scroll', upNav); window.removeEventListener('resize', upNav); };
-  }, [categories]);
 
   useEffect(() => {
     upMob();
@@ -41,94 +59,123 @@ export default function Navbar({ categories }: { categories: Category[] }) {
   }, [categories]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-plate-200">
+    <header className="sticky top-0 z-50">
 
-      {/* ── Barra principal ─────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 h-[72px] flex items-center gap-4">
-
-        {/* Logo */}
-        <Link href="/" className="relative h-10 w-36 shrink-0">
-          <Image src="/images/logo-behmont.png" alt="BEHMONT" fill priority sizes="160px"
-            className="object-contain object-left" />
-        </Link>
-
-        {/* Search — desktop */}
-        <form action="/buscar" className="hidden md:flex flex-1 max-w-md items-center h-[46px] rounded-full border border-plate-200 bg-plate-50 pl-5 pr-1.5 focus-within:border-[#0B1C3A] transition-colors">
-          <input
-            name="q" value={q} onChange={e => setQ(e.target.value)}
-            placeholder="¿Qué estás buscando?"
-            className="flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
-          />
-          <button type="submit"
-            className="shrink-0 h-9 w-9 rounded-full bg-[#0B1C3A] text-white flex items-center justify-center hover:bg-[#162040] transition-colors">
-            <Search className="h-4 w-4" />
-          </button>
-        </form>
-
-        {/* Acciones */}
-        <div className="ml-auto flex items-center gap-2">
-          {/* Carrito */}
-          <Link href="/pedido"
-            className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-[#182548] to-[#0B1C3A] px-5 h-11 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_16px_-6px_rgba(10,18,38,0.5)] hover:from-[#213262] hover:to-[#182548] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
-            <ShoppingCart className="h-4 w-4 shrink-0" />
-            <span className="hidden sm:inline">
-              {count > 0 ? `Pedido (${count})` : 'Pedido'}
-            </span>
-            {count > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 sm:hidden h-5 w-5 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
-                {count}
+      {/* ── Barra utilitaria ─────────────────────────── */}
+      <div className="hidden md:block bg-[#0B1C3A] text-white/70">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-8 flex items-center justify-between text-[12px]">
+          <div className="flex items-center gap-5">
+            <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
+            </a>
+            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
+            </Link>
+          </div>
+          <div className="flex items-center gap-5">
+            <Link href="/financiacion" className="hover:text-white transition-colors">Financiación</Link>
+            {phone && (
+              <span className="flex items-center gap-1.5 text-white/90">
+                <Phone className="h-3.5 w-3.5" /> {phone}
               </span>
             )}
-          </Link>
-
-          {/* Hamburguesa mobile */}
-          <button
-            className="md:hidden h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
-            onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Barra de categorías desktop ─────────────── */}
-      <div className="hidden md:block border-t border-plate-100">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative flex items-center h-11">
-          {canL && (
-            <>
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-              <button onClick={() => navRef.current?.scrollBy({ left: -220 })}
-                className="absolute left-2 z-20 h-6 w-6 flex items-center justify-center rounded-full text-steel-400 hover:text-steel-900 transition">
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-            </>
+      {/* ── Barra principal ─────────────────────────── */}
+      <div className="bg-white/90 backdrop-blur-md border-b border-plate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-[72px] flex items-center gap-4">
+
+          {/* Logo */}
+          <Link href="/" className="relative h-10 w-36 shrink-0">
+            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill priority sizes="160px"
+              className="object-contain object-left" />
+          </Link>
+
+          {/* Search — desktop */}
+          <form action="/buscar" className="hidden md:flex flex-1 max-w-md items-center h-[46px] rounded-full border border-plate-200 bg-plate-50 pl-5 pr-1.5 focus-within:border-[#0B1C3A] transition-colors">
+            <input
+              name="q" value={q} onChange={e => setQ(e.target.value)}
+              placeholder="¿Qué estás buscando?"
+              className="flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+            />
+            <button type="submit"
+              className="shrink-0 h-9 w-9 rounded-full bg-[#0B1C3A] text-white flex items-center justify-center hover:bg-[#162040] transition-colors">
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
+
+          {/* Acciones */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Carrito */}
+            <Link href="/pedido"
+              className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-[#182548] to-[#0B1C3A] px-5 h-11 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_16px_-6px_rgba(10,18,38,0.5)] hover:from-[#213262] hover:to-[#182548] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
+              <ShoppingCart className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">
+                {count > 0 ? `Pedido (${count})` : 'Pedido'}
+              </span>
+              {count > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 sm:hidden h-5 w-5 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
+                  {count}
+                </span>
+              )}
+            </Link>
+
+            {/* Hamburguesa mobile */}
+            <button
+              className="md:hidden h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Cinta de categorías desktop (navy) + mega-menu ── */}
+      <div className="hidden md:block bg-[#0B1C3A] relative" ref={megaRef}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center h-11 gap-1">
+          <button
+            onClick={() => setMegaOpen(v => !v)}
+            className={`flex items-center gap-2 px-3.5 h-8 rounded-full text-[13px] font-bold transition-colors ${megaOpen ? 'bg-white text-[#0B1C3A]' : 'bg-white/10 text-white hover:bg-white/15'}`}
+          >
+            <Menu className="h-4 w-4" /> Categorías
+          </button>
+
+          {city && (
+            <button onClick={clearZone}
+              className="hidden lg:flex items-center gap-1.5 px-3 h-8 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              <MapPin className="h-3.5 w-3.5" /> Estás en: {city}
+            </button>
           )}
-          <nav ref={navRef}
-            className="flex h-full items-center gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categories.map(cat => (
-              <Link key={cat.id} href={`/categoria/${cat.slug}`}
-                className="shrink-0 flex items-center px-3 py-1.5 rounded-full text-[13px] font-medium text-steel-500 hover:bg-plate-50 hover:text-[#0B1C3A] transition-colors whitespace-nowrap">
-                {cat.name}
-              </Link>
-            ))}
+
+          <div className="ml-auto flex items-center gap-1">
             <Link href="/ofertas"
-              className="shrink-0 flex items-center px-3 py-1.5 rounded-full text-[13px] font-bold text-amber-500 hover:bg-amber-50 hover:text-amber-600 transition-colors whitespace-nowrap">
+              className="shrink-0 flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold text-amber-400 hover:bg-white/10 transition-colors whitespace-nowrap">
               Ofertas
             </Link>
             <Link href="/mayorista"
-              className="shrink-0 flex items-center px-3 py-1.5 rounded-full text-[13px] font-medium text-steel-500 hover:bg-plate-50 hover:text-[#0B1C3A] transition-colors whitespace-nowrap">
+              className="shrink-0 flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
               Mayorista
             </Link>
-          </nav>
-          {canR && (
-            <>
-              <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-              <button onClick={() => navRef.current?.scrollBy({ left: 220 })}
-                className="absolute right-2 z-20 h-6 w-6 flex items-center justify-center rounded-full text-steel-400 hover:text-steel-900 transition">
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </>
-          )}
+          </div>
         </div>
+
+        {/* Mega-menu flyout */}
+        {megaOpen && (
+          <div className="absolute left-0 right-0 top-full bg-white border-b border-plate-200 shadow-xl z-40">
+            <div className="mx-auto max-w-7xl px-6 py-6 grid grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-1">
+              {categories.map(cat => (
+                <Link key={cat.id} href={`/categoria/${cat.slug}`}
+                  onClick={() => setMegaOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-sm font-medium text-steel-700 hover:bg-plate-50 hover:text-[#0B1C3A] transition-colors">
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Strip categorías mobile ──────────────────── */}
@@ -165,6 +212,14 @@ export default function Navbar({ categories }: { categories: Category[] }) {
               <Search className="h-4 w-4" />
             </button>
           </form>
+
+          {city && (
+            <button onClick={clearZone}
+              className="flex items-center gap-1.5 text-xs font-medium text-steel-500">
+              <MapPin className="h-3.5 w-3.5" /> Estás en: {city} · cambiar
+            </button>
+          )}
+
           <div className="grid grid-cols-2 gap-0.5">
             {categories.map(cat => (
               <Link key={cat.id} href={`/categoria/${cat.slug}`}
