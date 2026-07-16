@@ -2,6 +2,7 @@ import Hero from '@/components/Hero';
 import ScrollReveal from '@/components/ScrollReveal';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryGrid from '@/components/CategoryGrid';
+import FeaturedCategories from '@/components/FeaturedCategories';
 import BusinessSection from '@/components/BusinessSection';
 import FlashOffers from '@/components/FlashOffers';
 import ProductGrid from '@/components/ProductGrid';
@@ -40,6 +41,7 @@ export default async function HomePage() {
       <Hero promotions={heroPromos} />
       <ScrollReveal><TrustBadges /></ScrollReveal>
       <ScrollReveal><CategoryGrid categories={categories} /></ScrollReveal>
+      <ScrollReveal><FeaturedCategories categories={categories} /></ScrollReveal>
       <ScrollReveal><BusinessSection /></ScrollReveal>
       <ScrollReveal>
         <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />

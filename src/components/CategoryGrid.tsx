@@ -5,16 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Category } from '@/lib/types';
-
-// Fotos reales del local para las categorías que ya las tienen (resto sigue con icon_url o el numero).
-const CATEGORY_PHOTOS: Record<string, string> = {
-  gastronomia: '/images/categoria-gastronomia.jpg',
-  almacen: '/images/categoria-almacen.jpg',
-  frio: '/images/categoria-frio.jpg',
-  hogar: '/images/categoria-hogar.jpg',
-  decoracion: '/images/categoria-decoracion.jpg',
-  herramientas: '/images/categoria-herramientas.jpg',
-};
+import { CATEGORY_PHOTOS } from '@/lib/category-photos';
 
 export default function CategoryGrid({ categories }: { categories: Category[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
