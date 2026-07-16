@@ -54,7 +54,6 @@ export default function OrderForm() {
 
       window.open(data.whatsappUrl, '_blank');
       setSentName(form.name.split(' ')[0]);
-      clear();
       setSent(true);
     } finally {
       setSending(false);
@@ -75,6 +74,9 @@ export default function OrderForm() {
           </h2>
           <p className="mt-2 text-sm text-steel-400 leading-relaxed max-w-sm mx-auto">
             Se abrió WhatsApp con el detalle de tu pedido. En cuanto lo enviés, lo procesamos y te confirmamos a la brevedad.
+          </p>
+          <p className="mt-1 text-xs text-steel-300 leading-relaxed max-w-sm mx-auto">
+            Por las dudas, dejamos tu pedido guardado acá hasta que confirmes que se envió.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden w-full max-w-sm text-center mt-2">
@@ -97,12 +99,20 @@ export default function OrderForm() {
         >
           Seguir comprando
         </Link>
-        <button
-          onClick={() => setSent(false)}
-          className="font-mono text-[11px] text-steel-300 hover:text-steel-600 transition-colors"
-        >
-          Hacer otro pedido
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setSent(false)}
+            className="font-mono text-[11px] text-steel-300 hover:text-steel-600 transition-colors"
+          >
+            Editar pedido
+          </button>
+          <button
+            onClick={() => { clear(); setSent(false); }}
+            className="font-mono text-[11px] text-steel-300 hover:text-steel-600 transition-colors"
+          >
+            Ya se envió, vaciar carrito
+          </button>
+        </div>
       </div>
     );
   }
