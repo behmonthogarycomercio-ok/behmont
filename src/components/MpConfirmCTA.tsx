@@ -18,11 +18,10 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
         payer: { name: string; phone: string };
       };
 
-      // Solo vaciar el carrito si esta pagina corresponde a un checkout de MP
-      // que arranco realmente en este navegador (existe el sessionStorage) —
-      // evita vaciarlo si se llega a esta URL por "atras" del navegador o por
-      // cualquier otra via sin haber pagado nada.
-      if (status === 'approved' || status === 'pending') {
+      // Solo vaciar el carrito cuando el pago está realmente aprobado. "pending"
+      // no garantiza que se haya abonado, así que el pedido queda guardado en
+      // el carrito hasta que se confirme el pago de verdad.
+      if (status === 'approved') {
         clear();
       }
 

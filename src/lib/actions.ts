@@ -273,6 +273,15 @@ export async function updateOrderStatus(formData: FormData): Promise<ActionResul
   return {};
 }
 
+export async function deleteOrder(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('whatsapp_orders').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/pedidos');
+  revalidatePath('/admin/dashboard');
+  return {};
+}
+
 // ── CONTENIDO / INSTAGRAM ────────────────────────────────
 export async function upsertContentSource(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();

@@ -1,7 +1,8 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
+import DeleteButton from '@/components/admin/DeleteButton';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { updateOrderStatus } from '@/lib/actions';
+import { updateOrderStatus, deleteOrder } from '@/lib/actions';
 
 const STATUS_LABELS: Record<string, { label: string; classes: string }> = {
   pendiente:   { label: 'Pendiente',   classes: 'bg-yellow-100 text-yellow-700' },
@@ -171,26 +172,29 @@ export default async function PedidosPage({
                   </div>
 
                   {/* Status changer */}
-                  <div className="flex items-center gap-3 pt-2 border-t border-plate-100">
-                    <span className="text-xs font-semibold text-steel-500 shrink-0">Cambiar estado:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {STATUS_OPTIONS.map(({ value, label }) => (
-                        <AdminActionForm key={value} action={updateOrderStatus}>
-                          <input type="hidden" name="id" value={order.id} />
-                          <input type="hidden" name="status" value={value} />
-                          <button
-                            type="submit"
-                            className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
-                              st === value
-                                ? `${STATUS_LABELS[value].classes} border-transparent`
-                                : 'bg-white text-steel-500 border-plate-200 hover:border-steel-300'
-                            }`}
-                          >
-                            {label}
-                          </button>
-                        </AdminActionForm>
-                      ))}
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-plate-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-steel-500 shrink-0">Cambiar estado:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {STATUS_OPTIONS.map(({ value, label }) => (
+                          <AdminActionForm key={value} action={updateOrderStatus}>
+                            <input type="hidden" name="id" value={order.id} />
+                            <input type="hidden" name="status" value={value} />
+                            <button
+                              type="submit"
+                              className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
+                                st === value
+                                  ? `${STATUS_LABELS[value].classes} border-transparent`
+                                  : 'bg-white text-steel-500 border-plate-200 hover:border-steel-300'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          </AdminActionForm>
+                        ))}
+                      </div>
                     </div>
+                    <DeleteButton id={order.id} action={deleteOrder} label="pedido" />
                   </div>
                 </div>
               </details>

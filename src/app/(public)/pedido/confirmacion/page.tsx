@@ -9,8 +9,38 @@ export default async function ConfirmacionPage({
 }: {
   searchParams: { status?: string; payment_id?: string };
 }) {
-  const status = searchParams.status ?? 'pending';
   const paymentId = searchParams.payment_id;
+
+  // Si no viene "status" en la URL, no sabemos si el pago pasó o no (puede ser
+  // que el cliente haya vuelto de MercadoPago sin completar el pago). No hay
+  // que asumir "pending" acá — eso vaciaría el carrito sin que se haya pagado nada.
+  if (!searchParams.status) {
+    return (
+      <main className="min-h-[60vh] flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-sm text-center space-y-5">
+          <div className="mx-auto h-16 w-16 rounded-full grid place-items-center text-2xl font-bold bg-plate-100 text-steel-500">
+            ?
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-steel-950 tracking-tight">
+              No pudimos confirmar tu pago
+            </h1>
+            <p className="mt-2 text-sm text-steel-400 leading-relaxed">
+              Si saliste de MercadoPago sin terminar, no te preocupes: tu pedido sigue guardado en el carrito.
+            </p>
+          </div>
+          <Link
+            href="/pedido"
+            className="w-full rounded-xl bg-steel-950 py-3.5 text-sm font-bold text-white hover:bg-steel-800 transition-colors text-center block"
+          >
+            Volver a mi pedido
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const status = searchParams.status;
 
   const states = {
     approved: {
