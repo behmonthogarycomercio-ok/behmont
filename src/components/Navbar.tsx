@@ -89,9 +89,9 @@ export default function Navbar({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-[72px] flex items-center gap-4">
 
           {/* Logo */}
-          <Link href="/" className="relative h-10 w-36 shrink-0">
-            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill priority sizes="160px"
-              className="object-contain object-left brightness-0 invert" />
+          <Link href="/" className="relative h-12 w-24 shrink-0">
+            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill priority sizes="96px"
+              className="object-contain object-left" />
           </Link>
 
           {/* Search — desktop */}
