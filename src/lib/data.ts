@@ -48,7 +48,7 @@ export async function getBrands(): Promise<Brand[]> {
   return data || [];
 }
 
-/** Marcas con más productos activos, para destacar en el home (no hay logos cargados hoy). */
+/** Marcas con más productos activos, para destacar en el home. */
 export async function getTopBrands(limit = 14): Promise<Brand[]> {
   const supabase = createServerSupabase();
   const { data } = await supabase
