@@ -85,24 +85,24 @@ export default function Navbar({
       </div>
 
       {/* ── Barra principal ─────────────────────────── */}
-      <div className="bg-white/90 backdrop-blur-md border-b border-plate-200">
+      <div className="bg-[#0B1C3A]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-[72px] flex items-center gap-4">
 
           {/* Logo */}
           <Link href="/" className="relative h-10 w-36 shrink-0">
             <Image src="/images/logo-behmont.png" alt="BEHMONT" fill priority sizes="160px"
-              className="object-contain object-left" />
+              className="object-contain object-left brightness-0 invert" />
           </Link>
 
           {/* Search — desktop */}
-          <form action="/buscar" className="hidden md:flex flex-1 max-w-md items-center h-[46px] rounded-full border border-plate-200 bg-plate-50 pl-5 pr-1.5 focus-within:border-[#0B1C3A] transition-colors">
+          <form action="/buscar" className="hidden md:flex flex-1 max-w-md items-center h-[46px] rounded-full border border-white/15 bg-white/10 pl-5 pr-1.5 focus-within:border-white/30 transition-colors">
             <input
               name="q" value={q} onChange={e => setQ(e.target.value)}
               placeholder="¿Qué estás buscando?"
-              className="flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
             />
             <button type="submit"
-              className="shrink-0 h-9 w-9 rounded-full bg-[#0B1C3A] text-white flex items-center justify-center hover:bg-[#162040] transition-colors">
+              className="shrink-0 h-9 w-9 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-400 transition-colors">
               <Search className="h-4 w-4" />
             </button>
           </form>
@@ -111,13 +111,13 @@ export default function Navbar({
           <div className="ml-auto flex items-center gap-2">
             {/* Carrito */}
             <Link href="/pedido"
-              className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-[#182548] to-[#0B1C3A] px-5 h-11 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_16px_-6px_rgba(10,18,38,0.5)] hover:from-[#213262] hover:to-[#182548] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
+              className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 px-5 h-11 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(0,0,0,0.35)] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
               <ShoppingCart className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">
                 {count > 0 ? `Pedido (${count})` : 'Pedido'}
               </span>
               {count > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 sm:hidden h-5 w-5 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 sm:hidden h-5 w-5 rounded-full bg-white text-[10px] font-bold text-[#0B1C3A] flex items-center justify-center">
                   {count}
                 </span>
               )}
@@ -125,7 +125,7 @@ export default function Navbar({
 
             {/* Hamburguesa mobile */}
             <button
-              className="md:hidden h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="md:hidden h-10 w-10 flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/15 transition"
               onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -179,27 +179,27 @@ export default function Navbar({
       </div>
 
       {/* ── Strip categorías mobile ──────────────────── */}
-      <div className="md:hidden bg-plate-50 border-t border-plate-100 relative">
+      <div className="md:hidden bg-[#0B1C3A] border-t border-white/10 relative">
         {mobL && (
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-plate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#0B1C3A] to-transparent z-10 pointer-events-none" />
         )}
         <div ref={mobRef}
           className="flex h-9 px-2 gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map(cat => (
             <Link key={cat.id} href={`/categoria/${cat.slug}`}
-              className="shrink-0 flex items-center px-3 text-xs font-medium text-steel-500 hover:text-[#0B1C3A] whitespace-nowrap">
+              className="shrink-0 flex items-center px-3 text-xs font-medium text-white/70 hover:text-white whitespace-nowrap">
               {cat.name}
             </Link>
           ))}
-          <Link href="/ofertas" className="shrink-0 flex items-center px-3 text-xs font-bold text-amber-500 whitespace-nowrap">
+          <Link href="/ofertas" className="shrink-0 flex items-center px-3 text-xs font-bold text-amber-400 whitespace-nowrap">
             Ofertas
           </Link>
-          <Link href="/mayorista" className="shrink-0 flex items-center px-3 text-xs font-medium text-steel-500 whitespace-nowrap">
+          <Link href="/mayorista" className="shrink-0 flex items-center px-3 text-xs font-medium text-white/70 whitespace-nowrap">
             Mayorista
           </Link>
         </div>
         {mobR && (
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-plate-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#0B1C3A] to-transparent z-10 pointer-events-none" />
         )}
       </div>
 
