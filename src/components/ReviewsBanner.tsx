@@ -9,7 +9,7 @@ export default function ReviewsBanner({ reviewUrl }: { reviewUrl?: string }) {
         href={reviewUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative block aspect-[2400/750] overflow-hidden"
+        className="group relative block aspect-[7/2] overflow-hidden"
       >
         <Image
           src="/images/banner-resenas.png"
