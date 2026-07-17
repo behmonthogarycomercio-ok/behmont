@@ -11,6 +11,7 @@ import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
 import BrandStrip from '@/components/BrandStrip';
 import LocationSection from '@/components/LocationSection';
+import ReviewsBanner from '@/components/ReviewsBanner';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import {
   getCategories,
@@ -64,6 +65,7 @@ export default async function HomePage() {
           businessHours={settings.businessHours}
         />
       </ScrollReveal>
+      <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </main>
   );

@@ -17,6 +17,7 @@ export const getSiteSettings = cache(async () => {
     instagramUrl: settings.instagram_url || '',
     facebookUrl: settings.facebook_url || '',
     businessHours: settings.business_hours || '',
+    googleReviewUrl: settings.google_review_url || '',
   };
 });
 
