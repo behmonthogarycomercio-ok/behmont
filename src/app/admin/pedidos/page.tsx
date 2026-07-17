@@ -108,8 +108,9 @@ export default async function PedidosPage({
 
             const noteLines: string[] = order.customer_note ? order.customer_note.split('\n') : [];
             const financingLine = noteLines.find((l) => l.startsWith('[FINANCIACION]'));
+            const installments3Line = noteLines.find((l) => l.startsWith('[3CUOTAS]'));
             const plainNote = noteLines
-              .filter((l) => !l.startsWith('[FINANCIACION]') && !l.startsWith('[MP]'))
+              .filter((l) => !l.startsWith('[FINANCIACION]') && !l.startsWith('[MP]') && !l.startsWith('[3CUOTAS]'))
               .join('\n');
 
             return (
@@ -128,6 +129,11 @@ export default async function PedidosPage({
                   {financingLine && (
                     <span className="shrink-0 rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
                       Financia
+                    </span>
+                  )}
+                  {installments3Line && (
+                    <span className="shrink-0 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      3 cuotas
                     </span>
                   )}
                   {/* Name + date */}
@@ -162,6 +168,9 @@ export default async function PedidosPage({
                       )}
                       {financingLine && (
                         <p><span className="text-steel-400">Financiación:</span> <span className="font-medium text-amber-600">{financingLine.replace('[FINANCIACION] ', '').replace('[FINANCIACION]', '').trim()}</span></p>
+                      )}
+                      {installments3Line && (
+                        <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-emerald-600">Quiere 3 cuotas sin interés — coordinar link de pago</span></p>
                       )}
                     </div>
 

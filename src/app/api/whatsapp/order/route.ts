@@ -10,6 +10,7 @@ const orderSchema = z.object({
   customerAddress: z.string().optional(),
   customerNote: z.string().optional(),
   financingPlan: z.string().optional(),
+  wantsInstallments3: z.boolean().optional(),
   items: z
     .array(
       z.object({
@@ -33,9 +34,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { customerName, customerPhone, customerEmail, customerAddress, customerNote, financingPlan, items } = parsed.data;
+  const { customerName, customerPhone, customerEmail, customerAddress, customerNote, financingPlan, wantsInstallments3, items } = parsed.data;
   const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const message = buildOrderMessage({ customerName, customerPhone, customerAddress, customerNote, financingPlan, items });
+  const message = buildOrderMessage({ customerName, customerPhone, customerAddress, customerNote, financingPlan, wantsInstallments3, items });
 
   const supabase = createServiceSupabase();
   const { data: settings } = await supabase
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
 
   const noteParts = [];
   if (financingPlan) noteParts.push(`[FINANCIACION] ${financingPlan}`);
+  if (wantsInstallments3) noteParts.push('[3CUOTAS] Quiere pagar en 3 cuotas sin interés');
   if (customerNote) noteParts.push(customerNote);
 
   const { error } = await supabase.from('whatsapp_orders').insert({
