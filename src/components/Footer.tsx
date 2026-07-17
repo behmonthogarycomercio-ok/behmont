@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Instagram, Facebook, MessageCircle, MapPin, Mail, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { Instagram, Facebook, MessageCircle, MapPin, Mail, ArrowUpRight, Clock } from 'lucide-react';
 
 type FooterProps = {
   whatsappNumber: string;
@@ -23,28 +23,37 @@ export default function Footer({
   return (
     <footer className="bg-steel-950 text-plate-100 mt-10">
 
-      {/* Franja de marca */}
-      <div className="border-b border-white/10 px-4 sm:px-6 py-8">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="relative h-9 w-36 shrink-0">
-              <Image
-                src="/images/logo-behmont-dark.png"
-                alt="BEHMONT — Comercio y Hogar"
-                fill
-                className="object-contain object-left"
-              />
-            </div>
-            <div className="h-7 w-px bg-white/15 hidden sm:block" />
-            <p className="hidden sm:block font-mono text-[11px] font-medium tracking-wide text-plate-100/50 uppercase">
-              Concordia · Entre Ríos · Desde 1995
-            </p>
+      {/* Columnas */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+
+        {/* Marca */}
+        <div className="sm:col-span-2 lg:col-span-1">
+          <div className="relative h-9 w-36">
+            <Image
+              src="/images/logo-behmont-dark.png"
+              alt="BEHMONT — Comercio y Hogar"
+              fill
+              className="object-contain object-left"
+            />
           </div>
+          <p className="mt-4 font-mono text-[11px] font-medium tracking-wide text-plate-100/50 uppercase">
+            Concordia · Entre Ríos · Desde 1995
+          </p>
+          {contactAddress && (
+            <p className="mt-4 flex items-start gap-2 text-sm text-plate-100/70 max-w-xs">
+              <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-500/70" />
+              {contactAddress}
+            </p>
+          )}
+          <p className="mt-3 flex items-start gap-2 text-sm text-plate-100/70">
+            <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-500/70" />
+            <span>
+              Lun a Vie 08:00–12:30 · 16:00–20:00<br />
+              Sábados 08:00–13:00
+            </span>
+          </p>
           {(instagramUrl || facebookUrl) && (
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-plate-100/30 mr-1">
-                Seguinos
-              </span>
+            <div className="mt-5 flex items-center gap-2">
               {instagramUrl && (
                 <a
                   href={instagramUrl}
@@ -70,17 +79,14 @@ export default function Footer({
             </div>
           )}
         </div>
-      </div>
 
-      {/* Columnas de links */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-plate-100/40 mb-4">
             Institucional
           </h3>
           <ul className="space-y-2.5 text-sm">
             <li><a href="/mayorista" className="text-plate-100/70 hover:text-amber-400 transition-colors">Ventas mayoristas</a></li>
-<li><a href="/#ubicacion" className="text-plate-100/70 hover:text-amber-400 transition-colors">Cómo llegar</a></li>
+            <li><a href="/#ubicacion" className="text-plate-100/70 hover:text-amber-400 transition-colors">Cómo llegar</a></li>
             <li><a href="/faq" className="text-plate-100/70 hover:text-amber-400 transition-colors">Preguntas frecuentes</a></li>
             <li><a href="/guia-de-compras" className="text-plate-100/70 hover:text-amber-400 transition-colors">Guía de compras</a></li>
           </ul>
@@ -128,32 +134,12 @@ export default function Footer({
               </li>
             )}
             {contactEmail && (
-              <li className="flex items-center gap-2 text-plate-100/70">
+              <li className="flex items-center gap-2 text-plate-100/70 break-all">
                 <Mail className="h-3.5 w-3.5 shrink-0 text-amber-500/70" />
                 {contactEmail}
               </li>
             )}
-            {contactAddress && (
-              <li className="flex items-start gap-2 text-plate-100/70">
-                <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-500/70" />
-                {contactAddress}
-              </li>
-            )}
           </ul>
-        </div>
-
-        <div>
-          <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-plate-100/40 mb-4">
-            Horarios
-          </h3>
-          <p className="text-sm text-plate-100/70 leading-relaxed">
-            Lun a Vie<br />
-            <span className="text-plate-100/90 font-medium">08:00–12:30 · 16:00–20:00</span>
-          </p>
-          <p className="text-sm text-plate-100/70 leading-relaxed mt-2">
-            Sábados<br />
-            <span className="text-plate-100/90 font-medium">08:00–13:00</span>
-          </p>
         </div>
       </div>
 
