@@ -5,6 +5,7 @@ type BuildOrderMessageInput = {
   customerPhone: string;
   customerAddress?: string;
   customerNote?: string;
+  financingPlan?: string;
   items: WhatsAppOrderItem[];
 };
 
@@ -13,6 +14,7 @@ export function buildOrderMessage({
   customerPhone,
   customerAddress,
   customerNote,
+  financingPlan,
   items,
 }: BuildOrderMessageInput): string {
   const lines: string[] = [];
@@ -36,6 +38,10 @@ export function buildOrderMessage({
 
   lines.push('');
   lines.push(`Total estimado: $${total.toLocaleString('es-AR')}`);
+  if (financingPlan) {
+    lines.push('');
+    lines.push(`Quiere financiar: ${financingPlan}`);
+  }
   lines.push('');
   lines.push('_Pedido generado desde behmont.com.ar_');
 

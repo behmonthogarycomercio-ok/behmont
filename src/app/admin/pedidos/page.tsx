@@ -106,6 +106,12 @@ export default async function PedidosPage({
               hour: '2-digit', minute: '2-digit',
             });
 
+            const noteLines: string[] = order.customer_note ? order.customer_note.split('\n') : [];
+            const financingLine = noteLines.find((l) => l.startsWith('[FINANCIACION]'));
+            const plainNote = noteLines
+              .filter((l) => !l.startsWith('[FINANCIACION]') && !l.startsWith('[MP]'))
+              .join('\n');
+
             return (
               <details key={order.id} className="group rounded-xl border border-plate-200 bg-white shadow-sm overflow-hidden">
                 <summary className="flex items-center gap-4 px-5 py-4 cursor-pointer list-none hover:bg-plate-50 transition-colors">
@@ -117,6 +123,11 @@ export default async function PedidosPage({
                   {order.customer_note?.startsWith('[MP]') && (
                     <span className="shrink-0 rounded-full bg-[#009EE3] px-2.5 py-0.5 text-[10px] font-bold text-white">
                       MP
+                    </span>
+                  )}
+                  {financingLine && (
+                    <span className="shrink-0 rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      Financia
                     </span>
                   )}
                   {/* Name + date */}
@@ -143,11 +154,14 @@ export default async function PedidosPage({
                       <p><span className="text-steel-400">Tel:</span> <span className="font-medium">{order.customer_phone || '—'}</span></p>
                       {order.customer_email && <p><span className="text-steel-400">Email:</span> <span className="font-medium">{order.customer_email}</span></p>}
                       {order.customer_address && <p><span className="text-steel-400">Dirección:</span> <span className="font-medium">{order.customer_address}</span></p>}
-                      {order.customer_note && !order.customer_note.startsWith('[MP]') && (
-                        <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{order.customer_note}</span></p>
+                      {plainNote && (
+                        <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{plainNote}</span></p>
                       )}
                       {order.customer_note?.startsWith('[MP]') && (
                         <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-[#009EE3]">MercadoPago — {order.customer_note.replace('[MP] ', '').replace('[MP]', '').trim()}</span></p>
+                      )}
+                      {financingLine && (
+                        <p><span className="text-steel-400">Financiación:</span> <span className="font-medium text-amber-600">{financingLine.replace('[FINANCIACION] ', '').replace('[FINANCIACION]', '').trim()}</span></p>
                       )}
                     </div>
 

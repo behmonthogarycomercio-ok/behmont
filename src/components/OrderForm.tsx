@@ -2,18 +2,30 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Minus, Plus, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Minus, Plus, Trash2, Wallet, ChevronDown } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
+import {
+  DAILY_PLANS, MONTHLY_PLANS,
+  calcDaily, calcWeekly, calcMonthly, fmtARS,
+  type DailyPlan, type MonthlyPlan,
+} from '@/lib/financing';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import FormField from '@/components/ui/FormField';
 import Button from '@/components/ui/Button';
 
+type Freq = 'daily' | 'weekly' | 'monthly';
+type AnyPlan = DailyPlan | MonthlyPlan;
+
+const FREQ_OPTIONS: { key: Freq; label: string }[] = [
+  { key: 'daily',   label: 'Por día' },
+  { key: 'weekly',  label: 'Por semana' },
+  { key: 'monthly', label: 'Por mes' },
+];
+
 export default function OrderForm() {
   const { items, updateQty, removeItem, total, clear } = useCart();
-  const router = useRouter();
   const { allowed } = useLocation();
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', note: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -22,6 +34,36 @@ export default function OrderForm() {
   const [sentName, setSentName] = useState('');
   const [mpLoading, setMpLoading] = useState(false);
   const [mpError, setMpError] = useState('');
+
+  // Vista previa de financiación (solo para el pedido por WhatsApp, no aplica a MercadoPago)
+  const [wantsFinancing, setWantsFinancing] = useState(false);
+  const [freq, setFreq] = useState<Freq>('daily');
+  const [planIdx, setPlanIdx] = useState(0);
+
+  const activePlans: AnyPlan[] = freq === 'monthly' ? MONTHLY_PLANS : DAILY_PLANS;
+  const safeIdx = Math.min(planIdx, activePlans.length - 1);
+  const currentPlan = activePlans[safeIdx];
+
+  function getPlanAmount(plan: AnyPlan): number {
+    if ('months' in plan) return calcMonthly(total, plan.surcharge, plan.months);
+    if (freq === 'weekly') return calcWeekly(total, plan.surcharge, plan.days);
+    return calcDaily(total, plan.surcharge, plan.days);
+  }
+
+  function getPlanLabel(plan: AnyPlan): string {
+    if ('months' in plan) return `${plan.months} meses`;
+    if (freq === 'weekly') return `${plan.weeks} semanas`;
+    return `${plan.days} días`;
+  }
+
+  const cuota = total > 0 ? getPlanAmount(currentPlan) : 0;
+  const totalDevolver = total * (1 + currentPlan.surcharge);
+  const freqLabel = freq === 'daily' ? 'día' : freq === 'weekly' ? 'semana' : 'mes';
+
+  function financingSummary(): string | undefined {
+    if (!wantsFinancing) return undefined;
+    return `${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%) — Cuota por ${freqLabel}: $${fmtARS(cuota)} — Total a devolver: $${fmtARS(totalDevolver)}`;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +80,7 @@ export default function OrderForm() {
           customerEmail: form.email,
           customerAddress: form.address,
           customerNote: form.note,
+          financingPlan: financingSummary(),
           items,
         }),
       });
@@ -174,6 +217,75 @@ export default function OrderForm() {
         </p>
       </div>
 
+      {/* Vista previa de financiación — solo zonas habilitadas, solo aplica al pedido por WhatsApp */}
+      {allowed && (
+        <div className="rounded-xl2 border border-plate-200 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setWantsFinancing((v) => !v)}
+            className="w-full flex items-center justify-between gap-3 p-5 text-left hover:bg-plate-50 transition-colors"
+          >
+            <span className="flex items-center gap-2.5">
+              <Wallet className="h-4 w-4 text-amber-600 shrink-0" />
+              <span className="font-display font-semibold text-steel-900">¿Querés financiar este pedido?</span>
+            </span>
+            <ChevronDown className={`h-4 w-4 text-steel-400 shrink-0 transition-transform ${wantsFinancing ? 'rotate-180' : ''}`} />
+          </button>
+
+          {wantsFinancing && (
+            <div className="border-t border-plate-200 p-5 space-y-4">
+              <p className="text-xs text-steel-500 -mt-1">
+                Sin tarjeta. Elegí un plan y mirá cómo te queda antes de enviar el pedido.
+              </p>
+
+              <div className="grid grid-cols-3 gap-2">
+                {FREQ_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => { setFreq(key); setPlanIdx(0); }}
+                    className={`rounded-lg py-2 font-mono text-[11px] font-semibold uppercase tracking-wide border transition-colors ${
+                      freq === key
+                        ? 'bg-steel-950 text-white border-steel-950'
+                        : 'bg-white text-steel-500 border-plate-200 hover:border-steel-300'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <select
+                value={safeIdx}
+                onChange={(e) => setPlanIdx(Number(e.target.value))}
+                className="w-full rounded-lg border border-plate-200 px-3 py-2.5 text-sm focus:outline-none focus:border-steel-400"
+              >
+                {activePlans.map((plan, i) => (
+                  <option key={i} value={i}>
+                    {getPlanLabel(plan)} (+{Math.round(plan.surcharge * 100)}%) — ${fmtARS(getPlanAmount(plan))} por {freqLabel}
+                  </option>
+                ))}
+              </select>
+
+              <div className="rounded-xl bg-steel-950 text-white p-4 space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <span className="font-mono text-[11px] text-white/50 uppercase tracking-wide">Total a devolver</span>
+                  <span className="font-mono text-sm font-semibold text-amber-400">${fmtARS(totalDevolver)}</span>
+                </div>
+                <div className="flex justify-between items-baseline border-t border-white/10 pt-2 mt-1">
+                  <span className="font-mono text-[11px] text-white/50 uppercase tracking-wide">Cuota por {freqLabel}</span>
+                  <span className="font-display text-2xl font-bold">${fmtARS(cuota)}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-steel-400">
+                Este plan se incluye en el mensaje al enviar tu pedido por WhatsApp. Coordinamos ahí la documentación y confirmamos la primera cuota.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl2 border border-plate-200 p-6">
         <h2 className="font-display font-semibold text-steel-900">Tus datos</h2>
 
@@ -278,26 +390,6 @@ export default function OrderForm() {
           {mpLoading ? 'Redirigiendo...' : 'Pagar con MercadoPago'}
         </button>
       </form>
-
-      {/* Financing option — only for enabled zones */}
-      {allowed && (
-        <>
-          <div className="flex items-center gap-4">
-            <div className="flex-1 border-t border-plate-200" />
-            <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o</span>
-            <div className="flex-1 border-t border-plate-200" />
-          </div>
-          <button
-            onClick={() => {
-              const productsSummary = items.map((i) => `${i.name} (x${i.qty})`).join(', ');
-              router.push(`/financiacion?amount=${total}&products=${encodeURIComponent(productsSummary)}`);
-            }}
-            className="w-full rounded-xl border border-steel-200 py-3.5 text-sm font-semibold text-steel-700 hover:bg-plate-50 transition-colors"
-          >
-            Financiar este pedido →
-          </button>
-        </>
-      )}
     </div>
   );
 }
