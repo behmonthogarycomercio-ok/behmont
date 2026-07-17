@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, CreditCard, Wallet, ShieldCheck, Store, Truck, FileText } from 'lucide-react';
 
@@ -45,6 +45,8 @@ const BENEFITS = [
 
 export default function BenefitsCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const canRightRef = useRef(false);
+  const pausedRef = useRef(false);
   const [canLeft, setCanLeft]   = useState(false);
   const [canRight, setCanRight] = useState(false);
 
@@ -52,8 +54,17 @@ export default function BenefitsCarousel() {
     const el = scrollRef.current;
     if (!el) return;
     setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+    setCanRight(right);
+    canRightRef.current = right;
   }
+
+  const scroll = useCallback((dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardW = el.querySelector('a, div[data-card]')?.getBoundingClientRect().width ?? 220;
+    el.scrollBy({ left: dir === 'left' ? -(cardW * 2) : cardW * 2, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     updateArrows();
@@ -66,12 +77,38 @@ export default function BenefitsCarousel() {
     };
   }, []);
 
-  function scroll(dir: 'left' | 'right') {
+  // Avance automático: cada 3.5s pasa al siguiente grupo de tarjetas y vuelve al inicio al llegar al final.
+  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardW = el.querySelector('a, div[data-card]')?.getBoundingClientRect().width ?? 220;
-    el.scrollBy({ left: dir === 'left' ? -(cardW * 2) : cardW * 2 });
-  }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const pause = () => { pausedRef.current = true; };
+    const resume = () => { pausedRef.current = false; };
+    const resumeDelayed = () => { setTimeout(resume, 2500); };
+
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    el.addEventListener('touchstart', pause, { passive: true });
+    el.addEventListener('touchend', resumeDelayed, { passive: true });
+
+    const interval = setInterval(() => {
+      if (pausedRef.current || document.hidden) return;
+      if (canRightRef.current) {
+        scroll('right');
+      } else {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+    }, 3500);
+
+    return () => {
+      clearInterval(interval);
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+      el.removeEventListener('touchstart', pause);
+      el.removeEventListener('touchend', resumeDelayed);
+    };
+  }, [scroll]);
 
   const cardClasses = 'group flex shrink-0 w-[calc(50%-1px)] sm:w-[calc(33.333%-1px)] lg:w-[calc(16.666%-1px)] flex-col items-center gap-2 px-4 py-2 text-center';
 
