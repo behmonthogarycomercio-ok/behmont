@@ -4,12 +4,12 @@ export default function ReviewsBanner({ reviewUrl }: { reviewUrl?: string }) {
   if (!reviewUrl) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
+    <section>
       <a
         href={reviewUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group block overflow-hidden rounded-xl2 border border-plate-200 shadow-card transition-shadow hover:shadow-lg"
+        className="group block overflow-hidden"
       >
         <Image
           src="/images/banner-resenas.webp"
