@@ -8,6 +8,8 @@ import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import type { Product } from '@/lib/types';
 
+const CUOTAS = 3;
+
 export default function ProductCard({ product, whatsappNumber }: { product: Product; whatsappNumber: string }) {
   const { addItem }   = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -16,6 +18,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
   const discountPct = product.compare_at_price && product.compare_at_price > product.price
     ? Math.round(100 - (product.price / product.compare_at_price) * 100) : null;
 
+  const cuotaPrice = Math.ceil(product.price / CUOTAS);
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
 
   return (
@@ -70,6 +73,9 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           )}
           <p className="text-2xl font-extrabold text-[#0B1C3A] leading-none">
             ${product.price.toLocaleString('es-AR')}
+          </p>
+          <p className="text-xs font-semibold text-green-600 mt-0.5">
+            {CUOTAS}x ${cuotaPrice.toLocaleString('es-AR')} sin interés
           </p>
         </div>
 

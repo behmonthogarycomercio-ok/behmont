@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Minus, Plus, Trash2, Wallet, ChevronDown } from 'lucide-react';
+import { Minus, Plus, Trash2, Wallet, ChevronDown, Link2 } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import {
@@ -10,6 +10,7 @@ import {
   calcDaily, calcWeekly, calcMonthly, fmtARS,
   type DailyPlan, type MonthlyPlan,
 } from '@/lib/financing';
+import { buildPaymentLinkMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import FormField from '@/components/ui/FormField';
@@ -34,6 +35,8 @@ export default function OrderForm() {
   const [sentName, setSentName] = useState('');
   const [mpLoading, setMpLoading] = useState(false);
   const [mpError, setMpError] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkError, setLinkError] = useState('');
 
   // Vista previa de financiación (solo para el pedido por WhatsApp, no aplica a MercadoPago)
   const [wantsFinancing, setWantsFinancing] = useState(false);
@@ -389,6 +392,70 @@ export default function OrderForm() {
           )}
           {mpLoading ? 'Redirigiendo...' : 'Pagar con MercadoPago'}
         </button>
+
+        {/* Link de pago por WhatsApp */}
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex-1 border-t border-plate-200" />
+          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o</span>
+          <div className="flex-1 border-t border-plate-200" />
+        </div>
+
+        {linkError && <p className="text-xs text-red-600">{linkError}</p>}
+
+        <button
+          type="button"
+          disabled={linkLoading}
+          onClick={async () => {
+            if (!form.name || !form.phone) {
+              setLinkError('Completá tu nombre y teléfono antes de continuar.');
+              return;
+            }
+            setLinkError('');
+            setLinkLoading(true);
+            try {
+              const res = await fetch('/api/mp/create-preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
+                  payer: { name: form.name, phone: form.phone, email: form.email },
+                }),
+              });
+              const data = await res.json();
+              if (!res.ok || !data.init_point) throw new Error(data.error ?? 'Error');
+              sessionStorage.setItem('behmont-mp-pending', JSON.stringify({
+                items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
+                payer: { name: form.name, phone: form.phone },
+              }));
+              const message = buildPaymentLinkMessage({
+                customerName: form.name,
+                customerPhone: form.phone,
+                paymentLink: data.init_point,
+                items,
+              });
+              const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '';
+              window.open(buildWhatsAppLink(number, message), '_blank');
+            } catch (err: unknown) {
+              setLinkError(err instanceof Error ? err.message : 'No se pudo generar el link de pago. Intentá de nuevo.');
+            } finally {
+              setLinkLoading(false);
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white hover:bg-[#1ebe5a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {linkLoading ? (
+            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : (
+            <Link2 className="h-4 w-4 shrink-0" />
+          )}
+          {linkLoading ? 'Generando link...' : 'Enviar link de pago por WhatsApp'}
+        </button>
+        <p className="text-xs text-steel-400 text-center -mt-1">
+          Te mandamos por WhatsApp un link para pagar con tarjeta, hasta 3 cuotas sin interés.
+        </p>
       </form>
     </div>
   );

@@ -130,6 +130,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </>
             )}
           </div>
+          <p className="mt-1 text-sm font-semibold text-green-600">
+            3x ${Math.ceil(product.price / 3).toLocaleString('es-AR')} sin interés
+          </p>
 
           {/* Stock */}
           <div className="mt-2">

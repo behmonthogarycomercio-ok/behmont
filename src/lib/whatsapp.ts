@@ -48,6 +48,47 @@ export function buildOrderMessage({
   return lines.join('\n');
 }
 
+type BuildPaymentLinkMessageInput = {
+  customerName: string;
+  customerPhone: string;
+  paymentLink: string;
+  items: WhatsAppOrderItem[];
+};
+
+/** Mensaje que se manda por WhatsApp con el link de pago de MercadoPago (en vez de redirigir directo). */
+export function buildPaymentLinkMessage({
+  customerName,
+  customerPhone,
+  paymentLink,
+  items,
+}: BuildPaymentLinkMessageInput): string {
+  const lines: string[] = [];
+  lines.push('*Pedido con link de pago — BEHMONT*');
+  lines.push('');
+  lines.push(`Cliente: ${customerName}`);
+  lines.push(`Telefono: ${customerPhone}`);
+  lines.push('');
+  lines.push('Productos:');
+
+  let total = 0;
+  for (const item of items) {
+    const subtotal = item.price * item.qty;
+    total += subtotal;
+    lines.push(
+      `• (${item.sku}) ${item.name} — x${item.qty} — $${item.price.toLocaleString('es-AR')} c/u`
+    );
+  }
+
+  lines.push('');
+  lines.push(`Total: $${total.toLocaleString('es-AR')}`);
+  lines.push('');
+  lines.push(`Link de pago (tarjeta, hasta 3 cuotas sin interés): ${paymentLink}`);
+  lines.push('');
+  lines.push('_Pedido generado desde behmont.com.ar_');
+
+  return lines.join('\n');
+}
+
 type BuildMpOrderMessageInput = {
   customerName: string;
   customerPhone: string;
