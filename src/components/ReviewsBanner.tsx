@@ -9,10 +9,10 @@ export default function ReviewsBanner({ reviewUrl }: { reviewUrl?: string }) {
         href={reviewUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative block aspect-[7/2] overflow-hidden"
+        className="group relative block aspect-[2400/380] overflow-hidden"
       >
         <Image
-          src="/images/banner-resenas.png"
+          src="/images/banner-resenas.webp"
           alt="Dejanos tu opinión en Google — Calificanos con 5 estrellas"
           fill
           sizes="100vw"
