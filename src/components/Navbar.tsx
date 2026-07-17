@@ -72,7 +72,7 @@ export default function Navbar({
           </Link>
 
           {/* Search — desktop */}
-          <form action="/buscar" className="hidden md:flex flex-1 max-w-xl items-center h-12 rounded-full border border-white/15 bg-white/10 pl-5 pr-1.5 focus-within:border-white/30 transition-colors">
+          <form action="/buscar" className="hidden md:flex flex-1 items-center h-12 rounded-full border border-white/15 bg-white/10 pl-5 pr-1.5 focus-within:border-white/30 transition-colors">
             <input
               name="q" value={q} onChange={e => setQ(e.target.value)}
               placeholder="¿Qué estás buscando?"
