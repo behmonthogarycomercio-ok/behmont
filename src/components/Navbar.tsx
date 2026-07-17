@@ -61,41 +61,18 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50">
 
-      {/* ── Barra utilitaria ─────────────────────────── */}
-      <div className="hidden md:block bg-[#0B1C3A] text-white/70">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-8 flex items-center justify-between text-[12px]">
-          <div className="flex items-center gap-5">
-            <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
-            </a>
-            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
-            </Link>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="/financiacion" className="hover:text-white transition-colors">Financiación</Link>
-            {phone && (
-              <span className="flex items-center gap-1.5 text-white/90">
-                <Phone className="h-3.5 w-3.5" /> {phone}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* ── Barra principal ─────────────────────────── */}
       <div className="bg-[#0B1C3A]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-[72px] flex items-center gap-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-20 flex items-center gap-6">
 
           {/* Logo */}
-          <Link href="/" className="relative h-12 w-24 shrink-0">
-            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill priority sizes="96px"
+          <Link href="/" className="relative h-14 w-28 shrink-0">
+            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill priority sizes="112px"
               className="object-contain object-left" />
           </Link>
 
           {/* Search — desktop */}
-          <form action="/buscar" className="hidden md:flex flex-1 max-w-md items-center h-[46px] rounded-full border border-white/15 bg-white/10 pl-5 pr-1.5 focus-within:border-white/30 transition-colors">
+          <form action="/buscar" className="hidden md:flex flex-1 max-w-xl items-center h-12 rounded-full border border-white/15 bg-white/10 pl-5 pr-1.5 focus-within:border-white/30 transition-colors">
             <input
               name="q" value={q} onChange={e => setQ(e.target.value)}
               placeholder="¿Qué estás buscando?"
@@ -108,10 +85,10 @@ export default function Navbar({
           </form>
 
           {/* Acciones */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-3">
             {/* Carrito */}
             <Link href="/pedido"
-              className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 px-5 h-11 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(0,0,0,0.35)] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
+              className="relative flex items-center gap-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 px-5 h-12 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(0,0,0,0.35)] hover:-translate-y-px transition-all active:translate-y-px active:scale-[0.97]">
               <ShoppingCart className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">
                 {count > 0 ? `Pedido (${count})` : 'Pedido'}
@@ -125,7 +102,7 @@ export default function Navbar({
 
             {/* Hamburguesa mobile */}
             <button
-              className="md:hidden h-10 w-10 flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/15 transition"
+              className="md:hidden h-11 w-11 flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/15 transition"
               onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -133,32 +110,46 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* ── Cinta de categorías desktop (navy) + mega-menu ── */}
-      <div className="hidden md:block bg-[#0B1C3A] relative" ref={megaRef}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center h-11 gap-1">
+      {/* ── Cinta de categorías + info de contacto (navy) + mega-menu ── */}
+      <div className="hidden md:block bg-[#0B1C3A] border-t border-white/10 relative" ref={megaRef}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center h-12 gap-1">
           <button
             onClick={() => setMegaOpen(v => !v)}
-            className={`flex items-center gap-2 px-3.5 h-8 rounded-full text-[13px] font-bold transition-colors ${megaOpen ? 'bg-white text-[#0B1C3A]' : 'bg-white/10 text-white hover:bg-white/15'}`}
+            className={`flex items-center gap-2 px-3.5 h-9 rounded-full text-[13px] font-bold transition-colors ${megaOpen ? 'bg-white text-[#0B1C3A]' : 'bg-white/10 text-white hover:bg-white/15'}`}
           >
             <Menu className="h-4 w-4" /> Categorías
           </button>
 
+          <Link href="/ofertas"
+            className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-bold text-amber-400 hover:bg-white/10 transition-colors whitespace-nowrap">
+            Ofertas
+          </Link>
+          <Link href="/mayorista"
+            className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
+            Mayorista
+          </Link>
+
           {city && (
             <button onClick={clearZone}
-              className="hidden lg:flex items-center gap-1.5 px-3 h-8 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors">
               <MapPin className="h-3.5 w-3.5" /> Estás en: {city}
             </button>
           )}
 
-          <div className="ml-auto flex items-center gap-1">
-            <Link href="/ofertas"
-              className="shrink-0 flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold text-amber-400 hover:bg-white/10 transition-colors whitespace-nowrap">
-              Ofertas
+          <div className="ml-auto hidden lg:flex items-center gap-5 text-[12px] text-white/70">
+            <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
+            </a>
+            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
             </Link>
-            <Link href="/mayorista"
-              className="shrink-0 flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
-              Mayorista
-            </Link>
+            <Link href="/financiacion" className="hover:text-white transition-colors">Financiación</Link>
+            {phone && (
+              <span className="flex items-center gap-1.5 text-white/90">
+                <Phone className="h-3.5 w-3.5" /> {phone}
+              </span>
+            )}
           </div>
         </div>
 
