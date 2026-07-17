@@ -7,12 +7,22 @@ import {
   computeMonthlyMetrics,
   computeMonthlyTrend,
 } from '@/lib/metrics';
-import { TrendingUp, ShoppingBag, Receipt, MapPin } from 'lucide-react';
+import { getMLMetricsSummary } from '@/lib/mercadolibre';
+import { TrendingUp, ShoppingBag, Receipt, MapPin, Award, MessageCircleQuestion, Eye, ShieldAlert } from 'lucide-react';
+
+const ML_REPUTATION_LABELS: Record<string, string> = {
+  '5_green': 'Excelente (verde)',
+  '4_light_green': 'Muy buena (verde claro)',
+  '3_yellow': 'Buena (amarilla)',
+  '2_orange': 'Regular (naranja)',
+  '1_red': 'Mala (roja)',
+};
 
 export default async function MetricasPage() {
-  const [monthOrders, trendOrders] = await Promise.all([
+  const [monthOrders, trendOrders, mlMetrics] = await Promise.all([
     getOrdersForMonth(),
     getOrdersLastNMonths(6),
+    getMLMetricsSummary(30),
   ]);
 
   const metrics = computeMonthlyMetrics(monthOrders);
@@ -94,6 +104,104 @@ export default async function MetricasPage() {
             </ul>
           )}
         </div>
+      </div>
+
+      {/* ── MercadoLibre ── */}
+      <div className="mt-10">
+        <h2 className="font-display text-xl font-bold text-steel-950 mb-1">MercadoLibre</h2>
+        <p className="text-sm text-steel-500 mb-4">Últimos 30 días</p>
+
+        {!mlMetrics.connected ? (
+          <div className="rounded-xl2 border border-dashed border-plate-200 bg-white p-6 text-sm text-steel-500">
+            Todavía no conectaste tu cuenta de MercadoLibre. Hacelo desde{' '}
+            <a href="/admin/marcas" className="font-semibold text-amber-600 hover:underline">
+              Marcas y MercadoLibre
+            </a>{' '}
+            para ver acá las ventas, reputación y preguntas.
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+              <StatCard
+                icon={Receipt}
+                label="Ventas ML (30 días)"
+                value={
+                  mlMetrics.orders
+                    ? `$${mlMetrics.orders.orders
+                        .reduce((sum, o) => sum + Number(o.total_amount || 0), 0)
+                        .toLocaleString('es-AR')}`
+                    : '—'
+                }
+              />
+              <StatCard
+                icon={ShoppingBag}
+                label="Pedidos ML (30 días)"
+                value={mlMetrics.orders ? String(mlMetrics.orders.total) : '—'}
+              />
+              <StatCard
+                icon={Eye}
+                label="Visitas (30 días)"
+                value={mlMetrics.visits !== undefined ? mlMetrics.visits.toLocaleString('es-AR') : '—'}
+              />
+              <StatCard
+                icon={MessageCircleQuestion}
+                label="Preguntas sin responder"
+                value={mlMetrics.unansweredQuestions !== undefined ? String(mlMetrics.unansweredQuestions) : '—'}
+              />
+            </div>
+
+            {mlMetrics.reputation && (
+              <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card mb-6">
+                <h3 className="font-display font-semibold text-steel-900 mb-3 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-amber-500" /> Reputación del vendedor
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-3 text-sm">
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1">Nivel</p>
+                    <p className="font-semibold text-steel-900">
+                      {mlMetrics.reputation.levelId
+                        ? ML_REPUTATION_LABELS[mlMetrics.reputation.levelId] || mlMetrics.reputation.levelId
+                        : 'Sin datos todavía'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1">Ventas completadas / canceladas</p>
+                    <p className="font-semibold text-steel-900">
+                      {mlMetrics.reputation.transactions.completed} / {mlMetrics.reputation.transactions.canceled}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1 flex items-center gap-1">
+                      <ShieldAlert className="h-3.5 w-3.5" /> Reclamos / cancelaciones
+                    </p>
+                    <p className="font-semibold text-steel-900">
+                      {(mlMetrics.reputation.claimsRate * 100).toFixed(1)}% / {(mlMetrics.reputation.cancellationsRate * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {mlMetrics.orders && mlMetrics.orders.orders.length > 0 && (
+              <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+                <h3 className="font-display font-semibold text-steel-900 mb-3">Últimas ventas de ML</h3>
+                <ul className="space-y-2 text-sm">
+                  {mlMetrics.orders.orders.slice(0, 8).map((o) => (
+                    <li key={o.id} className="flex items-center justify-between gap-3 border-b border-plate-100 pb-2 last:border-0">
+                      <span className="text-steel-700 line-clamp-1">
+                        {o.order_items?.[0]?.item.title || `Pedido #${o.id}`}
+                        {o.buyer?.nickname ? ` — ${o.buyer.nickname}` : ''}
+                      </span>
+                      <span className="shrink-0 font-mono text-xs text-steel-500">
+                        {new Date(o.date_created).toLocaleDateString('es-AR')} · ${Number(o.total_amount).toLocaleString('es-AR')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </AdminShell>
   );

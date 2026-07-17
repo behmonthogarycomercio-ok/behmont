@@ -190,3 +190,125 @@ export async function fetchItemDescription(itemId: string, accessToken: string):
     return '';
   }
 }
+
+export type MLOrder = {
+  id: number;
+  date_created: string;
+  total_amount: number;
+  status: string;
+  buyer?: { nickname?: string };
+  order_items?: { item: { title: string }; quantity: number; unit_price: number }[];
+};
+
+/** Pedidos pagados de los últimos `days` días (para el panel de métricas). */
+export async function fetchMLOrders(
+  sellerId: string,
+  accessToken: string,
+  days: number
+): Promise<{ orders: MLOrder[]; total: number }> {
+  const from = new Date(Date.now() - days * 86400000).toISOString();
+  const to = new Date().toISOString();
+  const params = new URLSearchParams({
+    seller: sellerId,
+    'order.status': 'paid',
+    'order.date_created.from': from,
+    'order.date_created.to': to,
+    sort: 'date_desc',
+    limit: '50',
+  });
+  const res = await fetch(`${ML_API}/orders/search?${params}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`ML orders/search failed: ${await res.text()}`);
+  const data = await res.json();
+  return { orders: data.results || [], total: data.paging?.total ?? (data.results || []).length };
+}
+
+export type MLReputation = {
+  levelId: string | null;
+  powerSellerStatus: string | null;
+  transactions: { completed: number; canceled: number; total: number };
+  claimsRate: number;
+  cancellationsRate: number;
+};
+
+/** Nivel de reputación y métricas de calidad del vendedor ("Mi reputación" en ML). */
+export async function fetchMLReputation(sellerId: string, accessToken: string): Promise<MLReputation> {
+  const res = await fetch(`${ML_API}/users/${sellerId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`ML users/${sellerId} failed: ${await res.text()}`);
+  const data = await res.json();
+  const rep = data.seller_reputation || {};
+  return {
+    levelId: rep.level_id ?? null,
+    powerSellerStatus: rep.power_seller_status ?? null,
+    transactions: {
+      completed: rep.transactions?.completed ?? 0,
+      canceled: rep.transactions?.canceled ?? 0,
+      total: rep.transactions?.total ?? 0,
+    },
+    claimsRate: rep.metrics?.claims?.rate ?? 0,
+    cancellationsRate: rep.metrics?.cancellations?.rate ?? 0,
+  };
+}
+
+/** Cantidad de preguntas de compradores todavía sin responder. */
+export async function fetchMLUnansweredQuestionsCount(
+  sellerId: string,
+  accessToken: string
+): Promise<number> {
+  const params = new URLSearchParams({ seller_id: sellerId, status: 'UNANSWERED', limit: '1' });
+  const res = await fetch(`${ML_API}/questions/search?${params}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`ML questions/search failed: ${await res.text()}`);
+  const data = await res.json();
+  return data.total ?? 0;
+}
+
+/** Visitas totales a las publicaciones del vendedor en los últimos `days` días. */
+export async function fetchMLVisits(sellerId: string, accessToken: string, days: number): Promise<number> {
+  const res = await fetch(
+    `${ML_API}/users/${sellerId}/items_visits/time_window?last=${days}&unit=day`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) throw new Error(`ML items_visits failed: ${await res.text()}`);
+  const data = await res.json();
+  return data.total_visits ?? 0;
+}
+
+export type MLMetricsSummary = {
+  connected: boolean;
+  orders?: { orders: MLOrder[]; total: number };
+  reputation?: MLReputation;
+  unansweredQuestions?: number;
+  visits?: number;
+  error?: string;
+};
+
+/**
+ * Junta ventas, reputación, preguntas sin responder y visitas en una sola llamada
+ * para el panel de métricas. "Best effort" por sección: si una parte falla (por
+ * ejemplo, un endpoint que cambió), las demás igual se muestran.
+ */
+export async function getMLMetricsSummary(days = 30): Promise<MLMetricsSummary> {
+  const auth = await getValidMLAccessToken();
+  if (!auth) return { connected: false };
+
+  const { accessToken, sellerId } = auth;
+  const [orders, reputation, unansweredQuestions, visits] = await Promise.allSettled([
+    fetchMLOrders(sellerId, accessToken, days),
+    fetchMLReputation(sellerId, accessToken),
+    fetchMLUnansweredQuestionsCount(sellerId, accessToken),
+    fetchMLVisits(sellerId, accessToken, days),
+  ]);
+
+  return {
+    connected: true,
+    orders: orders.status === 'fulfilled' ? orders.value : undefined,
+    reputation: reputation.status === 'fulfilled' ? reputation.value : undefined,
+    unansweredQuestions: unansweredQuestions.status === 'fulfilled' ? unansweredQuestions.value : undefined,
+    visits: visits.status === 'fulfilled' ? visits.value : undefined,
+  };
+}
