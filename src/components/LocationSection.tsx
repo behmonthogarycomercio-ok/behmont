@@ -21,18 +21,15 @@ export default function LocationSection({
     : '';
 
   return (
-    <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 scroll-mt-20">
-      <div className="mb-5">
-        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
-          San Lorenzo Oeste 380, Concordia
-        </p>
-        <h2 className="font-display text-xl font-semibold text-steel-900">Dónde estamos</h2>
-      </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_1fr_1.1fr] rounded-xl2 border border-plate-200 bg-white shadow-card overflow-hidden">
-        <div className="relative hidden md:block min-h-[280px]">
-          <Image src="/images/ubicacion-fachada.png" alt="Fachada BEHMONT" fill sizes="30vw" className="object-cover" />
-        </div>
-        <div className="p-6 sm:p-8 flex flex-col justify-center">
+    <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-[88px] border-t border-steel-100 scroll-mt-20">
+      <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px] items-center">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-steel-300 mb-2.5">
+            Visitanos
+          </p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-steel-950 tracking-tight mb-6">
+            Dónde estamos
+          </h2>
           <div className="flex items-start gap-2 text-steel-800">
             <MapPin className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="font-medium">{address}</p>
@@ -45,12 +42,12 @@ export default function LocationSection({
               <p className="text-steel-500">Consultá nuestros horarios de atención por WhatsApp</p>
             )}
           </div>
-          <div className="flex flex-wrap gap-3 mt-5">
+          <div className="flex flex-wrap gap-3 mt-6">
             <a
               href={mapLink}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonClasses({ variant: 'outline', size: 'md' })}
+              className={buttonClasses({ variant: 'outline', size: 'md', className: 'rounded-full' })}
             >
               <MapPin className="h-4 w-4" /> Cómo llegar
             </a>
@@ -59,23 +56,28 @@ export default function LocationSection({
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonClasses({ variant: 'whatsapp', size: 'md' })}
+                className={buttonClasses({ variant: 'tactile-navy', size: 'md', className: 'rounded-full' })}
               >
-                <MessageCircle className="h-4 w-4" /> Consultar
+                <MessageCircle className="h-4 w-4" /> Escribinos por WhatsApp
               </a>
             )}
           </div>
         </div>
-        <div className="min-h-[280px]">
-          <iframe
-            src={mapSrc}
-            width="100%"
-            height="100%"
-            style={{ border: 0, minHeight: 280 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Ubicación de BEHMONT — Comercio y Hogar"
-          />
+        <div className="grid grid-cols-2 gap-[14px]">
+          <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden">
+            <Image src="/images/ubicacion-fachada.png" alt="Fachada BEHMONT" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
+          </div>
+          <div className="relative aspect-[3/4] rounded-[20px] overflow-hidden border border-steel-100">
+            <iframe
+              src={mapSrc}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Ubicación de BEHMONT — Comercio y Hogar"
+            />
+          </div>
         </div>
       </div>
     </section>

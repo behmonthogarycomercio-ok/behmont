@@ -14,7 +14,7 @@ export default function FlashOffers({
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-steel-900 py-14">
+    <section className="bg-steel-900 py-[88px]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-end justify-between mb-6 pb-5 border-b border-dashed border-white/15">
           <div className="flex items-center gap-3">

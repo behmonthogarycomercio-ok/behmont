@@ -24,7 +24,7 @@ export default function Footer({
     <footer className="bg-steel-950 text-plate-100 mt-10">
 
       {/* Columnas */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
 
         {/* Marca */}
         <div className="sm:col-span-2 lg:col-span-1">
@@ -144,7 +144,7 @@ export default function Footer({
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-white/10 py-5 px-4 sm:px-6">
+      <div className="border-t border-white/10 py-[22px] px-4 sm:px-6">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <p className="font-mono text-[10px] text-plate-100/30 uppercase tracking-wide">
             © {new Date().getFullYear()} BEHMONT — Comercio y Hogar

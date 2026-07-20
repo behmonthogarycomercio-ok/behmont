@@ -29,7 +29,7 @@ const METHODS = [
 
 export default function PaymentSection() {
   return (
-    <section className="border-y border-plate-200 bg-white py-12">
+    <section className="border-y border-plate-200 bg-white py-16 lg:py-[88px]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-steel-950 tracking-tight">

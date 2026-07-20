@@ -11,7 +11,7 @@ export default function TrustBadges() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-plate-100 sm:divide-y-0">
           {STATS.map(({ value, label }) => (
-            <div key={label} className="px-6 py-6 sm:py-7">
+            <div key={label} className="px-6 py-9">
               <p className="font-display text-2xl font-bold text-steel-950 tracking-tight leading-none">
                 {value}
               </p>

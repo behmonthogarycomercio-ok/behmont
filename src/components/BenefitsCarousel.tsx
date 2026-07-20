@@ -114,7 +114,7 @@ export default function BenefitsCarousel() {
 
   return (
     <section className="border-y border-plate-200 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 relative">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-9 relative">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto scroll-smooth divide-x divide-plate-100 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

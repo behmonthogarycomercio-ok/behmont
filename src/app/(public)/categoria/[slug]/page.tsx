@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     <main>
       {/* Category header */}
       <div className="border-b border-plate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-7 pb-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-10 pb-11">
           <Breadcrumbs
             items={[
               { label: 'Inicio', href: '/' },
@@ -78,8 +78,8 @@ export default async function CategoryPage({ params }: { params: { slug: string 
           </Link>
         </div>
       ) : (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-[100px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-[22px]">
             {products.map((product) => (
               <ProductCard
                 key={product.id}

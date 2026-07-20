@@ -31,7 +31,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
           <div className="absolute inset-0 bg-steel-900" />
         )}
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-12 sm:py-0">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-[88px] sm:py-0">
           {first.subtitle && (
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400">
               {first.subtitle}
@@ -68,7 +68,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
             <div className="absolute inset-0 bg-steel-900" />
           )}
 
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-10">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-[88px]">
             {second.subtitle && (
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400 mb-2">
                 {second.subtitle}

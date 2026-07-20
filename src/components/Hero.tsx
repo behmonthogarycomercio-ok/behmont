@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { buttonClasses } from '@/components/ui/Button';
 import type { Promotion } from '@/lib/types';
 
 const ANIM = `
@@ -19,39 +20,36 @@ const ANIM = `
 
 function Fallback() {
   return (
-    <div className="relative w-full bg-[#0B1C3A] overflow-hidden min-h-[420px] sm:min-h-[560px]">
-      {/* Foto real del local, full-bleed */}
-      <Image src="/images/hero-local.jpg" alt="Local BEHMONT" fill priority sizes="100vw"
-        className="object-cover" />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg,rgba(11,28,58,.92) 0%,rgba(11,28,58,.75) 35%,rgba(11,28,58,.35) 70%,rgba(11,28,58,.15) 100%)' }} />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg,rgba(11,28,58,.5) 0%,rgba(11,28,58,0) 30%)' }} />
-
-      {/* Texto integrado sobre la imagen */}
-      <div className="relative z-10 flex h-full min-h-[420px] sm:min-h-[560px] items-center">
-        <div className="mx-auto w-full max-w-7xl px-6 sm:px-12 py-14">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center mb-6 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3.5 py-1.5 rounded-full w-fit">
-              Concordia, Entre Ríos · Desde 1995
-            </span>
-            <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white leading-[0.98] tracking-tight">
-              Equipamiento para cada rincón<br />
-              <span className="text-amber-400">del negocio.</span>
-            </h1>
-            <p className="mt-6 text-white/70 text-base sm:text-lg max-w-md leading-relaxed">
-              Gastronomía, hogar, barbería y electrónica. Financiación propia y stock real, actualizado todos los días.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3.5">
-              <Link href="/buscar"
-                className="inline-flex items-center gap-2 bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 text-white font-bold px-7 py-3.5 rounded-full text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_20px_-6px_rgba(237,50,55,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-px active:scale-[.98]">
-                Ver catálogo <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/#ubicacion"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-7 py-3.5 rounded-full text-sm border border-white/15 transition-colors">
-                Cómo llegar
-              </Link>
-            </div>
-          </div>
+    <div className="relative w-full bg-[#0A1226] overflow-hidden flex flex-col lg:flex-row min-h-[480px] lg:min-h-[640px]">
+      {/* Panel de texto */}
+      <div className="relative z-20 flex flex-[1.1] flex-col justify-center px-6 sm:px-8 lg:px-16 py-16 lg:py-[100px] lg:max-w-[640px]">
+        <span className="inline-flex items-center mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400 bg-amber-400/10 px-3.5 py-2 rounded-full w-fit">
+          Concordia, Entre Ríos · Desde 1995
+        </span>
+        <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold text-white leading-[0.98] tracking-tight">
+          Equipamiento<br />
+          para cada<br />
+          <span className="text-amber-400">rincón del negocio.</span>
+        </h1>
+        <p className="mt-7 text-white/55 text-base sm:text-lg max-w-[420px] leading-relaxed">
+          Gastronomía, hogar, barbería y electrónica. Financiación propia y stock real, actualizado todos los días.
+        </p>
+        <div className="mt-10 flex flex-wrap gap-3.5">
+          <Link href="/buscar" className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full' })}>
+            Ver catálogo <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link href="/#ubicacion"
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-7 py-3.5 rounded-full text-sm border border-white/15 transition-colors">
+            Cómo llegar
+          </Link>
         </div>
+      </div>
+
+      {/* Panel de foto */}
+      <div className="relative flex-1 min-h-[280px] lg:min-h-0 overflow-hidden">
+        <Image src="/images/hero-local.jpg" alt="Local BEHMONT" fill priority sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A1226]/55 to-[#0A1226]/5" />
       </div>
     </div>
   );
@@ -81,42 +79,42 @@ export default function Hero({ promotions }: { promotions: Promotion[] }) {
   return (
     <>
       <style>{ANIM}</style>
-      <div className="relative w-full bg-[#0B1C3A] overflow-hidden" style={{ minHeight: 'clamp(300px, 45vw, 520px)' }}>
+      <div className="relative w-full bg-[#0A1226] overflow-hidden flex flex-col lg:flex-row min-h-[480px] lg:min-h-[640px]">
 
-        {/* Slides */}
-        {items.map((p, i) => (
-          <div key={p.id} className="absolute inset-0 transition-opacity duration-700"
-            style={{ opacity: i === idx ? 1 : 0, zIndex: i === idx ? 10 : 0 }}>
-            {p.image_url && (
-              <Image src={p.image_url} alt={p.title} fill priority={i === 0} sizes="100vw"
-                className={`object-cover ${i === idx ? (i % 2 === 0 ? 'kb' : 'kb2') : ''}`}
-                key={i === idx ? `${key}` : `s${i}`}
-              />
-            )}
-            {/* Overlay: negro izquierda, transparente derecha */}
-            <div className="absolute inset-0"
-              style={{ background: 'linear-gradient(90deg,rgba(11,28,58,.9) 0%,rgba(11,28,58,.5) 40%,rgba(11,28,58,.05) 100%)' }} />
-          </div>
-        ))}
-
-        {/* Contenido activo */}
-        <div className="relative z-20 flex h-full items-center" style={{ minHeight: 'clamp(300px, 45vw, 520px)' }}>
-          <div key={`t${key}`} className="fu mx-auto w-full max-w-7xl px-6 sm:px-12 py-14">
+        {/* Panel de texto */}
+        <div className="relative z-20 flex flex-[1.1] flex-col justify-center px-6 sm:px-8 lg:px-16 py-16 lg:py-[100px] lg:max-w-[640px]">
+          <div key={`t${key}`} className="fu">
             {slide.subtitle && (
               <span className="inline-block mb-3 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full">
                 {slide.subtitle}
               </span>
             )}
-            <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-white leading-tight max-w-2xl tracking-tight">
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               {slide.title}
             </h2>
             {slide.cta_link && (
               <Link href={slide.cta_link}
-                className="mt-8 inline-flex items-center gap-2 bg-gradient-to-b from-amber-400 to-amber-500 hover:to-amber-600 text-white font-bold px-8 py-3.5 rounded-full text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_20px_-6px_rgba(237,50,55,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-px active:scale-[.98]">
+                className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full mt-8' })}>
                 Ver más <ArrowRight className="h-4 w-4" />
               </Link>
             )}
           </div>
+        </div>
+
+        {/* Panel de foto */}
+        <div className="relative flex-1 min-h-[280px] lg:min-h-0 overflow-hidden">
+          {items.map((p, i) => (
+            <div key={p.id} className="absolute inset-0 transition-opacity duration-700"
+              style={{ opacity: i === idx ? 1 : 0, zIndex: i === idx ? 10 : 0 }}>
+              {p.image_url && (
+                <Image src={p.image_url} alt={p.title} fill priority={i === 0} sizes="(max-width: 1024px) 100vw, 50vw"
+                  className={`object-cover opacity-90 ${i === idx ? (i % 2 === 0 ? 'kb' : 'kb2') : ''}`}
+                  key={i === idx ? `${key}` : `s${i}`}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0A1226]/55 to-[#0A1226]/5" />
+            </div>
+          ))}
         </div>
 
         {/* Flechas */}

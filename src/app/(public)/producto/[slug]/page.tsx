@@ -78,7 +78,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Breadcrumb */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-7">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-10">
         <Breadcrumbs
           items={[
             { label: 'Inicio', href: '/' },
@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       </div>
 
       {/* Product layout */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-14 grid gap-10 md:gap-16 md:grid-cols-2">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-[100px] grid gap-10 md:gap-[72px] md:grid-cols-2">
         <ProductGallery images={product.images} name={product.name} />
 
         {/* Right panel */}
@@ -193,8 +193,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       {/* Specs */}
       {filteredSpecs.length > 0 && (
-        <div className="border-t border-plate-200 bg-plate-50">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+        <div className="border-t border-plate-200 bg-plate-50 mt-[88px]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-12">
             <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
               Características técnicas
             </h2>

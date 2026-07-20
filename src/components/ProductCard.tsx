@@ -32,19 +32,19 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
               className="object-contain p-4 transition-transform duration-300 group-hover:scale-105" />
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-gray-300 text-xs uppercase tracking-wider">
-              Sin imagen
+            <div className="placeholder-pattern h-full w-full flex items-center justify-center text-steel-300 text-[10px] uppercase tracking-wider">
+              Foto producto
             </div>
           )}
         </div>
         {/* Badges */}
         {discountPct && (
-          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+          <span className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
             -{discountPct}%
           </span>
         )}
         {product.stock > 0 && product.stock <= 3 && (
-          <span className="absolute bottom-3 left-3 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
+          <span className="absolute bottom-3 left-3 bg-warning-500/15 text-warning-600 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
             Últimas {product.stock}
           </span>
         )}
@@ -91,7 +91,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
             disabled={product.stock <= 0}
             className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#182548] to-[#0B1C3A] hover:from-[#213262] hover:to-[#182548] text-white text-xs font-bold py-2.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_6px_14px_-6px_rgba(10,18,38,0.5)] transition-all hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:translate-y-px active:scale-[.98]">
             <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
-            Agregar al carrito
+            Agregar al pedido
           </button>
           <a href={inquiryLink} target="_blank" rel="noopener noreferrer"
             className="h-9 w-9 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"

@@ -4,7 +4,7 @@ export default function WhatsAppSection({ whatsappNumber }: { whatsappNumber: st
   const link = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
 
   return (
-    <section className="bg-steel-950 py-20">
+    <section className="bg-steel-950 py-[88px]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400 mb-5">

@@ -35,7 +35,7 @@ const RUBROS = [
 
 export default function BusinessSection() {
   return (
-    <section className="bg-plate-50 border-y border-plate-200 py-16">
+    <section className="bg-plate-50 border-y border-plate-200 py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-steel-950 tracking-tight mb-10">
           Equipamos tu negocio

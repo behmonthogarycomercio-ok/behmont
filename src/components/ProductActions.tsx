@@ -52,7 +52,7 @@ export default function ProductActions({
           setTimeout(() => setAdded(false), 1800);
         }}
         disabled={product.stock <= 0}
-        className={buttonClasses({ variant: 'primary', size: 'lg', className: 'flex-1' })}
+        className={buttonClasses({ variant: 'tactile-navy', size: 'lg', className: 'flex-1' })}
       >
         <ShoppingCart className="h-4 w-4" />
         <span aria-live="polite">{added ? 'Agregado ✓' : 'Agregar al pedido'}</span>
