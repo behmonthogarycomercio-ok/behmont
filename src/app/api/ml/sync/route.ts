@@ -86,8 +86,32 @@ async function runSync(request: Request, fromCron: boolean) {
       .not('ml_item_id', 'is', null);
     const existingMlItemIds = new Set((existingRows || []).map((r: { ml_item_id: string }) => r.ml_item_id));
 
+    // Productos desvinculados a propósito (el dueño cortó el link con "desincronizar
+    // de la web" para manejar precio/fotos de forma independiente) — se identifican
+    // porque ya existe un producto con ese mismo SKU pero sin ml_item_id. El sync
+    // nunca debe volver a tocarlos ni intentar recrearlos.
+    const { data: skuRows } = await supabase
+      .from('products')
+      .select('sku')
+      .is('ml_item_id', null);
+    const disconnectedSkus = new Set(
+      (skuRows || []).map((r: { sku: string }) => r.sku.trim().toLowerCase())
+    );
+
     let synced = 0;
+    let skipped = 0;
     for (const item of items) {
+      // Si el item no está linkeado hoy pero su SKU ya existe como producto
+      // desvinculado, es uno de esos "desincronizados" a propósito — se salta
+      // antes de gastar la consulta de descripción y sin loguear error.
+      if (!existingMlItemIds.has(item.id)) {
+        const candidateSku = (item.seller_custom_field?.trim() || item.id).toLowerCase();
+        if (disconnectedSkus.has(candidateSku)) {
+          skipped++;
+          continue;
+        }
+      }
+
       const images =
         item.pictures && item.pictures.length > 0
           ? item.pictures.map((p) => p.secure_url)
@@ -161,17 +185,18 @@ async function runSync(request: Request, fromCron: boolean) {
       }
     }
 
+    const baseDetail = isCron ? 'Sincronización automática (cron)' : 'Sincronización manual';
     const { error: logError } = await supabase.from('ml_sync_log').insert({
       status: 'ok',
       items_synced: synced,
-      detail: isCron ? 'Sincronización automática (cron)' : 'Sincronización manual',
+      detail: skipped > 0 ? `${baseDetail} · ${skipped} desvinculado(s) omitido(s)` : baseDetail,
     });
     // El insert al log no debe tirar abajo un sync que ya funcionó, pero si
     // falla queremos verlo en los logs de Vercel en vez de perderlo en
     // silencio (antes no se chequeaba el resultado de este insert).
     if (logError) console.error('[ml/sync] no se pudo escribir ml_sync_log:', logError);
 
-    return NextResponse.json({ synced, total: items.length });
+    return NextResponse.json({ synced, skipped, total: items.length });
   } catch (err) {
     const detail = err instanceof Error ? err.message : 'Error desconocido';
     console.error('[ml/sync] fallo la sincronización:', detail);
