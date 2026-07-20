@@ -87,26 +87,44 @@ async function runSync(request: Request, fromCron: boolean) {
     const existingMlItemIds = new Set((existingRows || []).map((r: { ml_item_id: string }) => r.ml_item_id));
 
     // Productos desvinculados a propósito (el dueño cortó el link con "desincronizar
-    // de la web" para manejar precio/fotos de forma independiente) — se identifican
-    // porque ya existe un producto con ese mismo SKU pero sin ml_item_id. El sync
-    // nunca debe volver a tocarlos ni intentar recrearlos.
-    const { data: skuRows } = await supabase
-      .from('products')
-      .select('sku')
-      .is('ml_item_id', null);
-    const disconnectedSkus = new Set(
-      (skuRows || []).map((r: { sku: string }) => r.sku.trim().toLowerCase())
-    );
+    // de la web" para manejar precio/fotos de forma independiente) — el sync nunca
+    // debe volver a tocarlos ni intentar recrearlos. Se detectan de dos formas:
+    //   1) por SKU (item.seller_custom_field o item.id, tal como se usa al crear)
+    //   2) por el ml_item_id embebido al final del slug — slugify() siempre agrega
+    //      "-{id en minúscula}" como último segmento, y ese sufijo es inmutable
+    //      aunque el título se edite en ML después. Esta señal es más confiable
+    //      que el SKU, porque seller_custom_field puede cambiar con el tiempo.
+    //
+    // Paginado explícito: por default PostgREST corta en 1000 filas, y hoy hay
+    // más de 2000 productos sin ml_item_id — sin esto se pierden filas más allá
+    // de la 1000 y el sync los vuelve a intentar crear (fallando por sku/slug
+    // duplicado, silenciosamente, sin aparecer ni en "synced" ni en "skipped").
+    const disconnectedSkus = new Set<string>();
+    const disconnectedSlugMlIds = new Set<string>();
+    for (let from2 = 0; ; from2 += 1000) {
+      const { data: rows } = await supabase
+        .from('products')
+        .select('sku, slug')
+        .is('ml_item_id', null)
+        .range(from2, from2 + 999);
+      if (!rows || rows.length === 0) break;
+      for (const r of rows as { sku: string; slug: string }[]) {
+        disconnectedSkus.add(r.sku.trim().toLowerCase());
+        disconnectedSlugMlIds.add(r.slug.split('-').pop() || '');
+      }
+      if (rows.length < 1000) break;
+    }
 
     let synced = 0;
     let skipped = 0;
     for (const item of items) {
-      // Si el item no está linkeado hoy pero su SKU ya existe como producto
-      // desvinculado, es uno de esos "desincronizados" a propósito — se salta
-      // antes de gastar la consulta de descripción y sin loguear error.
+      // Si el item no está linkeado hoy pero coincide (por SKU o por el
+      // ml_item_id embebido en el slug) con un producto ya desvinculado a
+      // propósito, se salta antes de gastar la consulta de descripción y sin
+      // loguear error.
       if (!existingMlItemIds.has(item.id)) {
         const candidateSku = (item.seller_custom_field?.trim() || item.id).toLowerCase();
-        if (disconnectedSkus.has(candidateSku)) {
+        if (disconnectedSkus.has(candidateSku) || disconnectedSlugMlIds.has(item.id.toLowerCase())) {
           skipped++;
           continue;
         }
