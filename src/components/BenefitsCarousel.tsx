@@ -33,13 +33,13 @@ const BENEFITS = [
     icon: Truck,
     title: 'Envíos a todo el país',
     text: 'Con Andreani, a domicilio en toda Argentina.',
-    href: null,
+    href: 'https://www.andreani.com/?tab=seguir-envio',
   },
   {
     icon: FileText,
     title: 'Factura A y B',
     text: 'Facturación completa para empresa o consumidor final.',
-    href: null,
+    href: '/mayorista',
   },
 ];
 
