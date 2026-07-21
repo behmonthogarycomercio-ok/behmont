@@ -21,7 +21,7 @@ const BENEFITS = [
     icon: ShieldCheck,
     title: 'Compra segura',
     text: 'Atención directa por WhatsApp en cada paso de tu compra.',
-    href: null,
+    href: 'https://wa.me/5493454015358?text=Hola,%20Lucas.%20Quisiera%20realizar%20una%20consulta%20sobre%20sus%20productos.',
   },
   {
     icon: Store,
@@ -127,8 +127,13 @@ export default function BenefitsCarousel() {
                 <p className="text-xs text-steel-400 leading-snug">{text}</p>
               </>
             );
+            const isExternal = href?.startsWith('http');
             return href ? (
-              <Link key={title} href={href} className={cardClasses}>{inner}</Link>
+              isExternal ? (
+                <a key={title} href={href} target="_blank" rel="noopener noreferrer" className={cardClasses}>{inner}</a>
+              ) : (
+                <Link key={title} href={href} className={cardClasses}>{inner}</Link>
+              )
             ) : (
               <div key={title} data-card className={cardClasses}>{inner}</div>
             );
