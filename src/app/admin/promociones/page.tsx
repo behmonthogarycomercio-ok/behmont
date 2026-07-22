@@ -1,16 +1,48 @@
+import Link from 'next/link';
 import AdminShell from '@/components/admin/AdminShell';
 import DeleteButton from '@/components/admin/DeleteButton';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { upsertPromotion, deletePromotion } from '@/lib/actions';
 
-export default async function PromocionesPage() {
+const PLACEMENTS = [
+  { value: '', label: 'Todas' },
+  { value: 'hero', label: 'Hero' },
+  { value: 'banner', label: 'Banner' },
+  { value: 'strip', label: 'Franja' },
+  { value: 'financiacion', label: 'Promos en financiación' },
+] as const;
+
+export default async function PromocionesPage({
+  searchParams,
+}: {
+  searchParams: { placement?: string };
+}) {
+  const activePlacement = searchParams.placement || '';
   const supabase = createServerSupabase();
-  const { data: promotions } = await supabase.from('promotions').select('*').order('sort_order');
+  let query = supabase.from('promotions').select('*').order('sort_order');
+  if (activePlacement) query = query.eq('placement', activePlacement);
+  const { data: promotions } = await query;
 
   return (
     <AdminShell>
       <h1 className="font-display text-2xl font-bold text-steel-950 mb-6">Promociones y banners</h1>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        {PLACEMENTS.map((p) => (
+          <Link
+            key={p.value}
+            href={p.value ? `/admin/promociones?placement=${p.value}` : '/admin/promociones'}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+              activePlacement === p.value
+                ? 'bg-steel-900 text-white'
+                : 'bg-plate-100 text-steel-600 hover:bg-plate-200'
+            }`}
+          >
+            {p.label}
+          </Link>
+        ))}
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-3">
@@ -41,10 +73,11 @@ export default async function PromocionesPage() {
           <input name="image_url" placeholder="URL de imagen" className="input" />
           <input name="cta_link" placeholder="Link (ej: /categoria/frio)" className="input" />
           <input name="cta_text" placeholder="Texto del botón" defaultValue="Ver productos" className="input" />
-          <select name="placement" className="input">
+          <select name="placement" className="input" defaultValue={activePlacement || 'hero'}>
             <option value="hero">Hero (portada principal)</option>
             <option value="banner">Banner destacado (2 columnas)</option>
             <option value="strip">Franja secundaria</option>
+            <option value="financiacion">Promos en financiación (carrusel)</option>
           </select>
           <input type="number" name="sort_order" placeholder="Orden" defaultValue={0} className="input" />
           <label className="flex items-center gap-2 text-sm text-steel-700">

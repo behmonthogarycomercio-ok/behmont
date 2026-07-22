@@ -9,6 +9,7 @@ import ProductGrid from '@/components/ProductGrid';
 import PaymentSection from '@/components/PaymentSection';
 import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
+import FinancingPromosCarousel from '@/components/FinancingPromosCarousel';
 import BrandStrip from '@/components/BrandStrip';
 import LocationSection from '@/components/LocationSection';
 import ReviewsBanner from '@/components/ReviewsBanner';
@@ -17,7 +18,6 @@ import {
   getCategories,
   getPromotions,
   getBrands,
-  getTopBrands,
   getFeaturedProducts,
   getDiscountedProducts,
   getSiteSettings,
@@ -26,13 +26,13 @@ import {
 export const revalidate = 60; // ISR: refresca catálogo cada 60s (precio/stock de ML incluido)
 
 export default async function HomePage() {
-  const [settings, categories, heroPromos, stripPromos, brands, topBrands, featured, discounted] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
     getPromotions('banner'),
+    getPromotions('financiacion'),
     getBrands(),
-    getTopBrands(),
     getFeaturedProducts(),
     getDiscountedProducts(),
   ]);
@@ -43,7 +43,6 @@ export default async function HomePage() {
       <ScrollReveal><TrustBadges /></ScrollReveal>
       <ScrollReveal><BenefitsCarousel /></ScrollReveal>
       <ScrollReveal><CategoryMosaic categories={categories} /></ScrollReveal>
-      <ScrollReveal><BusinessSection /></ScrollReveal>
       <ScrollReveal>
         <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
@@ -54,10 +53,14 @@ export default async function HomePage() {
           whatsappNumber={settings.whatsappNumber}
         />
       </ScrollReveal>
+      <ScrollReveal><BusinessSection products={featured} /></ScrollReveal>
       <ScrollReveal><PaymentSection /></ScrollReveal>
+      <ScrollReveal>
+        <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />
+      </ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
       <ScrollReveal><WhatsAppSection whatsappNumber={settings.whatsappNumber} /></ScrollReveal>
-      <ScrollReveal><BrandStrip brands={brands} topBrands={topBrands} /></ScrollReveal>
+      <ScrollReveal><BrandStrip brands={brands} /></ScrollReveal>
       <ScrollReveal>
         <LocationSection
           address={settings.contactAddress}

@@ -31,7 +31,7 @@ export const getCategories = cache(async (): Promise<Category[]> => {
   return data || [];
 });
 
-export async function getPromotions(placement?: 'hero' | 'banner' | 'strip'): Promise<Promotion[]> {
+export async function getPromotions(placement?: 'hero' | 'banner' | 'strip' | 'financiacion'): Promise<Promotion[]> {
   const supabase = createServerSupabase();
   let query = supabase
     .from('promotions')

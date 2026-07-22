@@ -3,12 +3,20 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { slugify } from '@/lib/slugify';
 import type { Brand } from '@/lib/types';
 
-export default function BrandStrip({ brands, topBrands }: { brands: Brand[]; topBrands: Brand[] }) {
+const INITIAL_COUNT = 21;
+
+export default function BrandStrip({ brands }: { brands: Brand[] }) {
   const [query, setQuery] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const sortedBrands = useMemo(
+    () => [...brands].sort((a, b) => a.name.localeCompare(b.name, 'es')),
+    [brands]
+  );
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -17,6 +25,8 @@ export default function BrandStrip({ brands, topBrands }: { brands: Brand[]; top
   }, [query, brands]);
 
   if (brands.length === 0) return null;
+
+  const visibleBrands = showAll ? sortedBrands : sortedBrands.slice(0, INITIAL_COUNT);
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
@@ -54,28 +64,33 @@ export default function BrandStrip({ brands, topBrands }: { brands: Brand[]; top
         </div>
       </div>
 
-      {topBrands.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {topBrands.map((brand) =>
-            brand.logo_url ? (
-              <Link
-                key={brand.id}
-                href={`/marca/${slugify(brand.name)}`}
-                className="relative h-9 w-24 shrink-0 grayscale transition hover:grayscale-0"
-              >
-                <Image src={brand.logo_url} alt={brand.name} fill sizes="96px" className="object-contain object-left" />
-              </Link>
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        {visibleBrands.map((brand) => (
+          <Link
+            key={brand.id}
+            href={`/marca/${slugify(brand.name)}`}
+            className="group flex h-20 items-center justify-center rounded-xl2 border border-plate-200 bg-white px-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_16px_28px_-16px_rgba(10,18,38,0.2)]"
+          >
+            {brand.logo_url ? (
+              <div className="relative h-9 w-full rounded-md bg-plate-50 grayscale opacity-70 transition group-hover:grayscale-0 group-hover:opacity-100">
+                <Image src={brand.logo_url} alt={brand.name} fill sizes="140px" className="object-contain" />
+              </div>
             ) : (
-              <Link
-                key={brand.id}
-                href={`/marca/${slugify(brand.name)}`}
-                className="rounded-full border border-plate-200 bg-white px-4 py-1.5 text-sm font-medium text-steel-700 transition hover:border-amber-500 hover:text-amber-600"
-              >
+              <span className="text-center text-sm font-semibold text-steel-500 transition-colors group-hover:text-amber-600">
                 {brand.name}
-              </Link>
-            )
-          )}
-        </div>
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {!showAll && sortedBrands.length > INITIAL_COUNT && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="mt-6 mx-auto flex items-center gap-1.5 text-sm font-semibold text-steel-600 hover:text-amber-600 transition-colors"
+        >
+          Ver todas las marcas ({sortedBrands.length}) <ChevronDown className="h-4 w-4" />
+        </button>
       )}
     </section>
   );

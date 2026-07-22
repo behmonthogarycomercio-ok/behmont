@@ -44,7 +44,7 @@ export type Promotion = {
   image_url: string | null;
   cta_text: string | null;
   cta_link: string | null;
-  placement: 'hero' | 'banner' | 'strip';
+  placement: 'hero' | 'banner' | 'strip' | 'financiacion';
   sort_order: number;
   active: boolean;
 };

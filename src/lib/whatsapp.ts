@@ -100,3 +100,8 @@ export function buildWhatsAppLink(phoneNumber: string, message: string): string 
 export function buildQuickInquiryMessage(): string {
   return 'Hola, me comunico desde la página web porque quiero hacer una consulta sobre un producto.';
 }
+
+/** Mensaje para consultar por una promo puntual del carrusel de financiación, identificándola por título. */
+export function buildPromoInquiryMessage(promoTitle: string): string {
+  return `Hola, me comunico desde la página web porque me interesa esta promo: "${promoTitle}".`;
+}
