@@ -37,13 +37,36 @@ export default function BusinessSection({ products }: { products: Product[] }) {
 
   return (
     <section className="bg-steel-950 py-[88px]">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid lg:grid-cols-[360px_1fr] gap-8 lg:gap-12 items-center">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+        <div className="grid lg:grid-cols-[1fr_460px] gap-10 lg:gap-16 items-center">
+          {/* Texto, columna izquierda */}
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-400 mb-4">
+              Equipamos tu negocio
+            </p>
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.03] mb-6">
+              Todo lo que tu comercio necesita, en un solo lugar.
+            </h2>
+            <p className="text-white/70 text-lg leading-relaxed mb-10 max-w-lg">
+              Gastronomía, panadería, carnicería, peluquería, frío comercial y almacén. Stock real y
+              financiación propia para equipar tu local de punta a punta.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-6">
+              <Link href={`/producto/${current.slug}`} className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full' })}>
+                Ver {current.name.length > 28 ? `${current.name.slice(0, 28)}…` : current.name} <ArrowRight className="h-4 w-4" />
+              </Link>
+              <span className="text-white font-bold text-2xl">
+                ${current.price.toLocaleString('es-AR')}
+              </span>
+            </div>
+          </div>
+
           {/* Imagen contenida, columna derecha */}
-          <div className="relative order-2 max-w-md mx-auto lg:mx-0 w-full">
+          <div className="relative w-full">
             <div className="relative w-full overflow-hidden rounded-[18px] border border-white/10 bg-white"
               style={{ aspectRatio: '4 / 3' }}>
-              <Image src={current.images![0]} alt={current.name} fill sizes="(max-width: 1024px) 90vw, 620px"
+              <Image src={current.images![0]} alt={current.name} fill sizes="(max-width: 1024px) 90vw, 460px"
                 className="object-contain p-3" />
             </div>
 
@@ -66,29 +89,6 @@ export default function BusinessSection({ products }: { products: Product[] }) {
                 </div>
               </>
             )}
-          </div>
-
-          {/* Texto, columna izquierda */}
-          <div className="order-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400 mb-3">
-              Equipamos tu negocio
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight leading-[1.05] mb-4">
-              Todo lo que tu comercio necesita, en un solo lugar.
-            </h2>
-            <p className="text-white/70 text-base leading-relaxed mb-8">
-              Gastronomía, panadería, carnicería, peluquería, frío comercial y almacén. Stock real y
-              financiación propia para equipar tu local de punta a punta.
-            </p>
-
-            <div className="flex flex-col items-start gap-4">
-              <span className="text-white font-bold text-xl">
-                ${current.price.toLocaleString('es-AR')}
-              </span>
-              <Link href={`/producto/${current.slug}`} className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full' })}>
-                Ver {current.name.length > 28 ? `${current.name.slice(0, 28)}…` : current.name} <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
           </div>
         </div>
       </div>
