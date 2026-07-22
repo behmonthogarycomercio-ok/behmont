@@ -28,9 +28,9 @@ export default function Footer({
 
         {/* Marca */}
         <div className="sm:col-span-2 lg:col-span-1">
-          <div className="relative h-9 w-36">
+          <div className="relative h-16 w-36">
             <Image
-              src="/images/logo-behmont-dark.png"
+              src="/images/logo-behmont-oval.png"
               alt="BEHMONT — Comercio y Hogar"
               fill
               className="object-contain object-left"

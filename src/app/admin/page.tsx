@@ -34,8 +34,8 @@ export default function AdminLoginPage() {
         className="w-full max-w-sm rounded-xl2 bg-white p-8 shadow-card"
       >
         <div className="mb-6 text-center">
-          <div className="relative h-14 w-full mx-auto">
-            <Image src="/images/logo-behmont.png" alt="BEHMONT" fill className="object-contain" />
+          <div className="relative h-16 w-40 mx-auto">
+            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill className="object-contain" />
           </div>
           <h1 className="font-display text-xl font-bold text-steel-950 mt-4">
             Panel de administración
