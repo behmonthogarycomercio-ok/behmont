@@ -6,6 +6,7 @@ export const CATEGORY_PHOTOS: Record<string, string> = {
   frio: '/images/categoria-frio.webp',
   hogar: '/images/categoria-hogar.webp',
   decoracion: '/images/categoria-decoracion.webp',
+  electrodomesticos: '/images/categoria-electrodomesticos.webp',
   herramientas: '/images/categoria-herramientas.webp',
   carniceria: '/images/categoria-carniceria.webp',
   climatizacion: '/images/categoria-climatizacion.webp',
