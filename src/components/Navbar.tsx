@@ -66,8 +66,8 @@ export default function Navbar({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-20 flex items-center gap-6">
 
           {/* Logo */}
-          <Link href="/" className="relative h-14 w-28 shrink-0">
-            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill priority sizes="112px"
+          <Link href="/" className="relative h-16 w-36 shrink-0">
+            <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill priority sizes="144px"
               className="object-contain object-left" />
           </Link>
 
