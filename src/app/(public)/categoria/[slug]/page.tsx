@@ -2,10 +2,12 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { clsx } from 'clsx';
 import ProductCard from '@/components/ProductCard';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { getProductsByCategory, getSiteSettings } from '@/lib/data';
+import { SUBCATEGORIES } from '@/lib/subcategories';
 
 export const revalidate = 60;
 
@@ -27,13 +29,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const [settings, { category, products }] = await Promise.all([
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams: { sub?: string };
+}) {
+  const [settings, { category, products: allProducts }] = await Promise.all([
     getSiteSettings(),
     getProductsByCategory(params.slug),
   ]);
 
   if (!category) notFound();
+
+  const subcategories = SUBCATEGORIES[category.slug] ?? [];
+  const activeSub = subcategories.find((s) => s.keyword === searchParams.sub);
+  const products = activeSub
+    ? allProducts.filter((p) => p.name.toLowerCase().includes(activeSub.keyword))
+    : allProducts;
 
   return (
     <main>
@@ -58,9 +72,36 @@ export default async function CategoryPage({ params }: { params: { slug: string 
               </h1>
               <p className="mt-1 font-mono text-[11px] text-steel-400 uppercase tracking-wide">
                 {products.length} {products.length === 1 ? 'producto' : 'productos'}
+                {activeSub && ` en "${activeSub.name}"`}
               </p>
             </div>
           </div>
+
+          {subcategories.length > 0 && (
+            <div className="mt-8 flex gap-3 overflow-x-auto pb-1">
+              {subcategories.map((sub) => {
+                const isActive = sub.keyword === searchParams.sub;
+                return (
+                  <Link
+                    key={sub.keyword}
+                    href={isActive ? `/categoria/${category.slug}` : `/categoria/${category.slug}?sub=${sub.keyword}`}
+                    className={clsx(
+                      'group relative shrink-0 overflow-hidden rounded-xl border w-[120px] sm:w-[140px]',
+                      isActive ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-plate-200'
+                    )}
+                    style={{ aspectRatio: '4 / 3' }}
+                  >
+                    <Image src={sub.image} alt={sub.name} fill sizes="140px"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-steel-950/85 via-steel-950/10 to-transparent" />
+                    <span className="absolute inset-x-0 bottom-0 p-2.5 text-xs font-bold uppercase text-white leading-tight">
+                      {sub.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -68,13 +109,15 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       {products.length === 0 ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 text-center">
           <p className="font-display text-xl font-semibold text-steel-400">
-            No hay productos en esta categoría por el momento.
+            {activeSub
+              ? `No hay productos en "${activeSub.name}" por el momento.`
+              : 'No hay productos en esta categoría por el momento.'}
           </p>
           <Link
-            href="/buscar"
+            href={activeSub ? `/categoria/${category.slug}` : '/buscar'}
             className="mt-6 inline-block text-sm font-semibold text-amber-600 hover:text-amber-700"
           >
-            Ver todo el catálogo →
+            {activeSub ? `Ver todo ${category.name} →` : 'Ver todo el catálogo →'}
           </Link>
         </div>
       ) : (
