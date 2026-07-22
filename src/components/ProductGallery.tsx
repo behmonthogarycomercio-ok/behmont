@@ -32,7 +32,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
               )}
               aria-label={`Ver imagen ${i + 1}`}
             >
-              <Image src={src} alt="" fill sizes="64px" className="object-contain p-1.5" />
+              <Image src={src} alt="" fill sizes="64px" loading="eager" className="object-contain p-1.5" />
             </button>
           ))}
         </div>

@@ -1,11 +1,14 @@
+import Image from 'next/image';
 import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 
 export default function WhatsAppSection({ whatsappNumber }: { whatsappNumber: string }) {
   const link = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
 
   return (
-    <section className="bg-steel-950 py-[88px]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section className="relative overflow-hidden bg-steel-950 py-[88px]">
+      <Image src="/images/banner-hablemos.webp" alt="" fill sizes="100vw" className="object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-r from-steel-950/95 via-steel-950/85 to-steel-950/50" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400 mb-5">
             Asesoramiento sin compromiso
