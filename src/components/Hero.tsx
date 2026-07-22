@@ -26,7 +26,7 @@ function StaticFallback() {
   return (
     <div className="relative w-full overflow-hidden min-h-[520px] lg:min-h-[640px]">
       <Image src="/images/hero-local.webp" alt="Local BEHMONT" fill priority sizes="100vw"
-        className="object-cover" />
+        className="object-cover object-bottom" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#0A1226]/95 via-[#0A1226]/70 to-[#0A1226]/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A1226]/80 via-transparent to-transparent lg:hidden" />
 
