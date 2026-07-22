@@ -26,7 +26,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
   const current = items[idx];
 
   return (
-    <section className="relative w-full overflow-hidden min-h-[460px] lg:min-h-[520px]">
+    <section className="relative w-full overflow-hidden min-h-[620px] lg:min-h-[780px]">
       {/* Fotos de producto de fondo, en crossfade */}
       {items.map((p, i) => (
         <div key={p.id} className="absolute inset-0 transition-opacity duration-[1200ms] ease-in-out"
@@ -39,7 +39,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-steel-950/85 via-transparent to-transparent lg:hidden" />
 
       {/* Texto, integrado sobre la foto */}
-      <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[460px] lg:min-h-[520px] px-6 sm:px-8 lg:px-16 py-16">
+      <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[620px] lg:min-h-[780px] px-6 sm:px-8 lg:px-16 py-16">
         <div key={`t${key}`} className="max-w-xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400 mb-3">
             Equipamos tu negocio
