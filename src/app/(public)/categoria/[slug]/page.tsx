@@ -4,10 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { clsx } from 'clsx';
 import ProductCard from '@/components/ProductCard';
+import ProductFilters from '@/components/ProductFilters';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { getProductsByCategory, getSiteSettings } from '@/lib/data';
 import { SUBCATEGORIES } from '@/lib/subcategories';
+import { applyProductFilters, getAvailableBrands } from '@/lib/product-filters';
 
 export const revalidate = 60;
 
@@ -34,7 +36,15 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { sub?: string };
+  searchParams: {
+    sub?: string;
+    marca?: string;
+    precioMin?: string;
+    precioMax?: string;
+    oferta?: string;
+    stock?: string;
+    orden?: string;
+  };
 }) {
   const [settings, { category, products: allProducts }] = await Promise.all([
     getSiteSettings(),
@@ -45,9 +55,12 @@ export default async function CategoryPage({
 
   const subcategories = SUBCATEGORIES[category.slug] ?? [];
   const activeSub = subcategories.find((s) => s.keyword === searchParams.sub);
-  const products = activeSub
+  const subFiltered = activeSub
     ? allProducts.filter((p) => p.name.toLowerCase().includes(activeSub.keyword))
     : allProducts;
+
+  const brands = getAvailableBrands(subFiltered);
+  const products = applyProductFilters(subFiltered, searchParams);
 
   return (
     <main>
@@ -105,19 +118,26 @@ export default async function CategoryPage({
         </div>
       </div>
 
+      {/* Filtros */}
+      <div className="border-b border-plate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
+          <ProductFilters brands={brands} />
+        </div>
+      </div>
+
       {/* Products grid */}
       {products.length === 0 ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 text-center">
           <p className="font-display text-xl font-semibold text-steel-400">
             {activeSub
-              ? `No hay productos en "${activeSub.name}" por el momento.`
-              : 'No hay productos en esta categoría por el momento.'}
+              ? `No hay productos en "${activeSub.name}" con estos filtros.`
+              : 'No hay productos con estos filtros.'}
           </p>
           <Link
-            href={activeSub ? `/categoria/${category.slug}` : '/buscar'}
+            href={activeSub ? `/categoria/${category.slug}?sub=${activeSub.keyword}` : `/categoria/${category.slug}`}
             className="mt-6 inline-block text-sm font-semibold text-amber-600 hover:text-amber-700"
           >
-            {activeSub ? `Ver todo ${category.name} →` : 'Ver todo el catálogo →'}
+            Limpiar filtros →
           </Link>
         </div>
       ) : (

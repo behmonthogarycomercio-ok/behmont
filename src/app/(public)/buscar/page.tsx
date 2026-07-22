@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import ProductFilters from '@/components/ProductFilters';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import SearchInput from '@/components/SearchInput';
 import { getSiteSettings, searchProducts, getCategories } from '@/lib/data';
+import { applyProductFilters, getAvailableBrands } from '@/lib/product-filters';
 
 export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }): Promise<Metadata> {
   const q = searchParams.q?.trim();
@@ -17,15 +19,26 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: {
+    q?: string;
+    marca?: string;
+    precioMin?: string;
+    precioMax?: string;
+    oferta?: string;
+    stock?: string;
+    orden?: string;
+  };
 }) {
   const q = searchParams.q?.trim() || '';
 
-  const [settings, products, categories] = await Promise.all([
+  const [settings, allProducts, categories] = await Promise.all([
     getSiteSettings(),
     q ? searchProducts(q) : Promise.resolve([]),
     getCategories(),
   ]);
+
+  const brands = getAvailableBrands(allProducts);
+  const products = applyProductFilters(allProducts, searchParams);
 
   return (
     <main>
@@ -63,7 +76,13 @@ export default async function SearchPage({
         </div>
       )}
 
-      {/* Con query y resultados */}
+      {/* Con query: filtros + resultados */}
+      {q && allProducts.length > 0 && (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
+          <ProductFilters brands={brands} />
+        </div>
+      )}
+
       {q && products.length > 0 && (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
           <p className="font-mono text-[11px] uppercase tracking-wide text-steel-400 mb-6">
@@ -81,8 +100,22 @@ export default async function SearchPage({
         </div>
       )}
 
-      {/* Con query pero sin resultados */}
-      {q && products.length === 0 && (
+      {/* Con query pero sin resultados (por filtros o por búsqueda) */}
+      {q && allProducts.length > 0 && products.length === 0 && (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20">
+          <div className="max-w-md">
+            <p className="font-display text-2xl font-bold text-steel-950 tracking-tight">
+              Sin resultados con estos filtros
+            </p>
+            <p className="mt-3 text-sm text-steel-400 leading-relaxed">
+              Encontramos productos para "{q}" pero ninguno coincide con los filtros elegidos. Probá ajustándolos.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Sin resultados de búsqueda */}
+      {q && allProducts.length === 0 && (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20">
           <div className="max-w-md">
             <p className="font-display text-2xl font-bold text-steel-950 tracking-tight">
