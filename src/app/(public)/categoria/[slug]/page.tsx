@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { existsSync } from 'fs';
+import path from 'path';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -53,7 +55,9 @@ export default async function CategoryPage({
 
   if (!category) notFound();
 
-  const subcategories = SUBCATEGORIES[category.slug] ?? [];
+  const subcategories = (SUBCATEGORIES[category.slug] ?? []).filter((sub) =>
+    existsSync(path.join(process.cwd(), 'public', sub.image))
+  );
   const activeSub = subcategories.find((s) => s.keyword === searchParams.sub);
   const subFiltered = activeSub
     ? allProducts.filter((p) => p.name.toLowerCase().includes(activeSub.keyword))
