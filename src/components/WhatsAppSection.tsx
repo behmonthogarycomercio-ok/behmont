@@ -6,7 +6,7 @@ export default function WhatsAppSection({ whatsappNumber }: { whatsappNumber: st
 
   return (
     <section className="relative overflow-hidden bg-steel-950 py-[88px]">
-      <Image src="/images/banner-hablemos.webp" alt="" fill sizes="100vw" className="object-cover" />
+      <Image src="/images/banner-hablemos.webp" alt="" fill sizes="100vw" className="object-cover object-bottom" />
       <div className="absolute inset-0 bg-gradient-to-r from-steel-950/95 via-steel-950/85 to-steel-950/50" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl">
