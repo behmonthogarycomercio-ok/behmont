@@ -36,7 +36,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
   }
 
   return (
-    <section className="bg-steel-950 py-[88px]">
+    <section className="bg-steel-950 py-14 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <div className="grid lg:grid-cols-[1fr_460px] gap-10 lg:gap-16 items-center">
           {/* Texto, columna izquierda */}

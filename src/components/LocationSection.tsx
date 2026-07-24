@@ -21,7 +21,7 @@ export default function LocationSection({
     : '';
 
   return (
-    <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-[88px] border-t border-steel-100 scroll-mt-20">
+    <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 lg:py-16 border-t border-steel-100 scroll-mt-20">
       <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px] items-center">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-steel-300 mb-2.5">

@@ -13,7 +13,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
       {/* Primera promo — full-bleed split layout */}
       <Link
         href={first.cta_link || '#'}
-        className="group relative flex min-h-[420px] sm:min-h-[480px] items-end sm:items-center overflow-hidden"
+        className="group relative flex min-h-[320px] sm:min-h-[380px] items-end sm:items-center overflow-hidden"
       >
         {first.image_url && (
           <>
@@ -31,7 +31,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
           <div className="absolute inset-0 bg-steel-900" />
         )}
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-[88px] sm:py-0">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-14 sm:py-0">
           {first.subtitle && (
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400">
               {first.subtitle}
@@ -50,7 +50,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
       {second && (
         <Link
           href={second.cta_link || '#'}
-          className="group relative flex min-h-[240px] items-center overflow-hidden border-t border-white/10"
+          className="group relative flex min-h-[200px] items-center overflow-hidden border-t border-white/10"
         >
           {second.image_url && (
             <>
@@ -68,7 +68,7 @@ export default function PromoStrip({ promotions }: { promotions: Promotion[] }) 
             <div className="absolute inset-0 bg-steel-900" />
           )}
 
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-[88px]">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-14 py-14">
             {second.subtitle && (
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400 mb-2">
                 {second.subtitle}

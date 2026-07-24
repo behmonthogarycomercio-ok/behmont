@@ -24,13 +24,13 @@ type Slide = {
 
 function StaticFallback() {
   return (
-    <div className="relative w-full overflow-hidden min-h-[520px] lg:min-h-[640px]">
+    <div className="relative w-full overflow-hidden min-h-[420px] lg:min-h-[500px]">
       <Image src="/images/hero-local.webp" alt="Local BEHMONT" fill priority sizes="100vw"
         className="object-cover object-bottom" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#0A1226]/95 via-[#0A1226]/70 to-[#0A1226]/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A1226]/80 via-transparent to-transparent lg:hidden" />
 
-      <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[520px] lg:min-h-[640px] px-6 sm:px-8 lg:px-16 py-16 lg:py-[100px]">
+      <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[420px] lg:min-h-[500px] px-6 sm:px-8 lg:px-16 py-12 lg:py-16">
         <div className="max-w-[640px]">
           <span className="inline-flex items-center mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400 bg-amber-400/10 px-3.5 py-2 rounded-full w-fit">
             Concordia, Entre Ríos · Desde 1995
@@ -85,7 +85,7 @@ function SlideCarousel({ slides }: { slides: Slide[] }) {
   return (
     <>
       <style>{ANIM}</style>
-      <div className="relative w-full overflow-hidden min-h-[520px] lg:min-h-[640px]">
+      <div className="relative w-full overflow-hidden min-h-[420px] lg:min-h-[500px]">
         {/* Fotos de fondo, en crossfade simple */}
         {slides.map((s, i) => (
           <div key={s.id} className="absolute inset-0 transition-opacity duration-[900ms] ease-in-out"
@@ -99,7 +99,7 @@ function SlideCarousel({ slides }: { slides: Slide[] }) {
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0A1226]/80 via-transparent to-transparent lg:hidden" />
 
         {/* Texto, integrado sobre la foto */}
-        <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[520px] lg:min-h-[640px] px-6 sm:px-8 lg:px-16 py-16 lg:py-[100px]">
+        <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full min-h-[420px] lg:min-h-[500px] px-6 sm:px-8 lg:px-16 py-12 lg:py-16">
           <div key={`t${key}`} className="max-w-[640px]">
             {slide.eyebrow && (
               <span className="inline-block mb-3 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full">
