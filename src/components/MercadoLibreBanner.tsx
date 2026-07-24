@@ -9,7 +9,7 @@ export default function MercadoLibreBanner({ mlStoreUrl }: { mlStoreUrl?: string
         href={mlStoreUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative block min-h-[80px] bg-steel-950 sm:min-h-0 sm:aspect-[3840/200] overflow-hidden"
+        className="group relative block min-h-[110px] bg-steel-950 sm:min-h-0 sm:aspect-[2400/380] overflow-hidden"
       >
         <Image
           src="/images/banner-mercadolibre.webp"
