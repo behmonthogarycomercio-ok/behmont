@@ -41,6 +41,7 @@ export default async function HomePage() {
   return (
     <main>
       <Hero promotions={heroPromos} />
+      <ScrollReveal><BusinessSection products={featured} /></ScrollReveal>
       <ScrollReveal><TrustBadges /></ScrollReveal>
       <ScrollReveal><BenefitsCarousel /></ScrollReveal>
       <ScrollReveal><CategoryMosaic categories={categories} /></ScrollReveal>
@@ -54,7 +55,6 @@ export default async function HomePage() {
           whatsappNumber={settings.whatsappNumber}
         />
       </ScrollReveal>
-      <ScrollReveal><BusinessSection products={featured} /></ScrollReveal>
       <ScrollReveal><PaymentSection /></ScrollReveal>
       <ScrollReveal>
         <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />

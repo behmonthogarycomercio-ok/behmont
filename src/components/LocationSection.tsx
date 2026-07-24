@@ -22,32 +22,50 @@ export default function LocationSection({
 
   return (
     <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 lg:py-16 border-t border-steel-100 scroll-mt-20">
-      <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px] items-center">
-        <div>
+      <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px] items-start">
+        <div className="flex flex-col h-full">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-steel-300 mb-2.5">
             Visitanos
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-steel-950 tracking-tight mb-6">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-steel-950 tracking-tight mb-5">
             Dónde estamos
           </h2>
-          <div className="flex items-start gap-2 text-steel-800">
-            <MapPin className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-            <p className="font-medium">{address}</p>
+          <p className="text-steel-600 text-base sm:text-lg leading-relaxed max-w-md mb-8">
+            Te esperamos en nuestro local a la calle, con atención personalizada para asesorarte
+            en la compra del equipamiento que tu negocio o tu hogar necesitan.
+          </p>
+
+          <div className="flex flex-col gap-4 border-t border-steel-100 pt-8">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
+                <MapPin className="h-5 w-5 text-amber-500" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-steel-400">Dirección</p>
+                <p className="font-medium text-steel-900 text-base sm:text-lg mt-0.5">{address}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
+                <Clock className="h-5 w-5 text-amber-500" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-steel-400">Horarios</p>
+                {businessHours ? (
+                  <p className="whitespace-pre-line font-medium text-steel-900 text-base sm:text-lg mt-0.5">{businessHours}</p>
+                ) : (
+                  <p className="text-steel-500 mt-0.5">Consultá nuestros horarios de atención por WhatsApp</p>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex items-start gap-2 text-steel-600 text-sm mt-3">
-            <Clock className="h-4 w-4 shrink-0 mt-0.5" />
-            {businessHours ? (
-              <p className="whitespace-pre-line">{businessHours}</p>
-            ) : (
-              <p className="text-steel-500">Consultá nuestros horarios de atención por WhatsApp</p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-3 mt-6">
+
+          <div className="flex flex-wrap gap-3 mt-8">
             <a
               href={mapLink}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonClasses({ variant: 'outline', size: 'md', className: 'rounded-full' })}
+              className={buttonClasses({ variant: 'outline', size: 'lg', className: 'rounded-full' })}
             >
               <MapPin className="h-4 w-4" /> Cómo llegar
             </a>
@@ -56,7 +74,7 @@ export default function LocationSection({
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonClasses({ variant: 'tactile-navy', size: 'md', className: 'rounded-full' })}
+                className={buttonClasses({ variant: 'tactile-navy', size: 'lg', className: 'rounded-full' })}
               >
                 <MessageCircle className="h-4 w-4" /> Escribinos por WhatsApp
               </a>
