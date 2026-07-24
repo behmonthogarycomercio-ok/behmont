@@ -12,6 +12,7 @@ import PromoStrip from '@/components/PromoStrip';
 import FinancingPromosCarousel from '@/components/FinancingPromosCarousel';
 import BrandStrip from '@/components/BrandStrip';
 import LocationSection from '@/components/LocationSection';
+import MercadoLibreBanner from '@/components/MercadoLibreBanner';
 import ReviewsBanner from '@/components/ReviewsBanner';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import {
@@ -68,6 +69,7 @@ export default async function HomePage() {
           businessHours={settings.businessHours}
         />
       </ScrollReveal>
+      <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
       <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </main>
