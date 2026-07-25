@@ -51,9 +51,21 @@ export default function BusinessSection({ products }: { products: Product[] }) {
               Gastronomía, panadería, carnicería, peluquería, frío comercial y almacén. Stock real y
               financiación propia para equipar tu local de punta a punta.
             </p>
+
+            {/* Producto en foco — cambia con el carrusel */}
+            <div className="mt-8">
+              {current.category?.name && (
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40 mb-1">
+                  {current.category.name}
+                </p>
+              )}
+              <p className="text-white text-xl sm:text-2xl font-semibold leading-snug max-w-lg">
+                {current.name}
+              </p>
+            </div>
           </div>
 
-          {/* Imagen + producto en foco, columna derecha */}
+          {/* Imagen + CTA, columna derecha */}
           <div className="relative w-full">
             <div className="relative w-full overflow-hidden rounded-[18px] border border-white/10 bg-white"
               style={{ aspectRatio: '4 / 3' }}>
@@ -74,19 +86,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
               </>
             )}
 
-            {/* Producto en foco — cambia con el carrusel */}
-            <div className="mt-4">
-              {current.category?.name && (
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40 mb-1">
-                  {current.category.name}
-                </p>
-              )}
-              <p className="text-white text-base sm:text-lg font-semibold leading-snug line-clamp-1">
-                {current.name}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 mt-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
               <Link href={`/producto/${current.slug}`}
                 className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full !px-7 !py-3.5 !text-sm' })}>
                 Ver producto <ArrowRight className="h-4 w-4" />
