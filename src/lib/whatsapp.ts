@@ -34,12 +34,12 @@ export function buildOrderMessage({
     const subtotal = item.price * item.qty;
     total += subtotal;
     lines.push(
-      `• (${item.sku}) ${item.name} — x${item.qty} — $${item.price.toLocaleString('es-AR')} c/u`
+      `• (${item.sku}) ${item.name} — x${item.qty} — $${Math.round(item.price).toLocaleString('es-AR')} c/u`
     );
   }
 
   lines.push('');
-  lines.push(`Total estimado: $${total.toLocaleString('es-AR')}`);
+  lines.push(`Total estimado: $${Math.round(total).toLocaleString('es-AR')}`);
   if (financingPlan) {
     lines.push('');
     lines.push(`Quiere financiar: ${financingPlan}`);
@@ -79,11 +79,11 @@ export function buildMpOrderMessage({
   let total = 0;
   for (const item of items) {
     total += item.price * item.qty;
-    lines.push(`• ${item.name} — x${item.qty} — $${item.price.toLocaleString('es-AR')} c/u`);
+    lines.push(`• ${item.name} — x${item.qty} — $${Math.round(item.price).toLocaleString('es-AR')} c/u`);
   }
 
   lines.push('');
-  lines.push(`Total: $${total.toLocaleString('es-AR')}`);
+  lines.push(`Total: $${Math.round(total).toLocaleString('es-AR')}`);
   lines.push('');
   lines.push('_Pedido generado desde behmont.com.ar_');
 

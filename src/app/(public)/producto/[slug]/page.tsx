@@ -117,12 +117,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {/* Price block */}
           <div className="mt-5 flex items-baseline gap-3">
             <span className="font-display font-bold text-4xl text-steel-950 tracking-tight">
-              ${product.price.toLocaleString('es-AR')}
+              ${Math.round(product.price).toLocaleString('es-AR')}
             </span>
             {discountPct && product.compare_at_price && (
               <>
                 <span className="text-steel-350 line-through text-lg">
-                  ${product.compare_at_price.toLocaleString('es-AR')}
+                  ${Math.round(product.compare_at_price).toLocaleString('es-AR')}
                 </span>
                 <span className="-rotate-1 rounded bg-amber-500 px-2 py-0.5 font-mono text-[11px] font-bold text-white">
                   {discountPct}% OFF

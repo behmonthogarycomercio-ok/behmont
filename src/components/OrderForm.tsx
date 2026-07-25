@@ -203,7 +203,7 @@ export default function OrderForm() {
               </button>
             </div>
             <span className="w-24 text-right font-semibold text-sm text-steel-900">
-              ${(item.price * item.qty).toLocaleString('es-AR')}
+              ${Math.round(item.price * item.qty).toLocaleString('es-AR')}
             </span>
             <button
               onClick={() => removeItem(item.sku)}
@@ -218,7 +218,7 @@ export default function OrderForm() {
 
       <div className="flex justify-end">
         <p className="font-display text-lg font-bold text-steel-950">
-          Total: ${total.toLocaleString('es-AR')}
+          Total: ${Math.round(total).toLocaleString('es-AR')}
         </p>
       </div>
 

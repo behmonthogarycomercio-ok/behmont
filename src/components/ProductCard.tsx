@@ -69,13 +69,13 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         {/* Precio */}
         <div className="mt-2">
           {discountPct && product.compare_at_price && (
-            <p className="text-xs text-gray-400 line-through">${product.compare_at_price.toLocaleString('es-AR')}</p>
+            <p className="text-xs text-gray-400 line-through">${Math.round(product.compare_at_price).toLocaleString('es-AR')}</p>
           )}
           <p className="text-2xl font-extrabold text-[#0B1C3A] leading-none">
-            ${product.price.toLocaleString('es-AR')}
+            ${Math.round(product.price).toLocaleString('es-AR')}
           </p>
           <p className="text-xs font-semibold text-green-600 mt-0.5">
-            {CUOTAS}x ${cuotaPrice.toLocaleString('es-AR')} sin interés
+            {CUOTAS}x ${Math.round(cuotaPrice).toLocaleString('es-AR')} sin interés
           </p>
         </div>
 

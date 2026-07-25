@@ -92,7 +92,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
                 Ver producto <ArrowRight className="h-4 w-4" />
               </Link>
               <span className="text-white font-bold text-xl">
-                ${current.price.toLocaleString('es-AR')}
+                ${Math.round(current.price).toLocaleString('es-AR')}
               </span>
             </div>
 

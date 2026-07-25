@@ -111,7 +111,7 @@ function SlideCarousel({ slides }: { slides: Slide[] }) {
             </h2>
             {slide.price !== undefined && (
               <p className="mt-3 text-2xl sm:text-3xl font-extrabold text-white">
-                ${slide.price.toLocaleString('es-AR')}
+                ${Math.round(slide.price).toLocaleString('es-AR')}
               </p>
             )}
             {slide.ctaLink && (

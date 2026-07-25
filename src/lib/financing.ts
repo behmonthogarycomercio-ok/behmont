@@ -57,5 +57,5 @@ export function calcMonthly(principal: number, surcharge: number, months: number
 }
 
 export function fmtARS(n: number): string {
-  return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return Math.round(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
 }
