@@ -150,19 +150,20 @@ export async function upsertCategory(formData: FormData): Promise<ActionResult> 
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
 
-  const payload = {
+  const basePayload = {
     name,
-    slug: slugify(name),
     icon_url: (formData.get('icon_url') as string) || null,
     sort_order: Number(formData.get('sort_order') || 0),
     active: formData.get('active') === 'on',
   };
 
   if (id) {
-    const { error } = await supabase.from('categories').update(payload).eq('id', id);
+    // El slug NO se regenera al editar: cambia el nombre visible sin
+    // romper links, subcategorías o fotos ya asociadas a ese slug.
+    const { error } = await supabase.from('categories').update(basePayload).eq('id', id);
     if (error) return { error: friendlyDbError(error) };
   } else {
-    const { error } = await supabase.from('categories').insert(payload);
+    const { error } = await supabase.from('categories').insert({ ...basePayload, slug: slugify(name) });
     if (error) return { error: friendlyDbError(error) };
   }
 

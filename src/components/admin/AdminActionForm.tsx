@@ -1,18 +1,23 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import type { ActionResult } from '@/lib/actions';
 
 export default function AdminActionForm({
   action,
   className,
   children,
+  redirectTo,
 }: {
   action: (formData: FormData) => Promise<ActionResult>;
   className?: string;
   children: React.ReactNode;
+  /** Si se pasa, navega ahí después de guardar con éxito (ej. para salir del modo edición). */
+  redirectTo?: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -22,6 +27,10 @@ export default function AdminActionForm({
       const result = await action(formData);
       if (result?.error) {
         setError(result.error);
+        return;
+      }
+      if (redirectTo) {
+        router.push(redirectTo);
         return;
       }
       formRef.current?.reset();

@@ -4,9 +4,17 @@ import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { upsertCategory, deleteCategory } from '@/lib/actions';
 
-export default async function CategoriasPage() {
+export default async function CategoriasPage({
+  searchParams,
+}: {
+  searchParams: { edit?: string };
+}) {
   const supabase = createServerSupabase();
   const { data: categories } = await supabase.from('categories').select('*').order('sort_order');
+
+  const editing = searchParams.edit
+    ? categories?.find((c) => c.id === searchParams.edit)
+    : undefined;
 
   return (
     <AdminShell>
@@ -26,7 +34,7 @@ export default async function CategoriasPage() {
             </thead>
             <tbody>
               {(categories || []).map((c) => (
-                <tr key={c.id} className="border-b border-plate-100 last:border-0">
+                <tr key={c.id} className={`border-b border-plate-100 last:border-0 ${editing?.id === c.id ? 'bg-amber-50' : ''}`}>
                   <td className="p-3 font-medium text-steel-900">{c.name}</td>
                   <td className="p-3 font-mono text-xs text-steel-500">/{c.slug}</td>
                   <td className="p-3 text-steel-600">{c.sort_order}</td>
@@ -35,7 +43,10 @@ export default async function CategoriasPage() {
                       {c.active ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 text-right space-x-3 whitespace-nowrap">
+                    <a href={`?edit=${c.id}`} className="text-steel-600 hover:text-amber-600 text-xs font-semibold">
+                      Editar
+                    </a>
                     <DeleteButton id={c.id} action={deleteCategory} label="categoría" />
                   </td>
                 </tr>
@@ -44,16 +55,31 @@ export default async function CategoriasPage() {
           </table>
         </div>
 
-        <AdminActionForm action={upsertCategory} className="h-fit rounded-xl2 border border-plate-200 bg-white p-5 shadow-card space-y-3">
-          <h2 className="font-display font-semibold text-steel-900">Nueva categoría</h2>
-          <input name="name" required placeholder="Nombre (ej: Panadería)" className="input" />
-          <input name="icon_url" placeholder="URL del ícono (opcional)" className="input" />
-          <input type="number" name="sort_order" placeholder="Orden" defaultValue={0} className="input" />
+        <AdminActionForm
+          key={editing?.id || 'new'}
+          action={upsertCategory}
+          redirectTo={editing ? '/admin/categorias' : undefined}
+          className="h-fit rounded-xl2 border border-plate-200 bg-white p-5 shadow-card space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="font-display font-semibold text-steel-900">
+              {editing ? 'Editar categoría' : 'Nueva categoría'}
+            </h2>
+            {editing && (
+              <a href="/admin/categorias" className="text-xs font-semibold text-steel-500 hover:text-steel-800">
+                Cancelar
+              </a>
+            )}
+          </div>
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <input name="name" required placeholder="Nombre (ej: Panadería)" defaultValue={editing?.name} className="input" />
+          <input name="icon_url" placeholder="URL del ícono (opcional)" defaultValue={editing?.icon_url || ''} className="input" />
+          <input type="number" name="sort_order" placeholder="Orden" defaultValue={editing?.sort_order ?? 0} className="input" />
           <label className="flex items-center gap-2 text-sm text-steel-700">
-            <input type="checkbox" name="active" defaultChecked /> Activa
+            <input type="checkbox" name="active" defaultChecked={editing ? editing.active : true} /> Activa
           </label>
           <button type="submit" className="w-full rounded-lg bg-steel-900 py-2.5 text-sm font-semibold text-white hover:bg-steel-800">
-            Guardar
+            {editing ? 'Guardar cambios' : 'Guardar'}
           </button>
         </AdminActionForm>
       </div>
