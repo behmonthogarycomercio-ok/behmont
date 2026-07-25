@@ -1,0 +1,23 @@
+-- Acorta los titulos de los productos Behmont sin IMP (linea general del
+-- catalogo: Batea, Cartel Luminoso, Cortadora de Fiambre, Grafo, Hidro, MDF,
+-- Sommier, Tra, Vitrina, etc.), continuando el mismo criterio aplicado en
+-- migration_088 para Behmont - IMP.
+--
+-- A diferencia de IMP (que tiene un campo "categoria" fijo en la lista del
+-- distribuidor), este segmento no tiene una estructura constante. Se
+-- identificaron los tokens de sub-marca/linea que aparecen como primer
+-- segmento (Alien Tech, Brafh, Brother, Camping, Caperna, EMC, Grafo, Hidro,
+-- Mango, MDF, Olivetti, Tra, y los anidados Anion/Cool Brand dentro de Tra)
+-- y se descartaron del titulo -- igual que se descarto "Kemei" en el batch
+-- IMP -- porque son linea/fabricante, no el nombre del producto. El resto
+-- de la logica (nombre = primer segmento restante, resto a specs, y
+-- desambiguacion agregando la palabra distintiva o el SKU como ultimo
+-- recurso) es identica a migration_088.
+--
+-- Ejecutado via scripts/tmp_shorten_behmont_noimp.js (service role key), no
+-- desde el editor SQL. 85 productos actualizados, 39 ya tenian un nombre
+-- corto (sin segmentos adicionales para mover a specs). Los 124 SKUs de
+-- este segmento existen todos en la base.
+--
+-- Este archivo documenta el cambio a modo de auditoria; no es necesario
+-- volver a correrlo.
