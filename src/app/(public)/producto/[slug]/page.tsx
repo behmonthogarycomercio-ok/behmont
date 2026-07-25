@@ -92,7 +92,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
       </div>
 
       {/* Product layout */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-[100px] grid gap-10 md:gap-[72px] md:grid-cols-2">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-16">
+      <div className="grid gap-10 md:gap-[72px] md:grid-cols-2">
         <ProductGallery images={product.images} name={product.name} />
 
         {/* Right panel */}
@@ -192,31 +193,30 @@ export default async function ProductPage({ params }: { params: { slug: string }
         </div>
       </div>
 
-      {/* Specs */}
+      {/* Specs — misma sección que el producto, sin corte visual fuerte */}
       {filteredSpecs.length > 0 && (
-        <div className="border-t border-plate-200 bg-plate-50 mt-[88px]">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-12">
-            <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
-              Características técnicas
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-plate-200 rounded-xl overflow-hidden">
-              {filteredSpecs.map((spec, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between gap-6 px-5 py-3.5 bg-white border-b border-plate-200 last:border-b-0 even:sm:border-l"
-                >
-                  <span className="font-mono text-[11px] uppercase tracking-wide text-steel-400 shrink-0">
-                    {spec.label}
-                  </span>
-                  <span className="text-sm font-semibold text-steel-900 text-right">
-                    {spec.value}
-                  </span>
-                </div>
-              ))}
-            </div>
+        <div className="mt-12 pt-10 border-t border-plate-200">
+          <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
+            Características técnicas
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-plate-200 rounded-xl overflow-hidden">
+            {filteredSpecs.map((spec, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-6 px-5 py-3.5 bg-plate-50 border-b border-plate-200 last:border-b-0 even:sm:border-l"
+              >
+                <span className="font-mono text-[11px] uppercase tracking-wide text-steel-400 shrink-0">
+                  {spec.label}
+                </span>
+                <span className="text-sm font-semibold text-steel-900 text-right">
+                  {spec.value}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
+      </div>
 
       {/* Related products */}
       {related.length > 0 && (
