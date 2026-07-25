@@ -1,0 +1,27 @@
+-- Extiende el acortamiento de titulos (migration_088/089, hecho primero
+-- para Behmont IMP y Behmont sin IMP) a TODO el catalogo: los 781 productos
+-- restantes -- de cualquier marca, no sincronizados desde MercadoLibre --
+-- cuyo campo `name` todavia conservaba el formato crudo de la lista del
+-- distribuidor "Nombre - especificacion1 - especificacion2 - ...".
+--
+-- La marca ya estaba separada en `brand_id` para estos productos (nunca
+-- tuvo el prefijo "Marca - " en `name`), asi que no hizo falta volver a
+-- leer el PDF: se leyo directamente `products.name` de la base.
+--
+-- Regla: nombre = primer segmento antes del primer " - "; el resto pasa a
+-- specs como fila { label: 'Detalle', value: '...' } (deduplicada contra
+-- specs ya existentes, igual que en los batches anteriores). Para evitar
+-- que dos productos terminen con el mismo nombre corto, la desambiguacion
+-- (agregar la palabra/medida que distingue, o el SKU como ultimo recurso
+-- si la descripcion es identica) se aplico agrupando por marca -- dos
+-- productos de marcas distintas con el mismo nombre generico (ej. "Secador
+-- de pelo 2000 W") no se consideran una colision real, porque la marca ya
+-- los distingue en la interfaz.
+--
+-- Ejecutado via scripts/tmp_shorten_all_titles.js (service role key), no
+-- desde el editor SQL. 781 productos actualizados, 0 errores. Solo 1 par
+-- de productos (BA7504N/BA7603N, balanzas de baño Atma con descripcion
+-- identica) requirio el ultimo recurso de agregar el SKU al titulo.
+--
+-- Este archivo documenta el cambio a modo de auditoria; no es necesario
+-- volver a correrlo.
