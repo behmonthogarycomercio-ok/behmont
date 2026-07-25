@@ -6,6 +6,7 @@ import { Heart, MessageCircle, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
+import { formatPrice } from '@/lib/price';
 import type { Product } from '@/lib/types';
 
 const CUOTAS = 3;
@@ -69,13 +70,13 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         {/* Precio */}
         <div className="mt-2">
           {discountPct && product.compare_at_price && (
-            <p className="text-xs text-gray-400 line-through">${Math.round(product.compare_at_price).toLocaleString('es-AR')}</p>
+            <p className="text-xs text-gray-400 line-through">${formatPrice(product.compare_at_price)}</p>
           )}
           <p className="text-2xl font-extrabold text-[#0B1C3A] leading-none">
-            ${Math.round(product.price).toLocaleString('es-AR')}
+            ${formatPrice(product.price)}
           </p>
           <p className="text-xs font-semibold text-green-600 mt-0.5">
-            {CUOTAS}x ${Math.round(cuotaPrice).toLocaleString('es-AR')} sin interés
+            {CUOTAS}x ${formatPrice(cuotaPrice)} sin interés
           </p>
         </div>
 

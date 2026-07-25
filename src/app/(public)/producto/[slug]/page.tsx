@@ -7,6 +7,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
 import { getProductCode } from '@/lib/product-display';
+import { roundPrice, formatPrice } from '@/lib/price';
 
 export const revalidate = 60;
 
@@ -117,12 +118,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {/* Price block */}
           <div className="mt-5 flex items-baseline gap-3">
             <span className="font-display font-bold text-4xl text-steel-950 tracking-tight">
-              ${Math.round(product.price).toLocaleString('es-AR')}
+              ${formatPrice(product.price)}
             </span>
             {discountPct && product.compare_at_price && (
               <>
                 <span className="text-steel-350 line-through text-lg">
-                  ${Math.round(product.compare_at_price).toLocaleString('es-AR')}
+                  ${formatPrice(product.compare_at_price)}
                 </span>
                 <span className="-rotate-1 rounded bg-amber-500 px-2 py-0.5 font-mono text-[11px] font-bold text-white">
                   {discountPct}% OFF
@@ -131,7 +132,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
           </div>
           <p className="mt-1 text-sm font-semibold text-green-600">
-            3x ${Math.ceil(product.price / 3).toLocaleString('es-AR')} sin interés
+            3x ${formatPrice(roundPrice(product.price) / 3)} sin interés
           </p>
 
           {/* Stock */}

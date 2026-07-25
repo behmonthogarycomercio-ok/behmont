@@ -1,3 +1,5 @@
+import { formatPrice } from './price';
+
 export interface DailyPlan {
   days: number;
   weeks: number;
@@ -57,5 +59,5 @@ export function calcMonthly(principal: number, surcharge: number, months: number
 }
 
 export function fmtARS(n: number): string {
-  return Math.round(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+  return formatPrice(n);
 }

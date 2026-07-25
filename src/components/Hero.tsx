@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { buttonClasses } from '@/components/ui/Button';
+import { formatPrice } from '@/lib/price';
 import type { Promotion } from '@/lib/types';
 
 const ANIM = `
@@ -111,7 +112,7 @@ function SlideCarousel({ slides }: { slides: Slide[] }) {
             </h2>
             {slide.price !== undefined && (
               <p className="mt-3 text-2xl sm:text-3xl font-extrabold text-white">
-                ${Math.round(slide.price).toLocaleString('es-AR')}
+                ${formatPrice(slide.price)}
               </p>
             )}
             {slide.ctaLink && (

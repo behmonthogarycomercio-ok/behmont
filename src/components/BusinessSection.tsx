@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { buttonClasses } from '@/components/ui/Button';
+import { formatPrice } from '@/lib/price';
 import type { Product } from '@/lib/types';
 
 export default function BusinessSection({ products }: { products: Product[] }) {
@@ -92,7 +93,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
                 Ver producto <ArrowRight className="h-4 w-4" />
               </Link>
               <span className="text-white font-bold text-xl">
-                ${Math.round(current.price).toLocaleString('es-AR')}
+                ${formatPrice(current.price)}
               </span>
             </div>
 
