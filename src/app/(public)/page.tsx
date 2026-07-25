@@ -21,13 +21,20 @@ import {
   getBrands,
   getFeaturedProducts,
   getDiscountedProducts,
+  getProductsBySku,
   getSiteSettings,
 } from '@/lib/data';
 
 export const revalidate = 60; // ISR: refresca catálogo cada 60s (precio/stock de ML incluido)
 
+// Curada a mano para el carrusel de "Equipamos tu negocio".
+const BUSINESS_SECTION_SKUS = [
+  '400AS-B', 'HF-100', 'MLA3481742598', 'HF-150', '250ES-10', '300ES-12',
+  'LF-470', 'LF-910', 'LF-1440', 'FC-400-105', 'FC-850-12', 'FC-1250-19',
+];
+
 export default async function HomePage() {
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
@@ -36,12 +43,13 @@ export default async function HomePage() {
     getBrands(),
     getFeaturedProducts(),
     getDiscountedProducts(),
+    getProductsBySku(BUSINESS_SECTION_SKUS),
   ]);
 
   return (
     <main>
       <Hero promotions={heroPromos} />
-      <ScrollReveal><BusinessSection products={featured} /></ScrollReveal>
+      <ScrollReveal><BusinessSection products={businessProducts} /></ScrollReveal>
       <ScrollReveal><TrustBadges /></ScrollReveal>
       <ScrollReveal><BenefitsCarousel /></ScrollReveal>
       <ScrollReveal><CategoryMosaic categories={categories} /></ScrollReveal>

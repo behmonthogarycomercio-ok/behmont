@@ -85,6 +85,17 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   return data || [];
 }
 
+export async function getProductsBySku(skus: string[]): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .in('sku', skus)
+    .eq('active', true);
+  const bySku = new Map((data || []).map((p) => [p.sku, p]));
+  return skus.map((sku) => bySku.get(sku)).filter((p): p is Product => Boolean(p));
+}
+
 export async function getDiscountedProducts(): Promise<Product[]> {
   const supabase = createServerSupabase();
   const { data } = await supabase

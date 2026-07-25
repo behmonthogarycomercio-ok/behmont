@@ -8,7 +8,7 @@ import { buttonClasses } from '@/components/ui/Button';
 import type { Product } from '@/lib/types';
 
 export default function BusinessSection({ products }: { products: Product[] }) {
-  const items = products.filter((p) => p.images?.[0]).slice(0, 8);
+  const items = products.filter((p) => p.images?.[0]).slice(0, 12);
   const [idx, setIdx] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
