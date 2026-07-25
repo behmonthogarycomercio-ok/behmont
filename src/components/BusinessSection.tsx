@@ -47,14 +47,27 @@ export default function BusinessSection({ products }: { products: Product[] }) {
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.03] mb-6">
               Todo lo que tu comercio necesita, en un solo lugar.
             </h2>
-            <p className="text-white/70 text-lg leading-relaxed mb-10 max-w-lg">
+            <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-lg">
               Gastronomía, panadería, carnicería, peluquería, frío comercial y almacén. Stock real y
               financiación propia para equipar tu local de punta a punta.
             </p>
 
+            {/* Producto en foco — cambia con el carrusel */}
+            <div className="mb-6">
+              {current.category?.name && (
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40 mb-1.5">
+                  {current.category.name}
+                </p>
+              )}
+              <p className="text-white text-xl sm:text-2xl font-semibold leading-snug max-w-lg">
+                {current.name}
+              </p>
+            </div>
+
             <div className="flex flex-wrap items-center gap-6">
-              <Link href={`/producto/${current.slug}`} className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full' })}>
-                Ver {current.name.length > 28 ? `${current.name.slice(0, 28)}…` : current.name} <ArrowRight className="h-4 w-4" />
+              <Link href={`/producto/${current.slug}`}
+                className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full !px-8 !py-4 !text-base' })}>
+                Ver producto <ArrowRight className="h-5 w-5" />
               </Link>
               <span className="text-white font-bold text-2xl">
                 ${current.price.toLocaleString('es-AR')}
