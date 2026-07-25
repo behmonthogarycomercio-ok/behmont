@@ -120,10 +120,6 @@ export default function Navbar({
             <Menu className="h-4 w-4" /> Categorías
           </button>
 
-          <Link href="/ofertas"
-            className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-bold text-amber-400 hover:bg-white/10 transition-colors whitespace-nowrap">
-            Ofertas
-          </Link>
           <Link href="/categoria/almacen"
             className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
             Negocios
@@ -139,6 +135,10 @@ export default function Navbar({
           <Link href="/categoria/peluqueria-barberia"
             className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
             Peluquería
+          </Link>
+          <Link href="/ofertas"
+            className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-bold text-amber-400 hover:bg-white/10 transition-colors whitespace-nowrap">
+            Ofertas
           </Link>
           <Link href="/mayorista"
             className="shrink-0 flex items-center px-3.5 h-9 rounded-full text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap">
