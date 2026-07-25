@@ -1,0 +1,21 @@
+-- Acorta los títulos de los 238 productos Behmont - IMP siguiendo el
+-- segmentado propio de la lista del distribuidor (SKU - marca - categoria -
+-- nombre - características): el "nombre" pasa a ser solo el primer
+-- segmento tras la categoría, y el resto de la información pasa a specs
+-- como fila { label: 'Detalle', value: '...' } (deduplicada contra specs
+-- ya existentes).
+--
+-- Para los ~32 grupos de productos que hubieran quedado con el mismo
+-- nombre acortado (ej: 8 clippers Kemei distintos → "Clipper inalambrico"),
+-- se conserva en el título la palabra/medida que distingue a cada variante
+-- (ej: "Clipper inalambrico 3 posiciones 1.5 a 5 mm"), y solo como último
+-- recurso -- cuando la descripción es idéntica y solo cambia el SKU -- se
+-- agrega el código de SKU al final del título para garantizar unicidad.
+--
+-- Ejecutado vía scripts/tmp_shorten_imp_names.js (service role key), no
+-- desde el editor SQL. 199 productos actualizados, 36 ya tenían un nombre
+-- corto, 3 SKUs de la lista no existen en la base (25-YXH101, HF-130,
+-- 25-JA13 -- ya documentados como no resueltos en trabajo previo).
+--
+-- Este archivo documenta el cambio a modo de auditoría; no es necesario
+-- volver a correrlo.
