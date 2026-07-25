@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { roundPrice } from '@/lib/price';
 
 const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
 
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
     const preference = {
       items: items.map((item: { name: string; price: number; qty: number }) => ({
         title: item.name,
-        unit_price: Math.round(item.price),
+        unit_price: roundPrice(item.price),
         quantity: item.qty,
         currency_id: 'ARS',
       })),

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
+import { formatPrice } from '@/lib/price';
 
 const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
 
@@ -32,9 +33,9 @@ export async function POST(req: NextRequest) {
       paymentId ? `Nro de operacion: ${paymentId}` : '',
       '',
       'Productos:',
-      ...typedItems.map(i => `• ${i.name} — x${i.qty} — $${i.price.toLocaleString('es-AR')} c/u`),
+      ...typedItems.map(i => `• ${i.name} — x${i.qty} — $${formatPrice(i.price)} c/u`),
       '',
-      `Total: $${total.toLocaleString('es-AR')}`,
+      `Total: $${formatPrice(total)}`,
     ].filter(Boolean).join('\n');
 
     const supabase = createServiceSupabase();
