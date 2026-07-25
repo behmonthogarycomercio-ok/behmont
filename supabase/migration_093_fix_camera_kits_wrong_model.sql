@@ -1,0 +1,21 @@
+-- Corrige el problema de merge/dato incorrecto reportado en
+-- migration_092: MLA3624351780 y MLA3624451566 comparten el mismo
+-- titulo/descripcion "Kit Seguridad 4 Camaras Wifi..." (texto repetido,
+-- no un merge real -- son dos productos genuinos con fotos e IDs de
+-- MercadoLibre distintos).
+--
+-- El dueño confirmo que ambos son kits de 4 camaras, y que el spec
+-- "Modelo: HX-A05L8-BT2" cargado en MLA3624451566 esta mal (ese codigo
+-- corresponde a un kit de 8 camaras segun la lista del distribuidor). Se
+-- quito ese spec sin reemplazarlo por otro codigo de modelo, porque no hay
+-- una fuente confiable para el valor correcto.
+--
+-- Para diferenciar los titulos (que seguian siendo identicos) se uso un
+-- atributo real ya sincronizado desde MercadoLibre -- no inventado --
+-- "Con audio bidireccional": Si en MLA3624351780, No en MLA3624451566.
+-- Esto tambien es consistente con la diferencia de precio entre ambos
+-- (540.000 vs 380.000).
+--
+-- Ejecutado via script temporal (service role key), ya eliminado. Este
+-- archivo documenta el cambio a modo de auditoria; no es necesario volver
+-- a correrlo.
