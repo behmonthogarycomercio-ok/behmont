@@ -1,0 +1,45 @@
+-- Resuelve los 10 pares de titulos duplicados dentro de la misma marca que
+-- migration_091 dejo documentados sin tocar (preexistentes en el dato
+-- crudo del distribuidor, no causados por los batches de acortamiento).
+--
+-- 4 pares se resolvieron con datos ya verificados en la propia base (de
+-- investigacion previa hecha en este proyecto), sin necesidad de adivinar:
+--   56RB / 57RT (Patriot lavarropas): distingue por cantidad de programas
+--     (6 vs 7), ya presente en los specs de cada uno.
+--   2775USADA (HP impresora): se le agrega "(Usada)" -- el propio SKU ya
+--     lo indicaba, y 7FR21A (la version nueva, con specs completos) se
+--     dejo sin cambios.
+--   12359 / 12358 (Behmont Caja fuerte): distingue por el codigo de modelo
+--     (CZAB / CZB) que ya estaba en el spec "Detalle" de cada uno.
+--   PBB02 / PBB01 / HBB02 (Panter Parlante Bluetooth): distingue por
+--     potencia (35 W / 30 W / 20 W), ya presente en los specs.
+--
+-- Los otros 5 pares (10 SKUs) se investigaron por web antes de decidir:
+-- Philco A500LW00/A500LW02 y Atma SP8914N/SP8904N devolvieron resultados
+-- de busqueda con datos que sonaban plausibles pero sin una fuente
+-- confiable verificada; Volcan 313BRVN/313BRVE no arrojo ninguna
+-- diferencia documentada; Panter IHS01 no tiene ficha publicada; y para
+-- Daihatsu DCCB100/DCCB210 la busqueda inicial y una verificacion directa
+-- contra la pagina oficial del fabricante arrojaron cifras CONTRADICTORIAS
+-- entre si (velocidad, capacidad y peso distintos segun la fuente), lo que
+-- confirmo que no eran datos confiables para usar. Siguiendo la regla de
+-- "nunca adivinar" de la skill de investigacion de producto, estos 10 SKUs
+-- se desambiguaron agregando el propio codigo de SKU al titulo (recurso
+-- garantizado correcto, sin inventar ninguna especificacion).
+--
+-- Se reviso tambien, sin modificar, un posible problema de merge no
+-- relacionado con el formato de titulos: dos productos de MercadoLibre
+-- (MLA3624351780 / MLA3624451566) comparten el mismo nombre/descripcion
+-- "Kit Seguridad 4 Camaras Wifi..." pero uno de ellos tiene guardado en
+-- specs un Modelo (HX-A05L8-BT2) que segun la lista del distribuidor
+-- corresponde a un kit de 8 camaras cableadas, no 4 inalambricas. Al
+-- revisar las fotos reales de ambos productos, sin embargo, AMBAS
+-- muestran 4 camaras -- contradiciendo ese dato de Modelo. Como la
+-- evidencia es contradictoria y no hay ml_permalink guardado para volver
+-- a chequear contra la publicacion original de MercadoLibre, se dejo sin
+-- tocar y se reporto para que el dueño confirme cual kit es cual antes de
+-- corregir nombre/descripcion/specs.
+--
+-- Ejecutado via script temporal (service role key), ya eliminado. Este
+-- archivo documenta el cambio a modo de auditoria; no es necesario volver
+-- a correrlo.
