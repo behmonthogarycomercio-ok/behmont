@@ -127,7 +127,15 @@ export async function getProductsByCategory(slug: string): Promise<{
     .eq('category_id', category.id)
     .order('created_at', { ascending: false });
 
-  return { category, products: products || [] };
+  return { category, products: sortBehmontFirst(products || []) };
+}
+
+// Los productos de marca propia (Behmont) van primero en el listado de
+// cada categoría, sin importar precio; el resto mantiene su orden.
+function sortBehmontFirst(products: Product[]): Product[] {
+  const behmont = products.filter((p) => p.brand?.name === 'Behmont');
+  const rest = products.filter((p) => p.brand?.name !== 'Behmont');
+  return [...behmont, ...rest];
 }
 
 export async function getProductsByBrand(slug: string): Promise<{
