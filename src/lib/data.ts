@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { createServerSupabase } from './supabase/server';
 import { slugify } from './slugify';
+import { BEHMONT_IMP_SKUS } from './behmont-imp-skus';
 import type { Category, Product, Promotion, Brand } from './types';
 
 export const getSiteSettings = cache(async () => {
@@ -131,11 +132,13 @@ export async function getProductsByCategory(slug: string): Promise<{
 }
 
 // Los productos de marca propia (Behmont) van primero en el listado de
-// cada categoría, sin importar precio; el resto mantiene su orden.
+// cada categoría, sin importar precio; el resto mantiene su orden. Dentro de
+// Behmont, la línea "IMP" (importados) va antes que el resto de Behmont.
 function sortBehmontFirst(products: Product[]): Product[] {
-  const behmont = products.filter((p) => p.brand?.name === 'Behmont');
+  const imp = products.filter((p) => p.brand?.name === 'Behmont' && BEHMONT_IMP_SKUS.has(p.sku));
+  const behmontRest = products.filter((p) => p.brand?.name === 'Behmont' && !BEHMONT_IMP_SKUS.has(p.sku));
   const rest = products.filter((p) => p.brand?.name !== 'Behmont');
-  return [...behmont, ...rest];
+  return [...imp, ...behmontRest, ...rest];
 }
 
 export async function getProductsByBrand(slug: string): Promise<{
