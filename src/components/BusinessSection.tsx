@@ -38,44 +38,22 @@ export default function BusinessSection({ products }: { products: Product[] }) {
   return (
     <section className="bg-steel-950 py-14 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-        <div className="grid lg:grid-cols-[1fr_460px] gap-10 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-[1fr_460px] gap-10 lg:gap-16 items-start">
           {/* Texto, columna izquierda */}
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-400 mb-4">
               Equipamos tu negocio
             </p>
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.03] mb-6">
-              Todo lo que tu comercio necesita, en un solo lugar.
+              Los más elegidos por los negocios.
             </h2>
-            <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-lg">
+            <p className="text-white/70 text-lg leading-relaxed max-w-lg">
               Gastronomía, panadería, carnicería, peluquería, frío comercial y almacén. Stock real y
               financiación propia para equipar tu local de punta a punta.
             </p>
-
-            {/* Producto en foco — cambia con el carrusel */}
-            <div className="mb-6">
-              {current.category?.name && (
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40 mb-1.5">
-                  {current.category.name}
-                </p>
-              )}
-              <p className="text-white text-xl sm:text-2xl font-semibold leading-snug max-w-lg">
-                {current.name}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-6">
-              <Link href={`/producto/${current.slug}`}
-                className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full !px-8 !py-4 !text-base' })}>
-                Ver producto <ArrowRight className="h-5 w-5" />
-              </Link>
-              <span className="text-white font-bold text-2xl">
-                ${current.price.toLocaleString('es-AR')}
-              </span>
-            </div>
           </div>
 
-          {/* Imagen contenida, columna derecha */}
+          {/* Imagen + producto en foco, columna derecha */}
           <div className="relative w-full">
             <div className="relative w-full overflow-hidden rounded-[18px] border border-white/10 bg-white"
               style={{ aspectRatio: '4 / 3' }}>
@@ -93,14 +71,39 @@ export default function BusinessSection({ products }: { products: Product[] }) {
                   className="absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-lg border border-plate-200 text-steel-600 flex items-center justify-center hover:text-[#0B1C3A] transition">
                   <ChevronRight className="h-5 w-5" />
                 </button>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  {items.map((_, i) => (
-                    <button key={i} onClick={() => { setIdx(i); reset(); }} aria-label={`Ver producto ${i + 1}`}
-                      className="h-1.5 rounded-full transition-all duration-300"
-                      style={{ width: i === idx ? 24 : 8, background: i === idx ? '#ED3237' : 'rgba(255,255,255,0.35)' }} />
-                  ))}
-                </div>
               </>
+            )}
+
+            {/* Producto en foco — cambia con el carrusel */}
+            <div className="mt-4">
+              {current.category?.name && (
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40 mb-1">
+                  {current.category.name}
+                </p>
+              )}
+              <p className="text-white text-base sm:text-lg font-semibold leading-snug line-clamp-1">
+                {current.name}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-3">
+              <Link href={`/producto/${current.slug}`}
+                className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full !px-7 !py-3.5 !text-sm' })}>
+                Ver producto <ArrowRight className="h-4 w-4" />
+              </Link>
+              <span className="text-white font-bold text-xl">
+                ${current.price.toLocaleString('es-AR')}
+              </span>
+            </div>
+
+            {items.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-5">
+                {items.map((_, i) => (
+                  <button key={i} onClick={() => { setIdx(i); reset(); }} aria-label={`Ver producto ${i + 1}`}
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: i === idx ? 24 : 8, background: i === idx ? '#ED3237' : 'rgba(255,255,255,0.35)' }} />
+                ))}
+              </div>
             )}
           </div>
         </div>
