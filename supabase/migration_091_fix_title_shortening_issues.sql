@@ -1,0 +1,41 @@
+-- Auditoria post-acortamiento (migration_088/089/090): revision de todo
+-- `products.name` buscando titulos "raros" que hayan quedado como efecto
+-- secundario de esos batches.
+--
+-- 1) Colisiones causadas por mi propio bug: el chequeo de colisiones de
+--    esos scripts solo comparaba entre los productos que se estaban
+--    modificando, nunca contra los nombres que YA existian sin cambios
+--    (productos de una sola linea, sin guion, nunca entraron al set de
+--    candidatos). Eso dejo pasar 6 casos donde un producto recien acortado
+--    termino con el mismo nombre que un hermano que ya estaba corto de
+--    antes:
+--      46ACL10 (Codini) / B-60CA (Solei): recupera "2 anafes" en el titulo
+--      G923 / G924 (Calabro): recupera "24.000 kcal/h" en el titulo
+--      BSI-840 (Sol Real): recupera "Acero inox." en el titulo
+--      MATRB20UAP (Atma): recupera "Negro" en el titulo (el dato seguia
+--        vivo en el spec "Color", pero no se reflejaba en el nombre)
+--    Se removio el spec "Detalle" redundante en los primeros 5 (la info ya
+--    quedo en el titulo).
+--
+-- 2) Limpieza de dobles espacios: 62 productos en total (la gran mayoria
+--    preexistente en el dato crudo del distribuidor, no introducida por
+--    mis batches) -- normalizados a un solo espacio.
+--
+-- 3) Capitalizacion: HD555 (Black & Decker) tenia "taladro 13 BD" en
+--    minuscula (typo preexistente en la lista original) -> "Taladro 13 BD".
+--
+-- Quedan sin tocar 10 pares de nombres duplicados dentro de la misma marca
+-- que YA eran identicos en el texto original del distribuidor (distintos
+-- SKUs, misma descripcion pobre) -- no son un efecto de mis batches, y no
+-- hay dato confiable en la lista para diferenciarlos sin adivinar. Tambien
+-- se detecto (sin tocar) un posible problema de merge no relacionado: dos
+-- productos de MercadoLibre (MLA3624351780 / MLA3624451566) comparten el
+-- mismo titulo "Kit Seguridad 4 Camaras..." pero segun el Modelo en sus
+-- specs (TS-8854C vs HX-A05L8-BT2) uno deberia ser un kit x4 y el otro x8 --
+-- reportado aparte, requiere el mismo chequeo cuidadoso que las correcciones
+-- de merge de la sesion anterior (migration_086/087), no un ajuste de
+-- titulo.
+--
+-- Ejecutado via scripts temporales (service role key), ya eliminados. Este
+-- archivo documenta el cambio a modo de auditoria; no es necesario volver
+-- a correrlo.
