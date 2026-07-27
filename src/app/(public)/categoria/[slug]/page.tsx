@@ -56,7 +56,7 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const subcategories = (SUBCATEGORIES[category.slug] ?? []).filter((sub) =>
-    existsSync(path.join(process.cwd(), 'public', sub.image))
+    sub.image.startsWith('http') || existsSync(path.join(process.cwd(), 'public', sub.image))
   );
   const activeSub = subcategories.find((s) => s.keyword === searchParams.sub);
   const subFiltered = activeSub
