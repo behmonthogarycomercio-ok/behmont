@@ -60,7 +60,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     name: product.name,
     description: product.description ?? undefined,
     image: product.images,
-    sku: product.sku,
+    sku: code ?? product.sku,
     ...(product.brand && { brand: { '@type': 'Brand', name: product.brand.name } }),
     offers: {
       '@type': 'Offer',

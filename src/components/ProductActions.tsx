@@ -6,6 +6,7 @@ import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import { buttonClasses } from '@/components/ui/Button';
+import { getProductCode } from '@/lib/product-display';
 import type { Product } from '@/lib/types';
 
 export default function ProductActions({
@@ -47,7 +48,7 @@ export default function ProductActions({
 
       <button
         onClick={() => {
-          addItem({ sku: product.sku, name: product.name, qty, price: product.price, image: product.images?.[0] });
+          addItem({ sku: getProductCode(product) ?? product.sku, name: product.name, qty, price: product.price, image: product.images?.[0] });
           setAdded(true);
           setTimeout(() => setAdded(false), 1800);
         }}

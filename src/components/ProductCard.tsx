@@ -93,7 +93,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         {/* CTAs */}
         <div className="mt-3 flex gap-1.5">
           <button
-            onClick={() => addItem({ sku: product.sku, name: product.name, qty: 1, price: product.price, image: product.images?.[0] })}
+            onClick={() => addItem({ sku: code ?? product.sku, name: product.name, qty: 1, price: product.price, image: product.images?.[0] })}
             disabled={product.stock <= 0}
             className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#182548] to-[#0B1C3A] hover:from-[#213262] hover:to-[#182548] text-white text-xs font-bold py-2.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_6px_14px_-6px_rgba(10,18,38,0.5)] transition-all hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:translate-y-px active:scale-[.98]">
             <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
