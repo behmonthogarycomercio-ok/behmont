@@ -375,3 +375,39 @@ export async function disconnectInstagram(): Promise<ActionResult> {
   revalidatePath('/admin/contenido');
   return {};
 }
+
+// ── CUPONES ──────────────────────────────────────────────
+export async function upsertCoupon(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+
+  const payload = {
+    code: (formData.get('code') as string).trim().toUpperCase(),
+    description: formData.get('description') as string,
+    discount_pct: formData.get('discount_pct') ? Number(formData.get('discount_pct')) : null,
+    valid_until: (formData.get('valid_until') as string) || null,
+    sort_order: Number(formData.get('sort_order') || 0),
+    active: formData.get('active') === 'on',
+  };
+
+  if (id) {
+    const { error } = await supabase.from('coupons').update(payload).eq('id', id);
+    if (error) return { error: friendlyDbError(error) };
+  } else {
+    const { error } = await supabase.from('coupons').insert(payload);
+    if (error) return { error: friendlyDbError(error) };
+  }
+
+  revalidatePath('/admin/cupones');
+  revalidatePath('/');
+  return {};
+}
+
+export async function deleteCoupon(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('coupons').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/cupones');
+  revalidatePath('/');
+  return {};
+}

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Instagram, Facebook, MessageCircle, MapPin, Mail, ArrowUpRight, Clock } from 'lucide-react';
+import NewsletterForm from './NewsletterForm';
 
 type FooterProps = {
   whatsappNumber: string;
@@ -22,6 +23,21 @@ export default function Footer({
 }: FooterProps) {
   return (
     <footer className="bg-steel-950 text-plate-100 mt-10">
+
+      {/* Suscripción */}
+      <div className="border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h3 className="font-display font-bold text-white text-lg">
+              Enterate primero de nuestras promociones
+            </h3>
+            <p className="text-sm text-plate-100/60 mt-0.5">
+              Ofertas y novedades por mail, sin spam.
+            </p>
+          </div>
+          <NewsletterForm />
+        </div>
+      </div>
 
       {/* Columnas */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">

@@ -25,7 +25,7 @@ export default function FlashOffers({
               <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-amber-400/90">
                 Tiempo limitado
               </p>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight">Ofertas Flash</h2>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight">Precios que no vas a volver a ver</h2>
             </div>
           </div>
           <Link

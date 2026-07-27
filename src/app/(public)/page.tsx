@@ -3,6 +3,8 @@ import ScrollReveal from '@/components/ScrollReveal';
 import TrustBadges from '@/components/TrustBadges';
 import BenefitsCarousel from '@/components/BenefitsCarousel';
 import CategoryMosaic from '@/components/CategoryMosaic';
+import CategoryDiscountCarousel from '@/components/CategoryDiscountCarousel';
+import CouponsSection from '@/components/CouponsSection';
 import BusinessSection from '@/components/BusinessSection';
 import FlashOffers from '@/components/FlashOffers';
 import ProductGrid from '@/components/ProductGrid';
@@ -21,6 +23,8 @@ import {
   getBrands,
   getFeaturedProducts,
   getDiscountedProducts,
+  getCategoriesWithDiscounts,
+  getActiveCoupons,
   getProductsBySku,
   getSiteSettings,
 } from '@/lib/data';
@@ -34,7 +38,7 @@ const BUSINESS_SECTION_SKUS = [
 ];
 
 export default async function HomePage() {
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, businessProducts] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
@@ -43,6 +47,8 @@ export default async function HomePage() {
     getBrands(),
     getFeaturedProducts(),
     getDiscountedProducts(),
+    getCategoriesWithDiscounts(),
+    getActiveCoupons(),
     getProductsBySku(BUSINESS_SECTION_SKUS),
   ]);
 
@@ -54,7 +60,13 @@ export default async function HomePage() {
       <ScrollReveal><BenefitsCarousel /></ScrollReveal>
       <ScrollReveal><CategoryMosaic categories={categories} /></ScrollReveal>
       <ScrollReveal>
+        <CategoryDiscountCarousel categories={categoriesWithDiscounts} />
+      </ScrollReveal>
+      <ScrollReveal>
         <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
+      </ScrollReveal>
+      <ScrollReveal>
+        <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
       <ScrollReveal>
         <ProductGrid

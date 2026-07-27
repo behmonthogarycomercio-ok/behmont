@@ -32,6 +32,25 @@ export const getCategories = cache(async (): Promise<Category[]> => {
   return data || [];
 });
 
+export type Coupon = {
+  id: string;
+  code: string;
+  description: string;
+  discount_pct: number | null;
+  valid_until: string | null;
+};
+
+export async function getActiveCoupons(): Promise<Coupon[]> {
+  const supabase = createServerSupabase();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase
+    .from('coupons')
+    .select('id, code, description, discount_pct, valid_until')
+    .eq('active', true)
+    .order('sort_order');
+  return (data || []).filter((c) => !c.valid_until || c.valid_until >= today);
+}
+
 export async function getPromotions(placement?: 'hero' | 'banner' | 'strip' | 'financiacion'): Promise<Promotion[]> {
   const supabase = createServerSupabase();
   let query = supabase
@@ -132,6 +151,35 @@ export async function getDiscountedProducts(): Promise<Product[]> {
     .not('compare_at_price', 'is', null)
     .order('created_at', { ascending: false });
   return (data || []).filter((p) => p.compare_at_price && p.compare_at_price > p.price);
+}
+
+export type CategoryWithDiscount = Category & { maxDiscountPct: number; discountedCount: number };
+
+// Categorías que hoy tienen al menos un producto con descuento activo,
+// para el carrusel "Ofertas por sección" del home -- ordenadas por el
+// descuento más fuerte primero.
+export async function getCategoriesWithDiscounts(): Promise<CategoryWithDiscount[]> {
+  const [categories, discounted] = await Promise.all([getCategories(), getDiscountedProducts()]);
+
+  const byCategory = new Map<string, Product[]>();
+  for (const p of discounted) {
+    if (!p.category_id) continue;
+    const list = byCategory.get(p.category_id) ?? [];
+    list.push(p);
+    byCategory.set(p.category_id, list);
+  }
+
+  const result: CategoryWithDiscount[] = [];
+  for (const cat of categories) {
+    const products = byCategory.get(cat.id);
+    if (!products || products.length === 0) continue;
+    const maxDiscountPct = Math.max(
+      ...products.map((p) => Math.round(100 - (p.price / (p.compare_at_price as number)) * 100))
+    );
+    result.push({ ...cat, maxDiscountPct, discountedCount: products.length });
+  }
+
+  return result.sort((a, b) => b.maxDiscountPct - a.maxDiscountPct);
 }
 
 export async function getProductsByCategory(slug: string): Promise<{

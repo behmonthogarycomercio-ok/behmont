@@ -145,3 +145,8 @@ export function buildQuickInquiryMessage(): string {
 export function buildPromoInquiryMessage(promoTitle: string): string {
   return `Hola, me comunico desde la página web porque me interesa esta promo: "${promoTitle}".`;
 }
+
+/** Mensaje para avisar que quiere usar un cupón -- el descuento se aplica manualmente al armar el pedido. */
+export function buildCouponInquiryMessage(code: string): string {
+  return `Hola, quiero hacer un pedido usando el cupón ${code}.`;
+}

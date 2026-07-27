@@ -14,7 +14,7 @@ export default function CategoryMosaic({ categories }: { categories: Category[] 
             Explorá
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-steel-950 tracking-tight leading-[0.92]">
-            Categorías
+            Categorías que <span className="text-amber-500">equipan tu negocio</span>
           </h2>
         </div>
         <Link
