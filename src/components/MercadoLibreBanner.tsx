@@ -12,7 +12,7 @@ export default function MercadoLibreBanner({ mlStoreUrl }: { mlStoreUrl?: string
         className="group relative block min-h-[110px] bg-steel-950 sm:min-h-0 sm:aspect-[2400/380] overflow-hidden"
       >
         <Image
-          src="/images/banner-mercadolibre.webp"
+          src="/images/banner-mercadolibre.png"
           alt="Visitá nuestra tienda oficial en MercadoLibre"
           fill
           sizes="100vw"
