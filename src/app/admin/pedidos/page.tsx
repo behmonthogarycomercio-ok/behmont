@@ -3,6 +3,7 @@ import AdminActionForm from '@/components/admin/AdminActionForm';
 import DeleteButton from '@/components/admin/DeleteButton';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { updateOrderStatus, deleteOrder } from '@/lib/actions';
+import { formatPrice } from '@/lib/price';
 
 const STATUS_LABELS: Record<string, { label: string; classes: string }> = {
   pendiente:   { label: 'Pendiente',   classes: 'bg-yellow-100 text-yellow-700' },
@@ -37,7 +38,7 @@ export default async function PedidosPage({
 
   let query = supabase
     .from('whatsapp_orders')
-    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_postal_code, shipping_method, customer_note, items, total, status, created_at')
+    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at')
     .order('created_at', { ascending: false });
 
   if (filterStatus) query = query.eq('status', filterStatus);
@@ -155,7 +156,7 @@ export default async function PedidosPage({
                   </div>
                   {/* Total */}
                   <span className="font-display font-bold text-steel-950 shrink-0">
-                    ${Number(order.total || 0).toLocaleString('es-AR')}
+                    ${formatPrice(order.total || 0)}
                   </span>
                   {/* Arrow */}
                   <span className="text-steel-300 font-mono text-xs shrink-0 group-open:rotate-90 transition-transform">
@@ -173,6 +174,7 @@ export default async function PedidosPage({
                       {order.customer_email && <p><span className="text-steel-400">Email:</span> <span className="font-medium">{order.customer_email}</span></p>}
                       {order.customer_address && <p><span className="text-steel-400">Dirección:</span> <span className="font-medium">{order.customer_address}</span></p>}
                       {order.customer_city && <p><span className="text-steel-400">Ciudad:</span> <span className="font-medium">{order.customer_city}</span></p>}
+                      {order.customer_province && <p><span className="text-steel-400">Provincia:</span> <span className="font-medium">{order.customer_province}</span></p>}
                       {order.customer_postal_code && <p><span className="text-steel-400">CP:</span> <span className="font-medium">{order.customer_postal_code}</span></p>}
                       {order.shipping_method && (
                         <p>
@@ -205,14 +207,14 @@ export default async function PedidosPage({
                           <li key={i} className="flex justify-between gap-3">
                             <span className="text-steel-700 line-clamp-1">{item.name}</span>
                             <span className="shrink-0 text-steel-500 font-mono text-xs">
-                              x{item.qty} · ${Number(item.price).toLocaleString('es-AR')}
+                              x{item.qty} · ${formatPrice(item.price)}
                             </span>
                           </li>
                         ))}
                       </ul>
                       <div className="mt-2 pt-2 border-t border-plate-100 flex justify-between text-sm">
                         <span className="text-steel-500">Total</span>
-                        <span className="font-bold text-steel-950">${Number(order.total || 0).toLocaleString('es-AR')}</span>
+                        <span className="font-bold text-steel-950">${formatPrice(order.total || 0)}</span>
                       </div>
                     </div>
                   </div>

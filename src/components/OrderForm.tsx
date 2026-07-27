@@ -39,17 +39,20 @@ const SHIPPING_METHODS: { value: ShippingMethod; label: string }[] = [
   { value: 'retiro', label: 'Retiro en local' },
 ];
 
-// La nota de "domicilio" depende de si la zona tiene financiación
-// habilitada: dentro de zona, se puede abonar cuando se entrega el
-// pedido; fuera de zona, hay que pagar por MercadoPago antes del envío.
-function getShippingNote(method: ShippingMethod | '', allowed: boolean | null): string {
+const PROVINCES = [
+  'Buenos Aires', 'Catamarca', 'Chaco', 'Chubut', 'Ciudad Autónoma de Buenos Aires',
+  'Córdoba', 'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
+  'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan', 'San Luis',
+  'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
+];
+
+// El envío siempre se coordina por WhatsApp. Para domicilio, el pago
+// siempre es por transferencia (o MercadoPago) antes de coordinar el
+// envío -- no depende de la zona de financiación.
+function getShippingNote(method: ShippingMethod | ''): string {
   if (method === 'sucursal') return 'Lo abonás al retirarlo en la sucursal de destino.';
   if (method === 'retiro') return 'Coordinamos el retiro y el pago por WhatsApp. Descuento en efectivo del 10% al 15% según el producto.';
-  if (method === 'domicilio') {
-    return allowed
-      ? 'Pagando en efectivo al recibirlo accedés al descuento del 10% al 15% según el producto.'
-      : 'Se abona por MercadoPago antes de coordinar el envío.';
-  }
+  if (method === 'domicilio') return 'El monto se transfiere antes del envío. Coordinamos todo por WhatsApp.';
   return '';
 }
 
@@ -97,7 +100,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
   const { allowed } = useLocation();
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState({
-    name: '', phone: '', email: '', address: '', city: '', postalCode: '',
+    name: '', phone: '', email: '', address: '', city: '', province: '', postalCode: '',
     shippingMethod: '' as ShippingMethod | '', note: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -151,6 +154,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           customerEmail: form.email,
           customerAddress: form.address,
           customerCity: form.city,
+          customerProvince: form.province,
           customerPostalCode: form.postalCode,
           shippingMethod: form.shippingMethod,
           customerNote: form.note,
@@ -182,13 +186,6 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
     submitOrder();
   }
 
-  // Envío a domicilio fuera de zona de financiación: el pago tiene que
-  // hacerse por MercadoPago antes de coordinar el envío (no se ofrece la
-  // opción de pedido sin pagar por WhatsApp). Dentro de zona de
-  // financiación, sucursal y retiro en local siguen permitiendo coordinar
-  // el pago por WhatsApp (efectivo al retirar / financiación a domicilio).
-  const requiresPrepay = form.shippingMethod === 'domicilio' && !allowed;
-
   function goToDatos() {
     setStep(2);
   }
@@ -199,6 +196,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
     if (!form.phone.trim()) fieldErrors.customerPhone = 'Ingresá tu teléfono / WhatsApp.';
     if (!form.address.trim()) fieldErrors.customerAddress = 'Ingresá tu dirección.';
     if (!form.city.trim()) fieldErrors.customerCity = 'Ingresá tu ciudad.';
+    if (!form.province.trim()) fieldErrors.customerProvince = 'Elegí tu provincia.';
     if (!form.postalCode.trim()) fieldErrors.customerPostalCode = 'Ingresá tu código postal.';
     if (!form.shippingMethod) fieldErrors.shippingMethod = 'Elegí una opción de envío.';
     if (Object.keys(fieldErrors).length > 0) {
@@ -398,6 +396,20 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
             </FormField>
           </div>
 
+          <FormField label="Provincia" error={errors.customerProvince}>
+            <select
+              required
+              value={form.province}
+              onChange={(e) => setForm({ ...form, province: e.target.value })}
+              className="w-full rounded-lg border border-plate-200 px-3 py-2.5 text-sm focus:outline-none focus:border-steel-400 bg-white"
+            >
+              <option value="">Seleccioná tu provincia</option>
+              {PROVINCES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </FormField>
+
           <FormField label="Método de envío" error={errors.shippingMethod}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {SHIPPING_METHODS.map(({ value, label }) => (
@@ -417,7 +429,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
             </div>
             {form.shippingMethod && (
               <p className="mt-2 text-xs text-steel-500">
-                {getShippingNote(form.shippingMethod, allowed)}
+                {getShippingNote(form.shippingMethod)}
               </p>
             )}
             {form.shippingMethod === 'retiro' && storeAddress && (
@@ -486,7 +498,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
                   {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.label}
                 </p>
                 <p className="text-xs text-steel-500 mt-0.5">
-                  {getShippingNote(form.shippingMethod, allowed)}
+                  {getShippingNote(form.shippingMethod)}
                 </p>
                 {form.shippingMethod === 'retiro' && storeAddress && (
                   <p className="mt-1 text-xs font-medium text-steel-700">Retirás en: {storeAddress}</p>
@@ -576,24 +588,21 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           </button>
         </div>
 
-        {requiresPrepay ? (
+        {form.shippingMethod === 'domicilio' && (
           <p className="text-xs text-steel-500 bg-plate-50 rounded-lg p-3">
-            Para envío a domicilio fuera de zona de financiación, el pago se realiza por MercadoPago antes de coordinar el envío.
-            Si preferís pagar en efectivo, podés elegir retiro en local y acceder a un descuento del 10% al 15%.
+            Envío a domicilio: el monto se transfiere antes de coordinar el envío. Enviá tu pedido por WhatsApp para coordinar la transferencia, o pagá directo con MercadoPago.
           </p>
-        ) : (
-          <>
-            <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
-              {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
-            </Button>
-
-            <div className="flex items-center gap-3 pt-1">
-              <div className="flex-1 border-t border-plate-200" />
-              <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
-              <div className="flex-1 border-t border-plate-200" />
-            </div>
-          </>
         )}
+
+        <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
+          {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
+        </Button>
+
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex-1 border-t border-plate-200" />
+          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
+          <div className="flex-1 border-t border-plate-200" />
+        </div>
 
         {mpError && <p className="text-xs text-red-600">{mpError}</p>}
 
@@ -601,7 +610,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           type="button"
           disabled={mpLoading}
           onClick={async () => {
-            if (!form.name || !form.phone || !form.address || !form.city || !form.postalCode || !form.shippingMethod) {
+            if (!form.name || !form.phone || !form.address || !form.city || !form.province || !form.postalCode || !form.shippingMethod) {
               setMpError('Completá tus datos antes de continuar.');
               return;
             }
@@ -622,7 +631,8 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
                 items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
                 payer: {
                   name: form.name, phone: form.phone, address: form.address,
-                  city: form.city, postalCode: form.postalCode, shippingMethod: form.shippingMethod,
+                  city: form.city, province: form.province, postalCode: form.postalCode,
+                  shippingMethod: form.shippingMethod,
                 },
               }));
               window.location.href = data.init_point;

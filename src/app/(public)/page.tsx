@@ -59,6 +59,7 @@ export default async function HomePage() {
       <ScrollReveal>
         <ProductGrid
           title="El mejor precio de contado"
+          subtitle="Retirando por el local, con descuento en efectivo del 10% al 15% según el producto."
           products={featured}
           whatsappNumber={settings.whatsappNumber}
         />

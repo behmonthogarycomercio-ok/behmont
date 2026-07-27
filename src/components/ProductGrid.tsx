@@ -4,10 +4,12 @@ import type { Product } from '@/lib/types';
 
 export default function ProductGrid({
   title,
+  subtitle,
   products,
   whatsappNumber,
 }: {
   title?: string;
+  subtitle?: string;
   products: Product[];
   whatsappNumber: string;
 }) {
@@ -21,13 +23,14 @@ export default function ProductGrid({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
       {title && (
         <div className="mb-6">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
             Selección destacada
           </p>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-steel-900 tracking-tight">{title}</h2>
+          {subtitle && <p className="mt-1.5 text-sm text-steel-500">{subtitle}</p>}
         </div>
       )}
       <ProductCarousel>

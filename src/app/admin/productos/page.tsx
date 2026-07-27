@@ -3,6 +3,8 @@ import ProductForm from '@/components/admin/ProductForm';
 import DeleteButton from '@/components/admin/DeleteButton';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { deleteProduct } from '@/lib/actions';
+import { formatPrice } from '@/lib/price';
+import { getProductCode } from '@/lib/product-display';
 import Image from 'next/image';
 
 export default async function ProductosPage({
@@ -109,10 +111,10 @@ export default async function ProductosPage({
                     </div>
                     <span className="font-medium text-steel-900 line-clamp-1">{p.name}</span>
                   </td>
-                  <td className="p-3 font-mono text-xs text-steel-500">{p.sku}</td>
+                  <td className="p-3 font-mono text-xs text-steel-500">{getProductCode(p) ?? p.sku}</td>
                   <td className="p-3 text-steel-600">{p.category?.name || '—'}</td>
                   <td className="p-3 font-semibold text-steel-900">
-                    ${Number(p.price).toLocaleString('es-AR')}
+                    ${formatPrice(p.price)}
                   </td>
                   <td className={`p-3 font-medium ${p.stock <= 3 ? 'text-red-600' : 'text-steel-700'}`}>
                     {p.stock}

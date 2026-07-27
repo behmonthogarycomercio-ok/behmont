@@ -8,6 +8,7 @@ import {
   computeMonthlyTrend,
 } from '@/lib/metrics';
 import { getMLMetricsSummary } from '@/lib/mercadolibre';
+import { formatPrice } from '@/lib/price';
 import { TrendingUp, ShoppingBag, Receipt, MapPin, Award, MessageCircleQuestion, Eye, ShieldAlert } from 'lucide-react';
 
 const ML_REPUTATION_LABELS: Record<string, string> = {
@@ -45,13 +46,13 @@ export default async function MetricasPage() {
         <StatCard
           icon={Receipt}
           label="Ventas del mes"
-          value={`$${metrics.totalSales.toLocaleString('es-AR')}`}
+          value={`$${formatPrice(metrics.totalSales)}`}
         />
         <StatCard icon={ShoppingBag} label="Pedidos del mes" value={String(metrics.orderCount)} />
         <StatCard
           icon={TrendingUp}
           label="Ticket promedio"
-          value={`$${Math.round(metrics.avgTicket).toLocaleString('es-AR')}`}
+          value={`$${formatPrice(metrics.avgTicket)}`}
         />
         <StatCard
           icon={MapPin}

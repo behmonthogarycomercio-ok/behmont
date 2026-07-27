@@ -21,7 +21,7 @@ function searchZone(query: string): string | null {
 }
 
 export default function ZonePrompt() {
-  const { showPrompt, setZone, dismissPrompt } = useLocation();
+  const { showPrompt, setZone, dismissPrompt, declineZone } = useLocation();
   const [query, setQuery] = useState('');
   const [matched, setMatched] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
@@ -130,7 +130,7 @@ export default function ZonePrompt() {
 
           {/* Skip */}
           <button
-            onClick={dismissPrompt}
+            onClick={declineZone}
             className="mt-5 w-full text-center font-mono text-[11px] text-steel-300 hover:text-steel-500 transition-colors"
           >
             No soy de ninguna de estas zonas

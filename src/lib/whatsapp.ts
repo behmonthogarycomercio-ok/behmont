@@ -18,6 +18,7 @@ type BuildOrderMessageInput = {
   customerPhone: string;
   customerAddress?: string;
   customerCity?: string;
+  customerProvince?: string;
   customerPostalCode?: string;
   shippingMethod?: string;
   customerNote?: string;
@@ -31,6 +32,7 @@ export function buildOrderMessage({
   customerPhone,
   customerAddress,
   customerCity,
+  customerProvince,
   customerPostalCode,
   shippingMethod,
   customerNote,
@@ -45,6 +47,7 @@ export function buildOrderMessage({
   lines.push(`Telefono: ${customerPhone}`);
   if (customerAddress) lines.push(`Direccion: ${customerAddress}`);
   if (customerCity) lines.push(`Ciudad: ${customerCity}`);
+  if (customerProvince) lines.push(`Provincia: ${customerProvince}`);
   if (customerPostalCode) lines.push(`Codigo postal: ${customerPostalCode}`);
   if (shippingMethod) lines.push(`Envio: ${SHIPPING_METHOD_LABELS[shippingMethod] || shippingMethod} (${SHIPPING_METHOD_NOTES[shippingMethod] || ''})`);
   if (customerNote) lines.push(`Nota: ${customerNote}`);
@@ -81,6 +84,7 @@ type BuildMpOrderMessageInput = {
   customerPhone: string;
   customerAddress?: string;
   customerCity?: string;
+  customerProvince?: string;
   customerPostalCode?: string;
   shippingMethod?: string;
   paymentId?: string;
@@ -92,6 +96,7 @@ export function buildMpOrderMessage({
   customerPhone,
   customerAddress,
   customerCity,
+  customerProvince,
   customerPostalCode,
   shippingMethod,
   paymentId,
@@ -104,6 +109,7 @@ export function buildMpOrderMessage({
   lines.push(`Telefono: ${customerPhone}`);
   if (customerAddress) lines.push(`Direccion: ${customerAddress}`);
   if (customerCity) lines.push(`Ciudad: ${customerCity}`);
+  if (customerProvince) lines.push(`Provincia: ${customerProvince}`);
   if (customerPostalCode) lines.push(`Codigo postal: ${customerPostalCode}`);
   if (shippingMethod) lines.push(`Envio: ${SHIPPING_METHOD_LABELS[shippingMethod] || shippingMethod} (${SHIPPING_METHOD_NOTES[shippingMethod] || ''})`);
   if (paymentId) lines.push(`Nro de operacion: ${paymentId}`);

@@ -31,9 +31,16 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
       <Link href={`/producto/${product.slug}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '100%' }}>
         <div className="absolute inset-0">
           {product.images?.[0] ? (
-            <Image src={product.images[0]} alt={product.name} fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-              className="object-contain p-4 transition-transform duration-300 group-hover:scale-105" />
+            <>
+              <Image src={product.images[0]} alt={product.name} fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+                className={`object-contain p-4 transition-opacity duration-300 ${product.images[1] ? 'group-hover:opacity-0' : ''}`} />
+              {product.images[1] && (
+                <Image src={product.images[1]} alt={product.name} fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+                  className="object-contain p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              )}
+            </>
           ) : (
             <div className="placeholder-pattern h-full w-full flex items-center justify-center text-steel-300 text-[10px] uppercase tracking-wider">
               Foto producto

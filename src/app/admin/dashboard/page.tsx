@@ -1,5 +1,6 @@
 import AdminShell from '@/components/admin/AdminShell';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { formatPrice } from '@/lib/price';
 import { Package, FolderTree, MessageSquareText, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
                 <li key={o.id} className="flex justify-between">
                   <span className="text-steel-800">{o.customer_name}</span>
                   <span className="font-semibold text-steel-950">
-                    ${Number(o.total || 0).toLocaleString('es-AR')}
+                    ${formatPrice(o.total || 0)}
                   </span>
                 </li>
               ))}
