@@ -22,8 +22,8 @@ export default function LocationSection({
 
   return (
     <section id="ubicacion" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 lg:py-16 border-t border-steel-100 scroll-mt-20">
-      <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px] items-start">
-        <div className="flex flex-col h-full">
+      <div className="grid gap-10 md:grid-cols-2 lg:gap-[60px]">
+        <div className="flex flex-col h-full md:justify-between">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-steel-300 mb-2.5">
             Visitanos
           </p>

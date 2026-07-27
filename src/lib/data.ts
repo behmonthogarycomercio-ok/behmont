@@ -153,6 +153,23 @@ export async function getDiscountedProducts(): Promise<Product[]> {
   return (data || []).filter((p) => p.compare_at_price && p.compare_at_price > p.price);
 }
 
+// Trae productos activos con stock cuyo nombre matchea alguna de las
+// palabras clave dadas -- para armar carruseles tematicos ("gancho") con
+// productos reales del inventario, sin depender de una categoria unica.
+export async function getProductsByNameKeywords(keywords: string[], limit = 12): Promise<Product[]> {
+  const supabase = createServerSupabase();
+  const filters = keywords.map((k) => `name.ilike.%${k}%`).join(',');
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .gt('stock', 0)
+    .or(filters)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return data || [];
+}
+
 export type CategoryWithDiscount = Category & { maxDiscountPct: number; discountedCount: number };
 
 // Categorías que hoy tienen al menos un producto con descuento activo,
