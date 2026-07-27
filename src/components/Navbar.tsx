@@ -147,22 +147,22 @@ export default function Navbar({
 
           {city && (
             <button onClick={clearZone}
-              className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap shrink-0">
               <MapPin className="h-3.5 w-3.5" /> Estás en: {city}
             </button>
           )}
 
           <div className="ml-auto hidden lg:flex items-center gap-5 text-[12px] text-white/70">
             <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 hover:text-white transition-colors">
+              className="flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
             </a>
-            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors">
+            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
             </Link>
-            <Link href="/financiacion" className="hover:text-white transition-colors">Financiación</Link>
+            <Link href="/financiacion" className="hover:text-white transition-colors whitespace-nowrap shrink-0">Financiación</Link>
             {phone && (
-              <span className="flex items-center gap-1.5 text-white/90">
+              <span className="flex items-center gap-1.5 text-white/90 whitespace-nowrap shrink-0">
                 <Phone className="h-3.5 w-3.5" /> {phone}
               </span>
             )}

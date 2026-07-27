@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { ChevronDown } from 'lucide-react';
 import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import ProductActions from '@/components/ProductActions';
 import ProductGallery from '@/components/ProductGallery';
+import ProductPaymentBadges from '@/components/ProductPaymentBadges';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
@@ -153,6 +155,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
           </div>
 
+          {/* Enganche a características técnicas */}
+          {filteredSpecs.length > 0 && (
+            <a
+              href="#caracteristicas"
+              className="mt-3 inline-flex items-center gap-1.5 self-start font-mono text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+            >
+              Ver características técnicas
+              <ChevronDown className="h-3.5 w-3.5" />
+            </a>
+          )}
+
           {/* Description */}
           {product.description && (
             <p className="mt-5 text-steel-600 leading-relaxed text-sm whitespace-pre-line border-t border-plate-200 pt-5">
@@ -179,6 +192,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
           </div>
 
+          {/* Medios de pago */}
+          <ProductPaymentBadges />
+
           {/* ML link */}
           {product.ml_permalink && (
             <a
@@ -195,7 +211,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       {/* Specs — misma sección que el producto, sin corte visual fuerte */}
       {filteredSpecs.length > 0 && (
-        <div className="mt-12 pt-10 border-t border-plate-200">
+        <div id="caracteristicas" className="mt-12 pt-10 border-t border-plate-200 scroll-mt-24">
           <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
             Características técnicas
           </h2>
