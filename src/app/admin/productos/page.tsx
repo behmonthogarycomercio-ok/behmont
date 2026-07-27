@@ -18,7 +18,8 @@ export default async function ProductosPage({
   let productsQuery = supabase
     .from('products')
     .select('*, category:categories(name), brand:brands(name)')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(0, 4999);
 
   if (q) {
     const safeQ = q.replace(/[,()%]/g, ' ').trim();
@@ -39,15 +40,14 @@ export default async function ProductosPage({
     productsQuery = productsQuery.or(filters.join(','));
   }
 
-  const [{ data: products }, { data: categories }, { data: brands }] = await Promise.all([
+  const [{ data: products }, { data: categories }, { data: brands }, { data: editing }] = await Promise.all([
     productsQuery,
     supabase.from('categories').select('id,name').order('name'),
     supabase.from('brands').select('id,name').order('name'),
+    searchParams.edit
+      ? supabase.from('products').select('*, category:categories(name), brand:brands(name)').eq('id', searchParams.edit).maybeSingle()
+      : Promise.resolve({ data: undefined }),
   ]);
-
-  const editing = searchParams.edit
-    ? products?.find((p) => p.id === searchParams.edit)
-    : undefined;
   const showForm = searchParams.new === '1' || !!editing;
 
   return (
