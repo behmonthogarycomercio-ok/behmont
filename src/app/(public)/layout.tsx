@@ -1,13 +1,19 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PickupDiscountBanner from '@/components/PickupDiscountBanner';
-import { getCategories, getSiteSettings } from '@/lib/data';
+import FlashOfferBar from '@/components/FlashOfferBar';
+import { getCategories, getSiteSettings, getBombOffer } from '@/lib/data';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const [settings, categories] = await Promise.all([getSiteSettings(), getCategories()]);
+  const [settings, categories, bombOffer] = await Promise.all([
+    getSiteSettings(),
+    getCategories(),
+    getBombOffer(),
+  ]);
 
   return (
     <>
+      {bombOffer && <FlashOfferBar product={bombOffer} />}
       <PickupDiscountBanner />
       <Navbar categories={categories} contactPhone={settings.contactPhone} whatsappNumber={settings.whatsappNumber} />
       {children}

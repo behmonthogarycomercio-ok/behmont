@@ -97,6 +97,32 @@ export async function getProductsBySku(skus: string[]): Promise<Product[]> {
   return skus.map((sku) => bySku.get(sku)).filter((p): p is Product => Boolean(p));
 }
 
+// El producto con mayor % de descuento activo y con stock -- la "oferta
+// bomba" que se muestra en la barra superior del header con cuenta
+// regresiva hasta la medianoche.
+export async function getBombOffer(): Promise<Product | null> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .gt('stock', 0)
+    .not('compare_at_price', 'is', null);
+
+  const discounted = (data || []).filter(
+    (p) => p.compare_at_price && p.compare_at_price > p.price
+  );
+  if (discounted.length === 0) return null;
+
+  discounted.sort((a, b) => {
+    const discA = 1 - a.price / (a.compare_at_price as number);
+    const discB = 1 - b.price / (b.compare_at_price as number);
+    return discB - discA;
+  });
+
+  return discounted[0];
+}
+
 export async function getDiscountedProducts(): Promise<Product[]> {
   const supabase = createServerSupabase();
   const { data } = await supabase
