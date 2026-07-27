@@ -31,12 +31,13 @@ export default async function SearchPage({
 }) {
   const q = searchParams.q?.trim() || '';
 
-  const [settings, allProducts, categories] = await Promise.all([
+  const [settings, searchResult, categories] = await Promise.all([
     getSiteSettings(),
-    q ? searchProducts(q) : Promise.resolve([]),
+    q ? searchProducts(q) : Promise.resolve({ products: [], isFuzzy: false }),
     getCategories(),
   ]);
 
+  const { products: allProducts, isFuzzy } = searchResult;
   const brands = getAvailableBrands(allProducts);
   const products = applyProductFilters(allProducts, searchParams);
 
@@ -85,8 +86,14 @@ export default async function SearchPage({
 
       {q && products.length > 0 && (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+          {isFuzzy && (
+            <p className="mb-4 text-sm text-steel-600">
+              No encontramos "<span className="font-semibold">{q}</span>" exacto. ¿Quisiste decir alguno de estos?
+            </p>
+          )}
           <p className="font-mono text-[11px] uppercase tracking-wide text-steel-400 mb-6">
             {products.length} {products.length === 1 ? 'resultado' : 'resultados'}
+            {isFuzzy && ' similares'}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((product) => (

@@ -7,6 +7,7 @@ import { useCart } from '@/lib/cart-context';
 import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import { formatPrice } from '@/lib/price';
+import { getProductCode } from '@/lib/product-display';
 import type { Product } from '@/lib/types';
 
 const CUOTAS = 3;
@@ -21,6 +22,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
 
   const cuotaPrice = Math.ceil(product.price / CUOTAS);
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
+  const code = getProductCode(product);
 
   return (
     <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
@@ -66,6 +68,9 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           className="text-sm font-medium text-gray-800 leading-snug line-clamp-2 hover:text-[#0B1C3A] transition-colors">
           {product.name}
         </Link>
+        {code && (
+          <p className="font-mono text-[10px] text-gray-400">SKU: {code}</p>
+        )}
 
         {/* Precio */}
         <div className="mt-2">

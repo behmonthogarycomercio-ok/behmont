@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
             {code && (
               <span className="font-mono text-[11px] text-steel-300">
-                {code}
+                SKU: {code}
               </span>
             )}
           </div>

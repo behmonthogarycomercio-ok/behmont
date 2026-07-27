@@ -191,7 +191,17 @@ export async function getRelatedProducts(
   return data || [];
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
+export type SearchResult = { products: Product[]; isFuzzy: boolean };
+
+/**
+ * Busca por coincidencia exacta (substring) primero. Si no encuentra nada
+ * -- por ejemplo "lavacabezas" con S de más, que no aparece como
+ * substring en "Lavacabeza de cerámica" -- cae a una búsqueda por
+ * similitud de texto (pg_trgm), tolerante a plurales, letras de más/menos
+ * y errores de tipeo. `isFuzzy` le indica a la UI si mostrar los
+ * resultados como "similares a tu búsqueda" en vez de exactos.
+ */
+export async function searchProducts(query: string): Promise<SearchResult> {
   const supabase = createServerSupabase();
   const safeQuery = query.replace(/[,()%]/g, ' ').trim();
 
@@ -214,5 +224,24 @@ export async function searchProducts(query: string): Promise<Product[]> {
     .eq('active', true)
     .or(filters.join(','))
     .limit(40);
-  return data || [];
+
+  if (data && data.length > 0) return { products: data, isFuzzy: false };
+
+  const { data: fuzzyMatches } = await supabase.rpc('search_products_fuzzy', {
+    search_query: safeQuery,
+  });
+  if (!fuzzyMatches || fuzzyMatches.length === 0) return { products: [], isFuzzy: false };
+
+  const ids = fuzzyMatches.map((m: { id: string }) => m.id);
+  const { data: fuzzyProducts } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .eq('active', true)
+    .in('id', ids);
+
+  const rank = new Map<string, number>(ids.map((id: string, i: number) => [id, i]));
+  const sorted = (fuzzyProducts || []).sort(
+    (a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0)
+  );
+  return { products: sorted, isFuzzy: true };
 }
