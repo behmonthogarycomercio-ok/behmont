@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import OrderForm from '@/components/OrderForm';
+import { getSiteSettings } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Tu pedido | BEHMONT',
   description: 'Revisá y enviá tu pedido directamente por WhatsApp. BEHMONT, Concordia.',
 };
 
-export default function PedidoPage() {
+export default async function PedidoPage() {
+  const settings = await getSiteSettings();
+
   return (
     <main>
       {/* Header */}
@@ -29,7 +32,7 @@ export default function PedidoPage() {
 
       {/* Form */}
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
-        <OrderForm />
+        <OrderForm storeAddress={settings.contactAddress} />
       </div>
 
       {/* Trust strip */}

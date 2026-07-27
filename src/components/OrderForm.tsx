@@ -44,10 +44,10 @@ const SHIPPING_METHODS: { value: ShippingMethod; label: string }[] = [
 // pedido; fuera de zona, hay que pagar por MercadoPago antes del envío.
 function getShippingNote(method: ShippingMethod | '', allowed: boolean | null): string {
   if (method === 'sucursal') return 'Lo abonás al retirarlo en la sucursal de destino.';
-  if (method === 'retiro') return 'Coordinamos el retiro y el pago por WhatsApp.';
+  if (method === 'retiro') return 'Coordinamos el retiro y el pago por WhatsApp. Descuento en efectivo del 10% al 15% según el producto.';
   if (method === 'domicilio') {
     return allowed
-      ? 'Podés abonarlo cuando te enviamos el pedido al domicilio.'
+      ? 'Pagando en efectivo al recibirlo accedés al descuento del 10% al 15% según el producto.'
       : 'Se abona por MercadoPago antes de coordinar el envío.';
   }
   return '';
@@ -92,7 +92,7 @@ function StepIndicator({ step, onBack }: { step: Step; onBack: (s: Step) => void
   );
 }
 
-export default function OrderForm() {
+export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
   const { items, updateQty, removeItem, total, clear } = useCart();
   const { allowed } = useLocation();
   const [step, setStep] = useState<Step>(1);
@@ -420,6 +420,11 @@ export default function OrderForm() {
                 {getShippingNote(form.shippingMethod, allowed)}
               </p>
             )}
+            {form.shippingMethod === 'retiro' && storeAddress && (
+              <p className="mt-2 rounded-lg bg-plate-50 px-3 py-2 text-xs font-medium text-steel-700">
+                Retirás en: {storeAddress}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Nota (opcional)">
@@ -483,6 +488,9 @@ export default function OrderForm() {
                 <p className="text-xs text-steel-500 mt-0.5">
                   {getShippingNote(form.shippingMethod, allowed)}
                 </p>
+                {form.shippingMethod === 'retiro' && storeAddress && (
+                  <p className="mt-1 text-xs font-medium text-steel-700">Retirás en: {storeAddress}</p>
+                )}
               </div>
             )}
           </div>
@@ -571,6 +579,7 @@ export default function OrderForm() {
         {requiresPrepay ? (
           <p className="text-xs text-steel-500 bg-plate-50 rounded-lg p-3">
             Para envío a domicilio fuera de zona de financiación, el pago se realiza por MercadoPago antes de coordinar el envío.
+            Si preferís pagar en efectivo, podés elegir retiro en local y acceder a un descuento del 10% al 15%.
           </p>
         ) : (
           <>
