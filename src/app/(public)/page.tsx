@@ -34,6 +34,17 @@ import {
 
 const WINTER_KEYWORDS = ['calefactor', 'estufa', 'convector', 'caloventor', 'turboforzador', 'termotanque', 'calefon'];
 const LAUNDRY_KEYWORDS = ['lavarropa', 'secarropa'];
+// Día del Niño en Argentina: segundo domingo de agosto.
+function getChildrensDayLabel(): string | null {
+  const now = new Date();
+  const year = now.getFullYear();
+  const aug1 = new Date(year, 7, 1);
+  const firstSunday = 1 + ((7 - aug1.getDay()) % 7);
+  const childrensDay = new Date(year, 7, firstSunday + 7);
+  const daysLeft = Math.ceil((childrensDay.getTime() - now.getTime()) / 86400000);
+  if (daysLeft < 0 || daysLeft > 30) return null;
+  return daysLeft === 0 ? 'Es hoy' : `Faltan ${daysLeft} día${daysLeft === 1 ? '' : 's'}`;
+}
 
 export const revalidate = 60; // ISR: refresca catálogo cada 60s (precio/stock de ML incluido)
 
@@ -44,7 +55,7 @@ const BUSINESS_SECTION_SKUS = [
 ];
 
 export default async function HomePage() {
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, businessProducts] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, kidsCategory, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
@@ -58,8 +69,11 @@ export default async function HomePage() {
     getProductsByNameKeywords(LAUNDRY_KEYWORDS),
     getProductsByNameKeywords(WINTER_KEYWORDS),
     getProductsByCategory('hogar'),
+    getProductsByCategory('bebes-ninos'),
     getProductsBySku(BUSINESS_SECTION_SKUS),
   ]);
+
+  const childrensDayLabel = getChildrensDayLabel();
 
   return (
     <main>
@@ -82,6 +96,16 @@ export default async function HomePage() {
           whatsappNumber={settings.whatsappNumber}
         />
       </ScrollReveal>
+      {childrensDayLabel && (
+        <ScrollReveal>
+          <ThemedCollection
+            eyebrow={`Día del Niño · ${childrensDayLabel}`}
+            title="Regalos para los más chicos"
+            products={kidsCategory.products}
+            whatsappNumber={settings.whatsappNumber}
+          />
+        </ScrollReveal>
+      )}
       <ScrollReveal>
         <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
