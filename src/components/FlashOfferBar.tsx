@@ -44,33 +44,33 @@ export default function FlashOfferBar({ product }: { product: Product }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full bg-steel-950 text-amber-400 text-[11px] font-mono font-semibold uppercase tracking-wide py-1.5 flex items-center justify-center gap-1.5 hover:bg-steel-900 transition-colors"
+        className="w-full bg-white border-b border-plate-200 text-steel-950 text-xs font-mono font-bold uppercase tracking-wide py-2 flex items-center justify-center gap-2 hover:bg-plate-50 transition-colors"
       >
-        <Flame className="h-3.5 w-3.5" /> Oferta bomba: termina en {countdown}
-        <ChevronDown className="h-3.5 w-3.5" />
+        <Flame className="h-4 w-4 text-amber-500" /> Oferta bomba: termina en {countdown}
+        <ChevronDown className="h-4 w-4" />
       </button>
     );
   }
 
   return (
-    <div className="bg-steel-950 text-white">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center gap-3 sm:gap-5">
-        <Link href={`/producto/${product.slug}`} className="flex items-center gap-3 min-w-0 flex-1 sm:flex-none sm:w-[320px]">
-          <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-md bg-white/10 overflow-hidden">
+    <div className="bg-white border-b border-plate-200 text-steel-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4 sm:gap-8">
+        <Link href={`/producto/${product.slug}`} className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 sm:flex-none sm:w-[360px]">
+          <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-xl border border-plate-200 bg-plate-50 overflow-hidden">
             {product.images?.[0] && (
-              <Image src={product.images[0]} alt={product.name} fill sizes="48px" className="object-contain p-1" />
+              <Image src={product.images[0]} alt={product.name} fill sizes="64px" className="object-contain p-1.5" />
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold leading-tight truncate">{product.name}</p>
-            <p className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-sm font-bold text-amber-400">${formatPrice(product.price)}</span>
+            <p className="text-sm font-semibold leading-tight truncate text-steel-900">{product.name}</p>
+            <p className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className="text-lg sm:text-xl font-bold text-steel-950">${formatPrice(product.price)}</span>
               {discountPct !== null && (
                 <>
-                  <span className="text-[10px] font-medium text-white/40 line-through">
+                  <span className="text-xs font-medium text-steel-350 line-through">
                     ${formatPrice(product.compare_at_price!)}
                   </span>
-                  <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                  <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {discountPct}% OFF
                   </span>
                 </>
@@ -79,36 +79,36 @@ export default function FlashOfferBar({ product }: { product: Product }) {
           </div>
         </Link>
 
-        <div className="hidden sm:flex flex-1 items-center justify-center gap-3">
-          <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.15em] text-amber-400">
-            <Flame className="h-3.5 w-3.5" /> Oferta bomba · termina en
+        <div className="hidden sm:flex flex-1 items-center justify-center gap-4">
+          <span className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.15em] text-amber-600">
+            <Flame className="h-4 w-4" /> Oferta bomba · termina en
           </span>
-          <span className="font-mono text-lg font-bold tabular-nums tracking-wider">{countdown}</span>
+          <span className="font-mono text-3xl font-black tabular-nums tracking-wider text-steel-950">{countdown}</span>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto sm:ml-0">
           <Link
             href={`/producto/${product.slug}`}
-            className="rounded-full bg-amber-500 hover:bg-amber-400 px-3.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold text-white transition-colors whitespace-nowrap"
+            className="rounded-full bg-amber-500 hover:bg-amber-600 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white transition-colors whitespace-nowrap shadow-sm"
           >
             Llevalo hoy
           </Link>
           <button
             onClick={() => setOpen(false)}
             aria-label="Minimizar oferta bomba"
-            className="hidden sm:grid h-7 w-7 place-items-center rounded-full hover:bg-white/10 text-white/60 transition-colors"
+            className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-plate-100 text-steel-400 transition-colors"
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp className="h-5 w-5" />
           </button>
         </div>
       </div>
 
       {/* Cuenta regresiva — fila propia en mobile por espacio */}
-      <div className="sm:hidden border-t border-white/10 px-3 py-1.5 flex items-center justify-center gap-2">
-        <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide text-amber-400">
-          <Flame className="h-3 w-3" /> Termina en
+      <div className="sm:hidden border-t border-plate-200 px-4 py-2 flex items-center justify-center gap-2">
+        <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wide text-amber-600">
+          <Flame className="h-3.5 w-3.5" /> Termina en
         </span>
-        <span className="font-mono text-sm font-bold tabular-nums">{countdown}</span>
+        <span className="font-mono text-xl font-black tabular-nums text-steel-950">{countdown}</span>
       </div>
     </div>
   );
