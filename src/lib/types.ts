@@ -63,4 +63,5 @@ export type WhatsAppOrderItem = {
   name: string;
   qty: number;
   price: number;
+  image?: string;
 };

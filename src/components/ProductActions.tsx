@@ -47,7 +47,7 @@ export default function ProductActions({
 
       <button
         onClick={() => {
-          addItem({ sku: product.sku, name: product.name, qty, price: product.price });
+          addItem({ sku: product.sku, name: product.name, qty, price: product.price, image: product.images?.[0] });
           setAdded(true);
           setTimeout(() => setAdded(false), 1800);
         }}

@@ -7,7 +7,10 @@ const orderSchema = z.object({
   customerName: z.string().min(2, 'Ingresá tu nombre'),
   customerPhone: z.string().min(6, 'Ingresá un teléfono válido'),
   customerEmail: z.string().email().optional().or(z.literal('')),
-  customerAddress: z.string().optional(),
+  customerAddress: z.string().min(3, 'Ingresá tu dirección'),
+  customerCity: z.string().min(2, 'Ingresá tu ciudad'),
+  customerPostalCode: z.string().min(3, 'Ingresá tu código postal'),
+  shippingMethod: z.enum(['sucursal', 'domicilio', 'retiro'], { errorMap: () => ({ message: 'Elegí una opción de envío' }) }),
   customerNote: z.string().optional(),
   financingPlan: z.string().optional(),
   wantsInstallments3: z.boolean().optional(),
@@ -34,9 +37,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const { customerName, customerPhone, customerEmail, customerAddress, customerNote, financingPlan, wantsInstallments3, items } = parsed.data;
+  const {
+    customerName, customerPhone, customerEmail, customerAddress, customerCity,
+    customerPostalCode, shippingMethod, customerNote, financingPlan, wantsInstallments3, items,
+  } = parsed.data;
   const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const message = buildOrderMessage({ customerName, customerPhone, customerAddress, customerNote, financingPlan, wantsInstallments3, items });
+  const message = buildOrderMessage({
+    customerName, customerPhone, customerAddress, customerCity, customerPostalCode,
+    shippingMethod, customerNote, financingPlan, wantsInstallments3, items,
+  });
 
   const supabase = createServiceSupabase();
   const { data: settings } = await supabase
@@ -56,7 +65,10 @@ export async function POST(request: Request) {
     customer_name: customerName,
     customer_phone: customerPhone,
     customer_email: customerEmail || null,
-    customer_address: customerAddress || null,
+    customer_address: customerAddress,
+    customer_city: customerCity,
+    customer_postal_code: customerPostalCode,
+    shipping_method: shippingMethod,
     customer_note: noteParts.join('\n') || null,
     items,
     total,

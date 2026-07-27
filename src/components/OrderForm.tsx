@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Minus, Plus, Trash2, Wallet, ChevronDown, CreditCard } from 'lucide-react';
+import Image from 'next/image';
+import { Minus, Plus, Trash2, Wallet, ChevronDown, CreditCard, Check } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import {
@@ -24,10 +25,67 @@ const FREQ_OPTIONS: { key: Freq; label: string }[] = [
   { key: 'monthly', label: 'Por mes' },
 ];
 
+type Step = 1 | 2 | 3;
+const STEPS: { n: Step; label: string }[] = [
+  { n: 1, label: 'Carrito' },
+  { n: 2, label: 'Datos' },
+  { n: 3, label: 'Pago' },
+];
+
+type ShippingMethod = 'sucursal' | 'domicilio' | 'retiro';
+const SHIPPING_METHODS: { value: ShippingMethod; label: string; note: string }[] = [
+  { value: 'sucursal', label: 'Envío a sucursal', note: 'Lo abonás al retirarlo en la sucursal de destino.' },
+  { value: 'domicilio', label: 'Envío a domicilio', note: 'Se abona por transferencia antes del envío.' },
+  { value: 'retiro', label: 'Retiro en local', note: 'Coordinamos el retiro y el pago por WhatsApp.' },
+];
+
+function StepIndicator({ step, onBack }: { step: Step; onBack: (s: Step) => void }) {
+  return (
+    <div className="flex items-center">
+      {STEPS.map((s, i) => (
+        <div key={s.n} className="flex items-center flex-1 last:flex-none">
+          <button
+            type="button"
+            disabled={s.n >= step}
+            onClick={() => s.n < step && onBack(s.n)}
+            className="flex flex-col items-center gap-1.5 disabled:cursor-default"
+          >
+            <span
+              className={`grid h-8 w-8 place-items-center rounded-full font-mono text-xs font-bold border-2 transition-colors ${
+                s.n === step
+                  ? 'bg-steel-950 border-steel-950 text-white'
+                  : s.n < step
+                  ? 'bg-amber-500 border-amber-500 text-white'
+                  : 'bg-white border-plate-200 text-steel-300'
+              }`}
+            >
+              {s.n < step ? <Check className="h-3.5 w-3.5" /> : s.n}
+            </span>
+            <span
+              className={`font-mono text-[10px] uppercase tracking-wide ${
+                s.n <= step ? 'text-steel-700 font-semibold' : 'text-steel-300'
+              }`}
+            >
+              {s.label}
+            </span>
+          </button>
+          {i < STEPS.length - 1 && (
+            <div className={`h-0.5 flex-1 mx-2 rounded transition-colors ${s.n < step ? 'bg-amber-500' : 'bg-plate-200'}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function OrderForm() {
   const { items, updateQty, removeItem, total, clear } = useCart();
   const { allowed } = useLocation();
-  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', note: '' });
+  const [step, setStep] = useState<Step>(1);
+  const [form, setForm] = useState({
+    name: '', phone: '', email: '', address: '', city: '', postalCode: '',
+    shippingMethod: '' as ShippingMethod | '', note: '',
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -78,6 +136,9 @@ export default function OrderForm() {
           customerPhone: form.phone,
           customerEmail: form.email,
           customerAddress: form.address,
+          customerCity: form.city,
+          customerPostalCode: form.postalCode,
+          shippingMethod: form.shippingMethod,
           customerNote: form.note,
           financingPlan: financingSummary(),
           wantsInstallments3,
@@ -106,6 +167,26 @@ export default function OrderForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     submitOrder(false);
+  }
+
+  function goToDatos() {
+    setStep(2);
+  }
+
+  function goToPago() {
+    const fieldErrors: Record<string, string> = {};
+    if (!form.name.trim()) fieldErrors.customerName = 'Ingresá tu nombre y apellido.';
+    if (!form.phone.trim()) fieldErrors.customerPhone = 'Ingresá tu teléfono / WhatsApp.';
+    if (!form.address.trim()) fieldErrors.customerAddress = 'Ingresá tu dirección.';
+    if (!form.city.trim()) fieldErrors.customerCity = 'Ingresá tu ciudad.';
+    if (!form.postalCode.trim()) fieldErrors.customerPostalCode = 'Ingresá tu código postal.';
+    if (!form.shippingMethod) fieldErrors.shippingMethod = 'Elegí una opción de envío.';
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      return;
+    }
+    setErrors({});
+    setStep(3);
   }
 
   if (sent) {
@@ -178,52 +259,216 @@ export default function OrderForm() {
 
   return (
     <div className="space-y-8">
-      <ul className="divide-y divide-plate-200 rounded-xl2 border border-plate-200">
-        {items.map((item) => (
-          <li key={item.sku} className="flex items-center gap-4 p-4">
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-steel-900 text-sm truncate">{item.name}</p>
-              <p className="text-xs text-steel-500">Código: {item.sku}</p>
-            </div>
-            <div className="flex items-center gap-2 rounded-lg border border-plate-200 px-1.5 py-1">
-              <button
-                onClick={() => updateQty(item.sku, item.qty - 1)}
-                className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
-                aria-label="Restar"
-              >
-                <Minus className="h-3 w-3" />
-              </button>
-              <span className="w-5 text-center text-sm">{item.qty}</span>
-              <button
-                onClick={() => updateQty(item.sku, item.qty + 1)}
-                className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
-                aria-label="Sumar"
-              >
-                <Plus className="h-3 w-3" />
-              </button>
-            </div>
-            <span className="w-24 text-right font-semibold text-sm text-steel-900">
-              ${fmtARS(item.price * item.qty)}
-            </span>
-            <button
-              onClick={() => removeItem(item.sku)}
-              className="text-steel-400 hover:text-danger-600"
-              aria-label={`Quitar ${item.name}`}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </li>
-        ))}
-      </ul>
+      <StepIndicator step={step} onBack={setStep} />
 
-      <div className="flex justify-end">
-        <p className="font-display text-lg font-bold text-steel-950">
-          Total: ${fmtARS(total)}
-        </p>
-      </div>
+      {step === 1 && (
+        <div className="space-y-6">
+          <ul className="divide-y divide-plate-200 rounded-xl2 border border-plate-200">
+            {items.map((item) => (
+              <li key={item.sku} className="flex items-center gap-4 p-4">
+                <div className="relative h-14 w-14 shrink-0 rounded-lg bg-plate-50 overflow-hidden">
+                  {item.image ? (
+                    <Image src={item.image} alt={item.name} fill sizes="56px" className="object-contain p-1" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-steel-300 text-[8px] uppercase tracking-wide text-center px-1">
+                      Foto
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-steel-900 text-sm truncate">{item.name}</p>
+                  <p className="text-xs text-steel-500">Código: {item.sku}</p>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border border-plate-200 px-1.5 py-1">
+                  <button
+                    onClick={() => updateQty(item.sku, item.qty - 1)}
+                    className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
+                    aria-label="Restar"
+                  >
+                    <Minus className="h-3 w-3" />
+                  </button>
+                  <span className="w-5 text-center text-sm">{item.qty}</span>
+                  <button
+                    onClick={() => updateQty(item.sku, item.qty + 1)}
+                    className="grid h-6 w-6 place-items-center rounded transition active:scale-[0.95] hover:bg-plate-100"
+                    aria-label="Sumar"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
+                <span className="w-24 text-right font-semibold text-sm text-steel-900">
+                  ${fmtARS(item.price * item.qty)}
+                </span>
+                <button
+                  onClick={() => removeItem(item.sku)}
+                  className="text-steel-400 hover:text-danger-600"
+                  aria-label={`Quitar ${item.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
 
-      {/* Vista previa de financiación — solo zonas habilitadas, solo aplica al pedido por WhatsApp */}
-      {allowed && (
+          <div className="flex justify-end">
+            <p className="font-display text-lg font-bold text-steel-950">
+              Total: ${fmtARS(total)}
+            </p>
+          </div>
+
+          <Button type="button" size="lg" onClick={goToDatos} className="w-full">
+            Siguiente: Tus datos
+          </Button>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-4 rounded-xl2 border border-plate-200 p-6">
+          <h2 className="font-display font-semibold text-steel-900">Tus datos</h2>
+
+          <FormField label="Nombre y apellido" error={errors.customerName}>
+            <Input
+              required
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </FormField>
+
+          <FormField label="Teléfono / WhatsApp" error={errors.customerPhone}>
+            <Input
+              required
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="+54 9 3416..."
+            />
+          </FormField>
+
+          <FormField label="Email (opcional)">
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </FormField>
+
+          <FormField label="Dirección" error={errors.customerAddress}>
+            <Input
+              required
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="Calle y número"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="Ciudad" error={errors.customerCity}>
+              <Input
+                required
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </FormField>
+
+            <FormField label="Código postal" error={errors.customerPostalCode}>
+              <Input
+                required
+                value={form.postalCode}
+                onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+              />
+            </FormField>
+          </div>
+
+          <FormField label="Método de envío" error={errors.shippingMethod}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {SHIPPING_METHODS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setForm({ ...form, shippingMethod: value })}
+                  className={`rounded-lg py-2.5 px-3 text-xs font-semibold border transition-colors text-center ${
+                    form.shippingMethod === value
+                      ? 'bg-steel-950 text-white border-steel-950'
+                      : 'bg-white text-steel-600 border-plate-200 hover:border-steel-300'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {form.shippingMethod && (
+              <p className="mt-2 text-xs text-steel-500">
+                {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.note}
+              </p>
+            )}
+          </FormField>
+
+          <FormField label="Nota (opcional)">
+            <Textarea
+              value={form.note}
+              onChange={(e) => setForm({ ...form, note: e.target.value })}
+              rows={3}
+            />
+          </FormField>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)}>
+              Atrás
+            </Button>
+            <Button type="button" size="lg" onClick={goToPago} className="flex-1">
+              Siguiente: Pago
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="space-y-6">
+          <div className="rounded-xl2 border border-plate-200 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display font-semibold text-steel-900">Resumen del pedido</h2>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="font-mono text-[11px] text-steel-400 hover:text-steel-700 transition-colors"
+              >
+                Editar carrito
+              </button>
+            </div>
+            <ul className="divide-y divide-plate-100">
+              {items.map((item) => (
+                <li key={item.sku} className="flex items-center gap-3 py-2 text-sm">
+                  <div className="relative h-9 w-9 shrink-0 rounded-md bg-plate-50 overflow-hidden">
+                    {item.image ? (
+                      <Image src={item.image} alt={item.name} fill sizes="36px" className="object-contain p-0.5" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-steel-300 text-[6px] uppercase">Foto</div>
+                    )}
+                  </div>
+                  <span className="text-steel-700 truncate flex-1">
+                    {item.name} <span className="text-steel-400">x{item.qty}</span>
+                  </span>
+                  <span className="font-semibold text-steel-900 shrink-0">${fmtARS(item.price * item.qty)}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-between items-baseline border-t border-plate-200 pt-3">
+              <span className="font-mono text-[11px] text-steel-400 uppercase tracking-wide">Total</span>
+              <p className="font-display text-lg font-bold text-steel-950">${fmtARS(total)}</p>
+            </div>
+            {form.shippingMethod && (
+              <div className="border-t border-plate-200 pt-3">
+                <p className="text-sm font-semibold text-steel-900">
+                  {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.label}
+                </p>
+                <p className="text-xs text-steel-500 mt-0.5">
+                  {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.note}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Vista previa de financiación — solo zonas habilitadas, solo aplica al pedido por WhatsApp */}
+          {allowed && (
         <div className="rounded-xl2 border border-plate-200 overflow-hidden">
           <button
             type="button"
@@ -292,48 +537,16 @@ export default function OrderForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl2 border border-plate-200 p-6">
-        <h2 className="font-display font-semibold text-steel-900">Tus datos</h2>
-
-        <FormField label="Nombre y apellido" error={errors.customerName}>
-          <Input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-        </FormField>
-
-        <FormField label="Teléfono" error={errors.customerPhone}>
-          <Input
-            required
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="+54 9 3416..."
-          />
-        </FormField>
-
-        <FormField label="Email (opcional)">
-          <Input
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-        </FormField>
-
-        <FormField label="Dirección de entrega (opcional)">
-          <Input
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-            placeholder="Calle, número, localidad"
-          />
-        </FormField>
-
-        <FormField label="Nota (opcional)">
-          <Textarea
-            value={form.note}
-            onChange={(e) => setForm({ ...form, note: e.target.value })}
-            rows={3}
-          />
-        </FormField>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display font-semibold text-steel-900">¿Cómo pagás?</h2>
+          <button
+            type="button"
+            onClick={() => setStep(2)}
+            className="font-mono text-[11px] text-steel-400 hover:text-steel-700 transition-colors"
+          >
+            Atrás
+          </button>
+        </div>
 
         <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
           {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
@@ -352,8 +565,8 @@ export default function OrderForm() {
           type="button"
           disabled={mpLoading}
           onClick={async () => {
-            if (!form.name || !form.phone) {
-              setMpError('Completá tu nombre y teléfono antes de continuar.');
+            if (!form.name || !form.phone || !form.address || !form.city || !form.postalCode || !form.shippingMethod) {
+              setMpError('Completá tus datos antes de continuar.');
               return;
             }
             setMpError('');
@@ -371,7 +584,10 @@ export default function OrderForm() {
               if (!res.ok || !data.init_point) throw new Error(data.error ?? 'Error');
               sessionStorage.setItem('behmont-mp-pending', JSON.stringify({
                 items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
-                payer: { name: form.name, phone: form.phone },
+                payer: {
+                  name: form.name, phone: form.phone, address: form.address,
+                  city: form.city, postalCode: form.postalCode, shippingMethod: form.shippingMethod,
+                },
               }));
               window.location.href = data.init_point;
             } catch (err: unknown) {
@@ -415,6 +631,8 @@ export default function OrderForm() {
           Enviamos tu pedido por WhatsApp con la indicación de que querés pagar en 3 cuotas sin interés. Coordinamos el link de pago ahí.
         </p>
       </form>
+        </div>
+      )}
     </div>
   );
 }

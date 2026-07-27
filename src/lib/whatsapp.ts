@@ -1,10 +1,25 @@
 import { formatPrice } from './price';
 import type { WhatsAppOrderItem } from './types';
 
+const SHIPPING_METHOD_LABELS: Record<string, string> = {
+  sucursal: 'Envío a sucursal',
+  domicilio: 'Envío a domicilio',
+  retiro: 'Retiro en local',
+};
+
+const SHIPPING_METHOD_NOTES: Record<string, string> = {
+  sucursal: 'lo abona el cliente al retirar en la sucursal',
+  domicilio: 'lo abona el cliente por transferencia',
+  retiro: 'coordinar retiro y pago por WhatsApp',
+};
+
 type BuildOrderMessageInput = {
   customerName: string;
   customerPhone: string;
   customerAddress?: string;
+  customerCity?: string;
+  customerPostalCode?: string;
+  shippingMethod?: string;
   customerNote?: string;
   financingPlan?: string;
   wantsInstallments3?: boolean;
@@ -15,6 +30,9 @@ export function buildOrderMessage({
   customerName,
   customerPhone,
   customerAddress,
+  customerCity,
+  customerPostalCode,
+  shippingMethod,
   customerNote,
   financingPlan,
   wantsInstallments3,
@@ -26,6 +44,9 @@ export function buildOrderMessage({
   lines.push(`Cliente: ${customerName}`);
   lines.push(`Telefono: ${customerPhone}`);
   if (customerAddress) lines.push(`Direccion: ${customerAddress}`);
+  if (customerCity) lines.push(`Ciudad: ${customerCity}`);
+  if (customerPostalCode) lines.push(`Codigo postal: ${customerPostalCode}`);
+  if (shippingMethod) lines.push(`Envio: ${SHIPPING_METHOD_LABELS[shippingMethod] || shippingMethod} (${SHIPPING_METHOD_NOTES[shippingMethod] || ''})`);
   if (customerNote) lines.push(`Nota: ${customerNote}`);
   lines.push('');
   lines.push('Productos:');
@@ -58,6 +79,10 @@ export function buildOrderMessage({
 type BuildMpOrderMessageInput = {
   customerName: string;
   customerPhone: string;
+  customerAddress?: string;
+  customerCity?: string;
+  customerPostalCode?: string;
+  shippingMethod?: string;
   paymentId?: string;
   items: { name: string; price: number; qty: number }[];
 };
@@ -65,6 +90,10 @@ type BuildMpOrderMessageInput = {
 export function buildMpOrderMessage({
   customerName,
   customerPhone,
+  customerAddress,
+  customerCity,
+  customerPostalCode,
+  shippingMethod,
   paymentId,
   items,
 }: BuildMpOrderMessageInput): string {
@@ -73,6 +102,10 @@ export function buildMpOrderMessage({
   lines.push('');
   lines.push(`Cliente: ${customerName}`);
   lines.push(`Telefono: ${customerPhone}`);
+  if (customerAddress) lines.push(`Direccion: ${customerAddress}`);
+  if (customerCity) lines.push(`Ciudad: ${customerCity}`);
+  if (customerPostalCode) lines.push(`Codigo postal: ${customerPostalCode}`);
+  if (shippingMethod) lines.push(`Envio: ${SHIPPING_METHOD_LABELS[shippingMethod] || shippingMethod} (${SHIPPING_METHOD_NOTES[shippingMethod] || ''})`);
   if (paymentId) lines.push(`Nro de operacion: ${paymentId}`);
   lines.push('');
   lines.push('Productos:');

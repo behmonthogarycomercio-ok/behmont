@@ -15,7 +15,7 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
     try {
       const { items, payer } = JSON.parse(raw) as {
         items: { name: string; price: number; qty: number }[];
-        payer: { name: string; phone: string };
+        payer: { name: string; phone: string; address?: string; city?: string; postalCode?: string; shippingMethod?: string };
       };
 
       // Solo vaciar el carrito cuando el pago está realmente aprobado. "pending"
@@ -35,6 +35,10 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
       const message = buildMpOrderMessage({
         customerName: payer.name,
         customerPhone: payer.phone,
+        customerAddress: payer.address,
+        customerCity: payer.city,
+        customerPostalCode: payer.postalCode,
+        shippingMethod: payer.shippingMethod,
         paymentId,
         items,
       });

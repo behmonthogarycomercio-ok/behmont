@@ -13,6 +13,18 @@ const STATUS_LABELS: Record<string, { label: string; classes: string }> = {
 
 const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, { label }]) => ({ value, label }));
 
+const SHIPPING_METHOD_LABELS: Record<string, string> = {
+  sucursal: 'Envío a sucursal',
+  domicilio: 'Envío a domicilio',
+  retiro: 'Retiro en local',
+};
+
+const SHIPPING_METHOD_NOTES: Record<string, string> = {
+  sucursal: 'lo abona el cliente al retirar en la sucursal',
+  domicilio: 'lo abona el cliente por transferencia',
+  retiro: 'coordinar retiro y pago por WhatsApp',
+};
+
 export default async function PedidosPage({
   searchParams,
 }: {
@@ -25,7 +37,7 @@ export default async function PedidosPage({
 
   let query = supabase
     .from('whatsapp_orders')
-    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_note, items, total, status, created_at')
+    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_postal_code, shipping_method, customer_note, items, total, status, created_at')
     .order('created_at', { ascending: false });
 
   if (filterStatus) query = query.eq('status', filterStatus);
@@ -160,6 +172,17 @@ export default async function PedidosPage({
                       <p><span className="text-steel-400">Tel:</span> <span className="font-medium">{order.customer_phone || '—'}</span></p>
                       {order.customer_email && <p><span className="text-steel-400">Email:</span> <span className="font-medium">{order.customer_email}</span></p>}
                       {order.customer_address && <p><span className="text-steel-400">Dirección:</span> <span className="font-medium">{order.customer_address}</span></p>}
+                      {order.customer_city && <p><span className="text-steel-400">Ciudad:</span> <span className="font-medium">{order.customer_city}</span></p>}
+                      {order.customer_postal_code && <p><span className="text-steel-400">CP:</span> <span className="font-medium">{order.customer_postal_code}</span></p>}
+                      {order.shipping_method && (
+                        <p>
+                          <span className="text-steel-400">Envío:</span>{' '}
+                          <span className="font-medium">{SHIPPING_METHOD_LABELS[order.shipping_method] || order.shipping_method}</span>{' '}
+                          <span className="text-steel-400 italic">
+                            ({SHIPPING_METHOD_NOTES[order.shipping_method] || ''})
+                          </span>
+                        </p>
+                      )}
                       {plainNote && (
                         <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{plainNote}</span></p>
                       )}
