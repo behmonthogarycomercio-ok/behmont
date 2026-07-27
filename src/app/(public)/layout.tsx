@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PickupDiscountBanner from '@/components/PickupDiscountBanner';
 import { getCategories, getSiteSettings } from '@/lib/data';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -7,6 +8,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
+      <PickupDiscountBanner />
       <Navbar categories={categories} contactPhone={settings.contactPhone} whatsappNumber={settings.whatsappNumber} />
       {children}
       <Footer

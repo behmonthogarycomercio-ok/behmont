@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, Trash2, Wallet, ChevronDown, CreditCard, Check } from 'lucide-react';
+import { Minus, Plus, Trash2, Wallet, ChevronDown, Check } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import {
@@ -33,11 +33,25 @@ const STEPS: { n: Step; label: string }[] = [
 ];
 
 type ShippingMethod = 'sucursal' | 'domicilio' | 'retiro';
-const SHIPPING_METHODS: { value: ShippingMethod; label: string; note: string }[] = [
-  { value: 'sucursal', label: 'Envío a sucursal', note: 'Lo abonás al retirarlo en la sucursal de destino.' },
-  { value: 'domicilio', label: 'Envío a domicilio', note: 'Se abona por transferencia antes del envío.' },
-  { value: 'retiro', label: 'Retiro en local', note: 'Coordinamos el retiro y el pago por WhatsApp.' },
+const SHIPPING_METHODS: { value: ShippingMethod; label: string }[] = [
+  { value: 'sucursal', label: 'Envío a sucursal' },
+  { value: 'domicilio', label: 'Envío a domicilio' },
+  { value: 'retiro', label: 'Retiro en local' },
 ];
+
+// La nota de "domicilio" depende de si la zona tiene financiación
+// habilitada: dentro de zona, se puede abonar cuando se entrega el
+// pedido; fuera de zona, hay que pagar por MercadoPago antes del envío.
+function getShippingNote(method: ShippingMethod | '', allowed: boolean | null): string {
+  if (method === 'sucursal') return 'Lo abonás al retirarlo en la sucursal de destino.';
+  if (method === 'retiro') return 'Coordinamos el retiro y el pago por WhatsApp.';
+  if (method === 'domicilio') {
+    return allowed
+      ? 'Podés abonarlo cuando te enviamos el pedido al domicilio.'
+      : 'Se abona por MercadoPago antes de coordinar el envío.';
+  }
+  return '';
+}
 
 function StepIndicator({ step, onBack }: { step: Step; onBack: (s: Step) => void }) {
   return (
@@ -123,7 +137,7 @@ export default function OrderForm() {
     return `${getPlanLabel(currentPlan)} (+${Math.round(currentPlan.surcharge * 100)}%) — Cuota por ${freqLabel}: $${fmtARS(cuota)} — Total a devolver: $${fmtARS(totalDevolver)}`;
   }
 
-  async function submitOrder(wantsInstallments3: boolean) {
+  async function submitOrder() {
     setErrors({});
     setSending(true);
 
@@ -141,7 +155,6 @@ export default function OrderForm() {
           shippingMethod: form.shippingMethod,
           customerNote: form.note,
           financingPlan: financingSummary(),
-          wantsInstallments3,
           items,
         }),
       });
@@ -166,8 +179,15 @@ export default function OrderForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    submitOrder(false);
+    submitOrder();
   }
+
+  // Envío a domicilio fuera de zona de financiación: el pago tiene que
+  // hacerse por MercadoPago antes de coordinar el envío (no se ofrece la
+  // opción de pedido sin pagar por WhatsApp). Dentro de zona de
+  // financiación, sucursal y retiro en local siguen permitiendo coordinar
+  // el pago por WhatsApp (efectivo al retirar / financiación a domicilio).
+  const requiresPrepay = form.shippingMethod === 'domicilio' && !allowed;
 
   function goToDatos() {
     setStep(2);
@@ -397,7 +417,7 @@ export default function OrderForm() {
             </div>
             {form.shippingMethod && (
               <p className="mt-2 text-xs text-steel-500">
-                {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.note}
+                {getShippingNote(form.shippingMethod, allowed)}
               </p>
             )}
           </FormField>
@@ -461,7 +481,7 @@ export default function OrderForm() {
                   {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.label}
                 </p>
                 <p className="text-xs text-steel-500 mt-0.5">
-                  {SHIPPING_METHODS.find((m) => m.value === form.shippingMethod)?.note}
+                  {getShippingNote(form.shippingMethod, allowed)}
                 </p>
               </div>
             )}
@@ -548,16 +568,23 @@ export default function OrderForm() {
           </button>
         </div>
 
-        <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
-          {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
-        </Button>
+        {requiresPrepay ? (
+          <p className="text-xs text-steel-500 bg-plate-50 rounded-lg p-3">
+            Para envío a domicilio fuera de zona de financiación, el pago se realiza por MercadoPago antes de coordinar el envío.
+          </p>
+        ) : (
+          <>
+            <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
+              {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
+            </Button>
 
-        {/* MercadoPago */}
-        <div className="flex items-center gap-3 pt-1">
-          <div className="flex-1 border-t border-plate-200" />
-          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
-          <div className="flex-1 border-t border-plate-200" />
-        </div>
+            <div className="flex items-center gap-3 pt-1">
+              <div className="flex-1 border-t border-plate-200" />
+              <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
+              <div className="flex-1 border-t border-plate-200" />
+            </div>
+          </>
+        )}
 
         {mpError && <p className="text-xs text-red-600">{mpError}</p>}
 
@@ -610,26 +637,6 @@ export default function OrderForm() {
           )}
           {mpLoading ? 'Redirigiendo...' : 'Pagar con MercadoPago'}
         </button>
-
-        {/* Pedido en 3 cuotas sin interés (el link de pago se coordina despues por WhatsApp) */}
-        <div className="flex items-center gap-3 pt-1">
-          <div className="flex-1 border-t border-plate-200" />
-          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o</span>
-          <div className="flex-1 border-t border-plate-200" />
-        </div>
-
-        <button
-          type="button"
-          disabled={sending}
-          onClick={() => submitOrder(true)}
-          className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white hover:bg-[#1ebe5a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <CreditCard className="h-4 w-4 shrink-0" />
-          {sending ? 'Enviando...' : 'Pedido en 3 cuotas sin interés'}
-        </button>
-        <p className="text-xs text-steel-400 text-center -mt-1">
-          Enviamos tu pedido por WhatsApp con la indicación de que querés pagar en 3 cuotas sin interés. Coordinamos el link de pago ahí.
-        </p>
       </form>
         </div>
       )}
