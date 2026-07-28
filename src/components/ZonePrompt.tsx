@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useLocation } from '@/lib/location-context';
 import { ALLOWED_ZONES } from '@/lib/financing';
 
@@ -21,7 +21,7 @@ function searchZone(query: string): string | null {
 }
 
 export default function ZonePrompt() {
-  const { showPrompt, setZone, dismissPrompt, declineZone } = useLocation();
+  const { showPrompt, setZone, declineZone } = useLocation();
   const [query, setQuery] = useState('');
   const [matched, setMatched] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
@@ -42,10 +42,9 @@ export default function ZonePrompt() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — sin onClick: confirmar la zona es obligatorio */}
       <div
         className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
-        onClick={dismissPrompt}
       />
 
       {/* Panel — bottom sheet en mobile, card centrada en desktop */}
@@ -58,25 +57,16 @@ export default function ZonePrompt() {
       >
         <div className="rounded-t-2xl md:rounded-2xl bg-white p-6 shadow-2xl">
           {/* Header */}
-          <div className="flex items-start justify-between gap-3 mb-5">
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-50">
-                <MapPin className="h-5 w-5 text-amber-600" />
-              </span>
-              <div>
-                <p className="font-display font-bold text-steel-950 leading-tight">¿En qué zona estás?</p>
-                <p className="text-xs text-steel-400 leading-snug mt-0.5">
-                  Así te mostramos si tenés financiación disponible
-                </p>
-              </div>
+          <div className="flex items-center gap-3 mb-5">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-50">
+              <MapPin className="h-5 w-5 text-amber-600" />
+            </span>
+            <div>
+              <p className="font-display font-bold text-steel-950 leading-tight">¿En qué zona estás?</p>
+              <p className="text-xs text-steel-400 leading-snug mt-0.5">
+                Así te mostramos si tenés financiación disponible
+              </p>
             </div>
-            <button
-              onClick={dismissPrompt}
-              className="p-1.5 rounded-lg hover:bg-plate-100 text-steel-400 transition-colors shrink-0"
-              aria-label="Cerrar"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
 
           {/* Input */}

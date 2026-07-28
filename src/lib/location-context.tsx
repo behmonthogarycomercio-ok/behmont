@@ -11,7 +11,6 @@ type LocationContextType = ZoneState & {
   setZone: (city: string, allowed: boolean) => void;
   clearZone: () => void;
   showPrompt: boolean;
-  dismissPrompt: () => void;
   declineZone: () => void;
 };
 
@@ -51,15 +50,9 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setShowPrompt(true);
   }
 
-  // Cerrar con la X o el fondo no es una respuesta -- solo oculta el
-  // cartel por ahora, sin guardar nada, para que se vuelva a preguntar
-  // la próxima vez que entre al sitio. Antes esto guardaba allowed:false
-  // como si fuera una respuesta definitiva, y por eso a veces preguntaba
-  // la ubicación y otras veces no (quedaba guardado un cierre accidental).
-  function dismissPrompt() {
-    setShowPrompt(false);
-  }
-
+  // Confirmar la ubicación es obligatorio -- no hay forma de cerrar el
+  // cartel sin responder (ni X, ni click afuera). La única salida sin
+  // elegir una zona puntual es declineZone, que igual guarda una respuesta.
   // Respuesta explícita: el visitante confirmó que no está en ninguna
   // zona con financiación. Esto sí se guarda.
   function declineZone() {
@@ -70,7 +63,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <LocationContext.Provider value={{ ...state, setZone, clearZone, showPrompt, dismissPrompt, declineZone }}>
+    <LocationContext.Provider value={{ ...state, setZone, clearZone, showPrompt, declineZone }}>
       {children}
     </LocationContext.Provider>
   );
