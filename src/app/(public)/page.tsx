@@ -130,9 +130,6 @@ export default async function HomePage() {
       </ScrollReveal>
       <ScrollReveal><PaymentSection /></ScrollReveal>
       <ScrollReveal>
-        <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />
-      </ScrollReveal>
-      <ScrollReveal>
         <ThemedCollection
           eyebrow="Para tu casa"
           title="Todo para el hogar"
@@ -142,6 +139,9 @@ export default async function HomePage() {
         />
       </ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
+      <ScrollReveal>
+        <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />
+      </ScrollReveal>
       <ScrollReveal><WhatsAppSection whatsappNumber={settings.whatsappNumber} /></ScrollReveal>
       <ScrollReveal><BrandStrip brands={brands} /></ScrollReveal>
       <ScrollReveal>
