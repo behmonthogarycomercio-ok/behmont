@@ -1,9 +1,10 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import DeleteButton from '@/components/admin/DeleteButton';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { createServerSupabase, createServiceSupabase } from '@/lib/supabase/server';
 import { updateOrderStatus, deleteOrder } from '@/lib/actions';
 import { formatPrice } from '@/lib/price';
+import { FileText } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; classes: string }> = {
   pendiente:   { label: 'Pendiente',   classes: 'bg-yellow-100 text-yellow-700' },
@@ -38,13 +39,33 @@ export default async function PedidosPage({
 
   let query = supabase
     .from('whatsapp_orders')
-    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at')
+    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at, financing_documents')
     .order('created_at', { ascending: false });
 
   if (filterStatus) query = query.eq('status', filterStatus);
   if (q)            query = query.ilike('customer_name', `%${q}%`);
 
   const { data: orders } = await query.limit(100);
+
+  // Los documentos de financiacion viven en un bucket privado -- hace
+  // falta la service role para generar el link firmado de descarga,
+  // sin importar quien este autenticado como admin.
+  const serviceSupabase = createServiceSupabase();
+  const ordersWithDocs = await Promise.all(
+    (orders || []).map(async (order) => {
+      const docs = (order.financing_documents as { label: string; path: string }[] | null) || [];
+      if (docs.length === 0) return { ...order, financingDocsWithUrl: [] as { label: string; url: string }[] };
+      const withUrl = await Promise.all(
+        docs.map(async (doc) => {
+          const { data } = await serviceSupabase.storage
+            .from('financing-documents')
+            .createSignedUrl(doc.path, 60 * 10); // 10 min, se genera al abrir la pagina
+          return { label: doc.label, url: data?.signedUrl || '' };
+        })
+      );
+      return { ...order, financingDocsWithUrl: withUrl.filter((d) => d.url) };
+    })
+  );
 
   // Summary counts
   const { data: counts } = await supabase
@@ -104,13 +125,13 @@ export default async function PedidosPage({
       </form>
 
       {/* Orders list */}
-      {(!orders || orders.length === 0) ? (
+      {ordersWithDocs.length === 0 ? (
         <div className="rounded-xl border border-dashed border-plate-200 p-12 text-center">
           <p className="text-steel-500 text-sm">No hay pedidos con este filtro.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => {
+          {ordersWithDocs.map((order) => {
             const items = (order.items as { name: string; qty: number; price: number; sku: string }[]) || [];
             const st = order.status || 'pendiente';
             const badge = STATUS_LABELS[st] || STATUS_LABELS.pendiente;
@@ -196,6 +217,24 @@ export default async function PedidosPage({
                       )}
                       {installments3Line && (
                         <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-emerald-600">Quiere 3 cuotas sin interés — coordinar link de pago</span></p>
+                      )}
+                      {order.financingDocsWithUrl.length > 0 && (
+                        <div>
+                          <span className="text-steel-400">Documentos:</span>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {order.financingDocsWithUrl.map((doc, i) => (
+                              <a
+                                key={i}
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-plate-200 px-2.5 py-1 text-xs font-medium text-steel-700 hover:border-amber-400 hover:text-amber-700 transition-colors"
+                              >
+                                <FileText className="h-3.5 w-3.5" /> {doc.label}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
 

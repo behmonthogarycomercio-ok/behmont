@@ -75,8 +75,14 @@ export default async function GuiaDeComprasPage() {
                 <li><span className="font-semibold text-steel-900">Pagos diarios o semanales:</span> aplicables de forma estándar.</li>
                 <li><span className="font-semibold text-steel-900">Pagos mensuales:</span> exclusivo para clientes que presenten recibo de sueldo.</li>
               </ul>
-              <div className="mt-4 rounded-xl border border-plate-200 bg-plate-50 px-5 py-4 text-sm text-steel-600">
-                <span className="font-semibold text-steel-900">Requisitos:</span> DNI frente y dorso · Factura de servicio a nombre del solicitante · Comprobante de ingresos.
+              <div className="mt-4 rounded-xl border border-plate-200 bg-plate-50 px-5 py-4 text-sm text-steel-600 space-y-2">
+                <p><span className="font-semibold text-steel-900">Requisitos:</span> DNI frente y dorso · Factura de servicio a nombre del solicitante.</p>
+                <p>
+                  <span className="font-semibold text-steel-900">Comprobante de ingresos (recibo de sueldo):</span> no es necesario
+                  si el solicitante tiene comercio propio. Si no tiene comercio, es obligatorio presentar recibo de sueldo propio o,
+                  en su defecto, el de un garante. Sin comercio, recibo de sueldo propio o garante con recibo de sueldo, no es posible
+                  otorgar la financiación.
+                </p>
               </div>
               <p className="mt-3 text-xs text-steel-400 leading-relaxed">
                 El otorgamiento de cualquier línea de crédito queda sujeto a la previa revisión del perfil crediticio del solicitante.

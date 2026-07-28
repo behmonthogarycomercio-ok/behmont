@@ -15,6 +15,9 @@ const orderSchema = z.object({
   customerNote: z.string().optional(),
   financingPlan: z.string().optional(),
   wantsInstallments3: z.boolean().optional(),
+  financingDocuments: z
+    .array(z.object({ label: z.string(), path: z.string() }))
+    .optional(),
   items: z
     .array(
       z.object({
@@ -40,15 +43,35 @@ export async function POST(request: Request) {
 
   const {
     customerName, customerPhone, customerEmail, customerAddress, customerCity, customerProvince,
-    customerPostalCode, shippingMethod, customerNote, financingPlan, wantsInstallments3, items,
+    customerPostalCode, shippingMethod, customerNote, financingPlan, wantsInstallments3,
+    financingDocuments, items,
   } = parsed.data;
   const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const message = buildOrderMessage({
-    customerName, customerPhone, customerAddress, customerCity, customerProvince, customerPostalCode,
-    shippingMethod, customerNote, financingPlan, wantsInstallments3, items,
-  });
 
   const supabase = createServiceSupabase();
+
+  // Los documentos se guardan en un bucket privado -- para que se puedan ver
+  // desde el mensaje de WhatsApp se genera un link firmado con vencimiento,
+  // sin exponer el archivo publicamente.
+  let financingDocsWithUrl: { label: string; url: string }[] | undefined;
+  if (financingDocuments && financingDocuments.length > 0) {
+    const signed = await Promise.all(
+      financingDocuments.map(async (doc) => {
+        const { data } = await supabase.storage
+          .from('financing-documents')
+          .createSignedUrl(doc.path, 60 * 60 * 24 * 7); // 7 dias
+        return { label: doc.label, url: data?.signedUrl || '' };
+      })
+    );
+    financingDocsWithUrl = signed.filter((d) => d.url);
+  }
+
+  const message = buildOrderMessage({
+    customerName, customerPhone, customerAddress, customerCity, customerProvince, customerPostalCode,
+    shippingMethod, customerNote, financingPlan, wantsInstallments3,
+    financingDocuments: financingDocsWithUrl, items,
+  });
+
   const { data: settings } = await supabase
     .from('site_settings')
     .select('key, value')
@@ -75,6 +98,7 @@ export async function POST(request: Request) {
     items,
     total,
     message_text: message,
+    financing_documents: financingDocuments && financingDocuments.length > 0 ? financingDocuments : null,
   });
 
   if (error) {

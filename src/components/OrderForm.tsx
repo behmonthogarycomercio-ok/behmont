@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, Trash2, Wallet, ChevronDown, Check } from 'lucide-react';
+import { Minus, Plus, Trash2, Wallet, ChevronDown, Check, Upload, Loader2, AlertCircle } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import {
@@ -44,6 +44,18 @@ const PROVINCES = [
   'Córdoba', 'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
   'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan', 'San Luis',
   'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
+];
+
+// Mismos requisitos que ya figuran en la Guía de compras para financiación propia.
+const FINANCING_DOCS: { key: string; label: string; hint?: string }[] = [
+  { key: 'dni-frente', label: 'DNI (frente)' },
+  { key: 'dni-dorso', label: 'DNI (dorso)' },
+  { key: 'factura-servicio', label: 'Factura de servicio a tu nombre' },
+  {
+    key: 'comprobante-ingresos',
+    label: 'Comprobante de ingresos (recibo de sueldo)',
+    hint: 'No hace falta si tenés comercio propio. Si no tenés comercio ni recibo de sueldo, se puede financiar con un garante que presente su recibo de sueldo.',
+  },
 ];
 
 // El envío siempre se coordina por WhatsApp. Para domicilio, el pago
@@ -114,6 +126,25 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
   const [wantsFinancing, setWantsFinancing] = useState(false);
   const [freq, setFreq] = useState<Freq>('daily');
   const [planIdx, setPlanIdx] = useState(0);
+  const [financingDocs, setFinancingDocs] = useState<Record<string, { path?: string; uploading: boolean; error?: string }>>({});
+
+  async function uploadFinancingDoc(docKey: string, label: string, file: File) {
+    setFinancingDocs((prev) => ({ ...prev, [docKey]: { uploading: true } }));
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      body.append('label', label);
+      const res = await fetch('/api/upload/financing-doc', { method: 'POST', body });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo subir');
+      setFinancingDocs((prev) => ({ ...prev, [docKey]: { path: data.path, uploading: false } }));
+    } catch (err) {
+      setFinancingDocs((prev) => ({
+        ...prev,
+        [docKey]: { uploading: false, error: err instanceof Error ? err.message : 'No se pudo subir' },
+      }));
+    }
+  }
 
   const activePlans: AnyPlan[] = freq === 'monthly' ? MONTHLY_PLANS : DAILY_PLANS;
   const safeIdx = Math.min(planIdx, activePlans.length - 1);
@@ -159,6 +190,11 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           shippingMethod: form.shippingMethod,
           customerNote: form.note,
           financingPlan: financingSummary(),
+          financingDocuments: wantsFinancing
+            ? FINANCING_DOCS
+                .filter((d) => financingDocs[d.key]?.path)
+                .map((d) => ({ label: d.label, path: financingDocs[d.key].path as string }))
+            : undefined,
           items,
         }),
       });
@@ -571,6 +607,56 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
               <p className="text-xs text-steel-400">
                 Este plan se incluye en el mensaje al enviar tu pedido por WhatsApp. Coordinamos ahí la documentación y confirmamos la primera cuota.
               </p>
+
+              <div className="border-t border-plate-200 pt-4 space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-steel-900">Documentación para financiar</p>
+                  <p className="text-xs text-steel-400 mt-0.5">
+                    Opcional acá, pero la vamos a necesitar para aprobar el crédito. Subila ahora o mandala después por WhatsApp.
+                  </p>
+                </div>
+                {FINANCING_DOCS.map(({ key, label, hint }) => {
+                  const doc = financingDocs[key];
+                  return (
+                    <label
+                      key={key}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-plate-200 px-3.5 py-2.5 cursor-pointer hover:border-steel-300 transition-colors"
+                    >
+                      <span className="flex items-center gap-2.5 min-w-0">
+                        {doc?.uploading ? (
+                          <Loader2 className="h-4 w-4 shrink-0 text-steel-400 animate-spin" />
+                        ) : doc?.path ? (
+                          <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                        ) : doc?.error ? (
+                          <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                        ) : (
+                          <Upload className="h-4 w-4 shrink-0 text-steel-400" />
+                        )}
+                        <span className="text-sm text-steel-700 min-w-0">
+                          <span className="block truncate">{label}</span>
+                          {doc?.error ? (
+                            <span className="block text-xs text-red-500">{doc.error}</span>
+                          ) : hint ? (
+                            <span className="block text-xs text-steel-400 whitespace-normal">{hint}</span>
+                          ) : null}
+                        </span>
+                      </span>
+                      <span className="shrink-0 font-mono text-[11px] font-semibold text-amber-600">
+                        {doc?.path ? 'Cambiar' : 'Subir'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadFinancingDoc(key, label, file);
+                        }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

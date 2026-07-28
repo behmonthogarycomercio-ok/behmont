@@ -24,6 +24,7 @@ type BuildOrderMessageInput = {
   customerNote?: string;
   financingPlan?: string;
   wantsInstallments3?: boolean;
+  financingDocuments?: { label: string; url: string }[];
   items: WhatsAppOrderItem[];
 };
 
@@ -38,6 +39,7 @@ export function buildOrderMessage({
   customerNote,
   financingPlan,
   wantsInstallments3,
+  financingDocuments,
   items,
 }: BuildOrderMessageInput): string {
   const lines: string[] = [];
@@ -72,6 +74,13 @@ export function buildOrderMessage({
   if (wantsInstallments3) {
     lines.push('');
     lines.push('Quiere pagar en 3 cuotas sin interés — coordinar link de pago.');
+  }
+  if (financingDocuments && financingDocuments.length > 0) {
+    lines.push('');
+    lines.push('Documentacion para financiar:');
+    for (const doc of financingDocuments) {
+      lines.push(`• ${doc.label}: ${doc.url}`);
+    }
   }
   lines.push('');
   lines.push('_Pedido generado desde behmont.com.ar_');
