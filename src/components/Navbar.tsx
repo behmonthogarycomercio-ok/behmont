@@ -112,7 +112,7 @@ export default function Navbar({
 
       {/* ── Cinta de categorías + info de contacto (navy) + mega-menu ── */}
       <div className="hidden md:block bg-[#0B1C3A] border-t border-white/10 relative" ref={megaRef}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center h-12 gap-1">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-wrap items-center min-h-12 py-1.5 gap-1">
           <button
             onClick={() => setMegaOpen(v => !v)}
             className={`flex items-center gap-2 px-3.5 h-9 rounded-full text-[13px] font-bold transition-colors ${megaOpen ? 'bg-white text-[#0B1C3A]' : 'bg-white/10 text-white hover:bg-white/15'}`}
@@ -152,7 +152,7 @@ export default function Navbar({
             </button>
           )}
 
-          <div className="ml-auto hidden lg:flex items-center gap-5 text-[12px] text-white/70">
+          <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-white/70">
             <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
