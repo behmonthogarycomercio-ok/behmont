@@ -40,39 +40,46 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
   ],
   panaderia: [
     { name: 'Amasadoras', keyword: 'amasadora', image: '/images/subcategorias/amasadoras.webp' },
-    { name: 'Sobadoras', keyword: 'sobadora', image: '/images/products/RMJ-500/1.png' },
+    { name: 'Hornos', keyword: 'horno', image: '/images/subcategorias/hornos-panaderia.webp' },
+    { name: 'Sobadoras', keyword: 'sobadora', image: '/images/subcategorias/sobadoras.webp' },
     { name: 'Ralladoras', keyword: 'ralladora', image: '/images/products/1315/1.jpg' },
   ],
   hogar: [
     { name: 'Cámaras de Seguridad', keyword: 'camara', image: '/images/products/TS-8854C/1.jpg' },
   ],
   'peluqueria-barberia': [
-    { name: 'Secadores de Pelo', keyword: 'secador', image: '/images/products/517-12/1.webp' },
+    { name: 'Secadores de Pelo', keyword: 'secador', image: '/images/subcategorias/secadores.webp' },
     { name: 'Planchitas de Pelo', keyword: 'planchita', image: '/images/products/CFJB-KM-6910/1.png' },
     { name: 'Clippers', keyword: 'clipper', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA1714244593-1.jpg' },
+    { name: 'Trimmers y Patilleras', keyword: 'trimmer', image: '/images/subcategorias/trimmers.webp' },
     { name: 'Peines', keyword: 'peine', image: '/images/products/25-YXH112/1.png' },
     { name: 'Lavacabezas', keyword: 'lavacabeza', image: '/images/products/517-8/1.jpg' },
     { name: 'Rizadores', keyword: 'rizador', image: '/images/products/25-YXH110/1.png' },
     { name: 'Sillones y Sillas', keyword: 'sillon', image: '/images/subcategorias/sillones-peluqueria.webp' },
-    { name: 'Carritos Ayudantes', keyword: 'ayudante', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA2194305160-1.webp' },
+    { name: 'Carritos Ayudantes', keyword: 'ayudante', image: '/images/subcategorias/carritos-ayudantes.webp' },
   ],
   estetica: [
-    { name: 'Camillas', keyword: 'camilla', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA1706557905-1.webp' },
-    { name: 'Mesas de Manicura', keyword: 'manicura', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA3126101014-1.webp' },
+    { name: 'Camillas', keyword: 'camilla', image: '/images/subcategorias/camillas.webp' },
+    { name: 'Mesas de Manicura', keyword: 'manicura', image: '/images/subcategorias/mesas-manicura.webp' },
+    { name: 'Depiladoras', keyword: 'depiladora', image: '/images/subcategorias/depiladoras.webp' },
   ],
-  decoracion: [],
+  decoracion: [
+    { name: 'Espejos Ovalados', keyword: 'ovalado', image: '/images/subcategorias/espejos-ovalados.webp' },
+    { name: 'Espejos Rectangulares', keyword: 'rectangular', image: '/images/subcategorias/espejos-rectangulares.webp' },
+    { name: 'Espejos con Iluminación', keyword: 'led', image: '/images/subcategorias/espejos-iluminacion.webp' },
+  ],
   almacenamiento: [
-    { name: 'Racks', keyword: 'rack', image: 'https://http2.mlstatic.com/D_865078-MLA113833200048_072026-O.webp' },
-    { name: 'Estanterías', keyword: 'estante', image: 'https://http2.mlstatic.com/D_857607-MLA113644743512_072026-O.webp' },
+    { name: 'Racks', keyword: 'rack', image: '/images/subcategorias/racks.webp' },
+    { name: 'Estanterías', keyword: 'estante', image: '/images/subcategorias/estanterias.webp' },
   ],
   oficina: [
-    { name: 'Sillas de Oficina', keyword: 'silla', image: '/images/products/25-JA31/1.jpg' },
+    { name: 'Sillas de Oficina', keyword: 'silla', image: '/images/subcategorias/sillas-oficina.webp' },
   ],
   herramientas: [
     { name: 'Hidrolavadoras', keyword: 'hidrolavadora', image: '/images/subcategorias/hidrolavadoras.webp' },
-    { name: 'Taladros', keyword: 'taladro', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA2211789840-1.jpg' },
-    { name: 'Amoladoras', keyword: 'amoladora', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA2211789840-1.jpg' },
-    { name: 'Atornilladores', keyword: 'atornillador', image: 'https://pobfcnezbxrprtymyivi.supabase.co/storage/v1/object/public/product-images/ml-import/MLA2211789840-1.jpg' },
+    { name: 'Taladros', keyword: 'taladro', image: '/images/subcategorias/taladros.webp' },
+    { name: 'Amoladoras', keyword: 'amoladora', image: '/images/subcategorias/amoladoras.webp' },
+    { name: 'Atornilladores', keyword: 'atornillador', image: '/images/subcategorias/atornilladores.webp' },
   ],
   electronica: [
     { name: 'Televisores', keyword: 'smart', image: '/images/subcategorias/televisores.webp' },
@@ -85,7 +92,8 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
   ],
   muebles: [
     { name: 'Colchones', keyword: 'colchon', image: '/images/subcategorias/colchones.webp' },
-    { name: 'Sillas', keyword: 'silla', image: '/images/products/25-JA31/1.jpg' },
+    { name: 'Sillas', keyword: 'silla', image: '/images/subcategorias/sillas-muebles.webp' },
+    { name: 'Placares', keyword: 'placar', image: '/images/subcategorias/placares.webp' },
   ],
   electrodomesticos: [
     { name: 'Cocinas', keyword: 'cocina', image: '/images/subcategorias/cocinas-electro.webp' },
