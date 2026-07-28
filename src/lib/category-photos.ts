@@ -3,6 +3,7 @@ export const CATEGORY_PHOTOS: Record<string, string> = {
   gastronomia: '/images/categoria-gastronomia.webp',
   almacen: '/images/categoria-almacen.webp',
   almacenamiento: '/images/categoria-almacenamiento.webp',
+  'bebes-ninos': '/images/categoria-bebes-ninos.webp',
   frio: '/images/categoria-frio.webp',
   hogar: '/images/categoria-hogar.webp',
   decoracion: '/images/categoria-decoracion.webp',

@@ -103,6 +103,7 @@ export default async function HomePage() {
             title="Regalos para los más chicos"
             products={kidsCategory.products}
             whatsappNumber={settings.whatsappNumber}
+            promoImage="/images/promo-6-cuotas-ninos.webp"
           />
         </ScrollReveal>
       )}
@@ -136,6 +137,7 @@ export default async function HomePage() {
           title="Todo para el hogar"
           products={hogarCategory.products}
           whatsappNumber={settings.whatsappNumber}
+          promoImage="/images/promo-6-cuotas-hogar.webp"
         />
       </ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
