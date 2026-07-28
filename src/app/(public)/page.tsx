@@ -123,6 +123,7 @@ export default async function HomePage() {
           title="Lavarropas y secarropas"
           products={laundryProducts}
           whatsappNumber={settings.whatsappNumber}
+          promoImage="/images/promo-6-cuotas-lavarropas.webp"
         />
       </ScrollReveal>
       <ScrollReveal><PaymentSection /></ScrollReveal>

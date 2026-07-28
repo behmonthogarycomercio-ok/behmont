@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import ProductCard from './ProductCard';
 import ProductCarousel from './ProductCarousel';
 import type { Product } from '@/lib/types';
@@ -9,11 +10,14 @@ export default function ThemedCollection({
   title,
   products,
   whatsappNumber,
+  promoImage,
 }: {
   eyebrow?: string;
   title: string;
   products: Product[];
   whatsappNumber: string;
+  /** Reemplaza el tile de "Hasta N cuotas" calculado por una imagen ya diseñada (formato vertical). */
+  promoImage?: string;
 }) {
   if (products.length === 0) return null;
 
@@ -40,6 +44,11 @@ export default function ThemedCollection({
       </div>
 
       <div className="flex gap-5">
+        {promoImage ? (
+          <div className="hidden lg:block shrink-0 w-[170px] relative rounded-xl2 overflow-hidden">
+            <Image src={promoImage} alt={title} width={170} height={302} className="h-full w-full object-cover" />
+          </div>
+        ) : (
         <div className="hidden lg:flex shrink-0 w-[170px] flex-col items-center justify-center gap-1 rounded-xl2 bg-steel-950 text-white p-5 text-center">
           <p className="font-mono text-[11px] uppercase tracking-wide text-amber-400">Hasta</p>
           <p className="font-display text-3xl font-black leading-none">
@@ -58,6 +67,7 @@ export default function ThemedCollection({
           )}
           <p className="text-[10px] text-white/40 mt-3 leading-snug">En productos seleccionados</p>
         </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <ProductCarousel>
