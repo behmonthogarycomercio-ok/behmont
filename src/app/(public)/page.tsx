@@ -94,6 +94,7 @@ export default async function HomePage() {
           title="Preparate para el frío"
           products={winterProducts}
           whatsappNumber={settings.whatsappNumber}
+          promoImage="/images/promo-6-cuotas-calefaccion.webp"
         />
       </ScrollReveal>
       {childrensDayLabel && (
