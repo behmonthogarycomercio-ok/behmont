@@ -1,19 +1,10 @@
 'use client';
 
 import { BadgePercent } from 'lucide-react';
-import { useLocation } from '@/lib/location-context';
 
-// El descuento por retiro en local solo tiene sentido para gente que
-// realmente puede llegar hasta el local -- se muestra automaticamente
-// nada mas cuando la zona detectada/elegida por el visitante es una de
-// las zonas habilitadas (las mismas que ya se usan para financiacion).
-// Si todavia no eligio zona, o eligio una zona fuera de esa lista, el
-// cartel no aparece.
+// El descuento por retiro en local aplica a cualquier cliente que elija
+// esa opcion al comprar, sin importar su ubicacion -- se muestra siempre.
 export default function PickupDiscountBanner() {
-  const { allowed } = useLocation();
-
-  if (!allowed) return null;
-
   return (
     <div className="bg-amber-500 text-steel-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-center gap-2.5 sm:gap-3 text-center">
