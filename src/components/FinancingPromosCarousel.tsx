@@ -32,30 +32,30 @@ export default function FinancingPromosCarousel({
   const generalLink = buildWhatsAppLink(whatsappNumber, buildPromoInquiryMessage('Promos en financiación'));
 
   return (
-    <section className="bg-steel-900 py-[84px] lg:py-[104px]">
+    <section className="bg-steel-900 py-[74px] lg:py-[92px]">
       <div className="mx-auto max-w-[1382px] px-4 sm:px-6">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-[35px] lg:gap-[56px]">
           {/* Texto */}
-          <div className="lg:w-[520px] shrink-0">
-            <span className="grid h-20 w-20 shrink-0 -rotate-6 place-items-center rounded-xl bg-amber-500 shadow-lg mb-6">
-              <Wallet className="h-10 w-10 text-white" />
+          <div className="lg:w-[458px] shrink-0">
+            <span className="grid h-[70px] w-[70px] shrink-0 -rotate-6 place-items-center rounded-lg bg-amber-500 shadow-lg mb-[21px]">
+              <Wallet className="h-[35px] w-[35px] text-white" />
             </span>
-            <p className="font-mono text-[22px] font-medium uppercase tracking-[0.2em] text-amber-400/90 mb-4">
+            <p className="font-mono text-[19px] font-medium uppercase tracking-[0.2em] text-amber-400/90 mb-[14px]">
               Julio · hasta agotar stock
             </p>
-            <h2 className="font-display text-5xl sm:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
+            <h2 className="font-display text-[42px] sm:text-[53px] font-bold text-white leading-tight tracking-tight mb-[21px]">
               Promos en financiación
             </h2>
-            <p className="text-white/60 text-2xl leading-relaxed mb-8">
+            <p className="text-white/60 text-[25px] leading-relaxed mb-[28px]">
               Tocá una imagen para ver el detalle de la promo.
             </p>
             <a
               href={generalLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 rounded-full bg-[#ED3237] px-8 py-4 text-lg font-bold text-white transition hover:bg-[#c9282c]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#ED3237] px-[35px] py-[21px] text-[25px] font-bold text-white transition hover:bg-[#c9282c]"
             >
-              <MessageCircle className="h-6 w-6" /> Me interesa esta promo
+              <MessageCircle className="h-[28px] w-[28px]" /> Me interesa esta promo
             </a>
           </div>
 
@@ -67,14 +67,14 @@ export default function FinancingPromosCarousel({
                   key={item.id}
                   onClick={() => setOpenIdx(i)}
                   aria-label={`Ver promo: ${item.title}`}
-                  className="group shrink-0 w-[300px] sm:w-[380px] relative overflow-hidden rounded-[16px] border border-white/10 bg-white"
+                  className="group shrink-0 w-[264px] sm:w-[334px] relative overflow-hidden rounded-[16px] border border-white/10 bg-white"
                   style={{ aspectRatio: '3 / 4' }}
                 >
                   <Image
                     src={item.image_url!}
                     alt={item.title}
                     fill
-                    sizes="380px"
+                    sizes="334px"
                     className="object-contain p-1 transition-transform duration-300 group-hover:scale-105"
                   />
                 </button>
