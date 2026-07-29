@@ -68,21 +68,21 @@ export default function FinancingPromosCarousel({
   }
 
   return (
-    <section className="bg-steel-900 py-9 lg:py-11">
+    <section className="bg-steel-900 py-5 lg:py-6">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid lg:grid-cols-[300px_1fr] gap-8 lg:gap-12 items-center">
+        <div className="grid lg:grid-cols-[300px_1fr] gap-5 lg:gap-8 items-center">
           {/* Texto, columna izquierda */}
           <div>
-            <span className="grid h-10 w-10 shrink-0 -rotate-6 place-items-center rounded-md bg-amber-500 shadow-lg mb-5">
+            <span className="grid h-10 w-10 shrink-0 -rotate-6 place-items-center rounded-md bg-amber-500 shadow-lg mb-3">
               <Wallet className="h-5 w-5 text-white" />
             </span>
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-amber-400/90 mb-2">
               Julio · hasta agotar stock
             </p>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight mb-4">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight mb-3">
               Promos en financiación
             </h2>
-            <p className="text-white/60 text-sm leading-relaxed mb-6">
+            <p className="text-white/60 text-sm leading-relaxed mb-4">
               Pasá el mouse por la imagen para ampliarla y leer bien la promo, o tocala para ver el detalle.
             </p>
             <a
@@ -96,7 +96,7 @@ export default function FinancingPromosCarousel({
           </div>
 
           {/* Imagen unica grande, columna derecha */}
-          <div ref={containerRef} className="relative max-w-md mx-auto lg:mx-0 lg:max-w-lg w-full">
+          <div ref={containerRef} className="relative max-w-[220px] mx-auto lg:mx-0 lg:max-w-[260px] w-full">
             <ZoomableImage src={current.image_url!} alt={current.title} onClick={() => setOpenDetail(true)} />
 
             {items.length > 1 && (

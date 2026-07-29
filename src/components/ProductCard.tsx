@@ -28,17 +28,17 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
     <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
 
       {/* Imagen */}
-      <Link href={`/producto/${product.slug}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '100%' }}>
+      <Link href={`/producto/${product.slug}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '68%' }}>
         <div className="absolute inset-0">
           {product.images?.[0] ? (
             <>
               <Image src={product.images[0]} alt={product.name} fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-                className={`object-contain p-4 transition-opacity duration-300 ${product.images[1] ? 'group-hover:opacity-0' : ''}`} />
+                className={`object-contain p-2.5 transition-opacity duration-300 ${product.images[1] ? 'group-hover:opacity-0' : ''}`} />
               {product.images[1] && (
                 <Image src={product.images[1]} alt={product.name} fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-                  className="object-contain p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  className="object-contain p-2.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               )}
             </>
           ) : (
@@ -67,7 +67,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
       </Link>
 
       {/* Info */}
-      <div className="flex flex-col flex-1 p-3 gap-1">
+      <div className="flex flex-col flex-1 p-2.5 gap-0.5">
         {product.brand && (
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{product.brand.name}</p>
         )}
@@ -80,11 +80,11 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         )}
 
         {/* Precio */}
-        <div className="mt-2">
+        <div className="mt-1.5">
           {discountPct && product.compare_at_price && (
             <p className="text-xs text-gray-400 line-through">${formatPrice(product.compare_at_price)}</p>
           )}
-          <p className="text-2xl font-extrabold text-[#0B1C3A] leading-none">
+          <p className="text-xl font-extrabold text-[#0B1C3A] leading-none">
             ${formatPrice(product.price)}
           </p>
           <p className="text-xs font-semibold text-green-600 mt-0.5">
@@ -98,16 +98,16 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         )}
 
         {/* CTAs */}
-        <div className="mt-3 flex gap-1.5">
+        <div className="mt-2 flex gap-1.5">
           <button
             onClick={() => addItem({ sku: code ?? product.sku, name: product.name, qty: 1, price: product.price, image: product.images?.[0] })}
             disabled={product.stock <= 0}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#182548] to-[#0B1C3A] hover:from-[#213262] hover:to-[#182548] text-white text-xs font-bold py-2.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_6px_14px_-6px_rgba(10,18,38,0.5)] transition-all hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:translate-y-px active:scale-[.98]">
+            className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#182548] to-[#0B1C3A] hover:from-[#213262] hover:to-[#182548] text-white text-xs font-bold py-2 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_6px_14px_-6px_rgba(10,18,38,0.5)] transition-all hover:-translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:translate-y-px active:scale-[.98]">
             <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
             Agregar al pedido
           </button>
           <a href={inquiryLink} target="_blank" rel="noopener noreferrer"
-            className="h-9 w-9 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
+            className="h-8 w-8 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
             aria-label="WhatsApp">
             <MessageCircle className="h-4 w-4" />
           </a>

@@ -8,7 +8,6 @@ import CouponsSection from '@/components/CouponsSection';
 import ThemedCollection from '@/components/ThemedCollection';
 import BusinessSection from '@/components/BusinessSection';
 import FlashOffers from '@/components/FlashOffers';
-import ProductGrid from '@/components/ProductGrid';
 import PaymentSection from '@/components/PaymentSection';
 import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
@@ -22,7 +21,6 @@ import {
   getCategories,
   getPromotions,
   getBrands,
-  getFeaturedProducts,
   getDiscountedProducts,
   getCategoriesWithDiscounts,
   getActiveCoupons,
@@ -103,14 +101,13 @@ const BUSINESS_SECTION_SKUS = [
 export default async function HomePage() {
   const seasonal = getActiveSeasonalHook();
 
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, seasonalCategory, businessProducts] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, seasonalCategory, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
     getPromotions('banner'),
     getPromotions('financiacion'),
     getBrands(),
-    getFeaturedProducts(),
     getDiscountedProducts(),
     getCategoriesWithDiscounts(),
     getActiveCoupons(),
@@ -128,6 +125,7 @@ export default async function HomePage() {
       <ScrollReveal><TrustBadges /></ScrollReveal>
       <ScrollReveal><BenefitsCarousel /></ScrollReveal>
       <ScrollReveal><CategoryMosaic categories={categories} /></ScrollReveal>
+      <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
       <ScrollReveal>
         <CategoryDiscountCarousel categories={categoriesWithDiscounts} />
       </ScrollReveal>
@@ -173,15 +171,6 @@ export default async function HomePage() {
           products={hogarCategory.products}
           whatsappNumber={settings.whatsappNumber}
           promoImage="/images/promo-6-cuotas-hogar.webp"
-        />
-      </ScrollReveal>
-      <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
-      <ScrollReveal>
-        <ProductGrid
-          title="El mejor precio de contado"
-          subtitle="Retirando por el local, con descuento en efectivo del 10% al 15% según el producto."
-          products={featured}
-          whatsappNumber={settings.whatsappNumber}
         />
       </ScrollReveal>
       <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>

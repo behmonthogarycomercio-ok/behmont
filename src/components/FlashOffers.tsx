@@ -14,9 +14,9 @@ export default function FlashOffers({
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-steel-900 py-10 lg:py-12">
+    <section className="bg-steel-900 py-7 lg:py-9">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex items-end justify-between mb-6 pb-5 border-b border-dashed border-white/15">
+        <div className="flex items-end justify-between mb-4 pb-3 border-b border-dashed border-white/15">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 -rotate-6 place-items-center rounded-md bg-amber-500 shadow-lg">
               <Zap className="h-5 w-5 text-white" fill="currentColor" />
