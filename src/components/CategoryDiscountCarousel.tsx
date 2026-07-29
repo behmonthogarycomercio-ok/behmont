@@ -9,7 +9,7 @@ export default function CategoryDiscountCarousel({ categories }: { categories: C
   if (categories.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-8 lg:py-10">
       <div className="flex items-center gap-3 mb-6">
         <span className="grid h-10 w-10 shrink-0 -rotate-6 place-items-center rounded-md bg-amber-500 shadow-lg">
           <Percent className="h-5 w-5 text-white" />

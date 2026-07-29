@@ -19,6 +19,7 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
     { name: 'Pancheras', keyword: 'panchera', image: '/images/products/SP-1000/1.jpg' },
     { name: 'Hornos Pizzeros', keyword: 'pizzero', image: '/images/subcategorias/hornos-pizzeros.webp' },
     { name: 'Asadores Criollos', keyword: 'asador', image: '/images/subcategorias/asadores-criollos.webp' },
+    { name: 'Ralladoras', keyword: 'rallador', image: '/images/products/1315/1.jpg' },
   ],
   frio: [
     { name: 'Heladeras', keyword: 'heladera', image: '/images/subcategorias/heladeras.webp' },
@@ -29,7 +30,7 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
     { name: 'Cortadoras de Fiambre', keyword: 'fiambre', image: '/images/subcategorias/cortadoras-fiambre.webp' },
     { name: 'Balanzas', keyword: 'balanza', image: '/images/subcategorias/balanzas.webp' },
     { name: 'Góndolas y Exhibidores', keyword: 'gondola', image: '/images/subcategorias/gondolas.webp' },
-    { name: 'Cajas Registradoras', keyword: 'gaveta', image: '/images/subcategorias/gaveta.webp' },
+    { name: 'Gaveta de Dinero', keyword: 'gaveta', image: '/images/subcategorias/gaveta.webp' },
     { name: 'Selladoras', keyword: 'sellador', image: '/images/products/SF-300/1.png' },
   ],
   carniceria: [
@@ -42,7 +43,6 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
     { name: 'Amasadoras', keyword: 'amasadora', image: '/images/subcategorias/amasadoras.webp' },
     { name: 'Hornos', keyword: 'horno', image: '/images/subcategorias/hornos-panaderia.webp' },
     { name: 'Sobadoras', keyword: 'sobadora', image: '/images/subcategorias/sobadoras.webp' },
-    { name: 'Ralladoras', keyword: 'ralladora', image: '/images/products/1315/1.jpg' },
   ],
   hogar: [
     { name: 'Cámaras de Seguridad', keyword: 'camara', image: '/images/products/TS-8854C/1.jpg' },

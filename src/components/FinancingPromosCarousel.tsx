@@ -68,7 +68,7 @@ export default function FinancingPromosCarousel({
   }
 
   return (
-    <section className="bg-steel-900 py-14 lg:py-16">
+    <section className="bg-steel-900 py-9 lg:py-11">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid lg:grid-cols-[300px_1fr] gap-8 lg:gap-12 items-center">
           {/* Texto, columna izquierda */}

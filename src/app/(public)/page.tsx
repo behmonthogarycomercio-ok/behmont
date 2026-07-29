@@ -34,16 +34,62 @@ import {
 
 const WINTER_KEYWORDS = ['calefactor', 'estufa', 'convector', 'caloventor', 'turboforzador', 'termotanque', 'calefon'];
 const LAUNDRY_KEYWORDS = ['lavarropa', 'secarropa'];
-// Día del Niño en Argentina: segundo domingo de agosto.
-function getChildrensDayLabel(): string | null {
+
+function daysUntil(date: Date): number {
   const now = new Date();
-  const year = now.getFullYear();
+  return Math.ceil((date.getTime() - now.getTime()) / 86400000);
+}
+
+function faltanLabel(daysLeft: number): string {
+  return daysLeft === 0 ? 'Es hoy' : `Faltan ${daysLeft} día${daysLeft === 1 ? '' : 's'}`;
+}
+
+// Segundo domingo de agosto (Día del Niño en Argentina).
+function childrensDayDate(year: number): Date {
   const aug1 = new Date(year, 7, 1);
   const firstSunday = 1 + ((7 - aug1.getDay()) % 7);
-  const childrensDay = new Date(year, 7, firstSunday + 7);
-  const daysLeft = Math.ceil((childrensDay.getTime() - now.getTime()) / 86400000);
-  if (daysLeft < 0 || daysLeft > 30) return null;
-  return daysLeft === 0 ? 'Es hoy' : `Faltan ${daysLeft} día${daysLeft === 1 ? '' : 's'}`;
+  return new Date(year, 7, firstSunday + 7);
+}
+
+// Ganchos de temporada: cada uno con su fecha, categoria de productos y banner
+// propio. Se agregan nuevas fechas alegoricas ahi mismo -- la seccion elige
+// sola cual mostrar (la mas cercana dentro de su ventana), sin tocar el resto
+// del home. Solo se agregan fechas que ya tienen banner/foto real cargada.
+type SeasonalHook = {
+  key: string;
+  eyebrowPrefix: string;
+  title: string;
+  categorySlug: string;
+  promoImage: string;
+  getDate: (year: number) => Date;
+  windowDays: number;
+};
+
+const SEASONAL_HOOKS: SeasonalHook[] = [
+  {
+    key: 'dia-del-nino',
+    eyebrowPrefix: 'Día del Niño',
+    title: 'Regalos para los más chicos',
+    categorySlug: 'bebes-ninos',
+    promoImage: '/images/promo-6-cuotas-ninos.webp',
+    getDate: childrensDayDate,
+    windowDays: 30,
+  },
+];
+
+function getActiveSeasonalHook(): { hook: SeasonalHook; label: string } | null {
+  const now = new Date();
+  const candidates = [now.getFullYear(), now.getFullYear() + 1].flatMap((year) =>
+    SEASONAL_HOOKS.map((hook) => ({ hook, date: hook.getDate(year) }))
+  );
+  let best: { hook: SeasonalHook; date: Date; daysLeft: number } | null = null;
+  for (const { hook, date } of candidates) {
+    const daysLeft = daysUntil(date);
+    if (daysLeft < 0 || daysLeft > hook.windowDays) continue;
+    if (!best || daysLeft < best.daysLeft) best = { hook, date, daysLeft };
+  }
+  if (!best) return null;
+  return { hook: best.hook, label: faltanLabel(best.daysLeft) };
 }
 
 export const revalidate = 60; // ISR: refresca catálogo cada 60s (precio/stock de ML incluido)
@@ -55,7 +101,9 @@ const BUSINESS_SECTION_SKUS = [
 ];
 
 export default async function HomePage() {
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, kidsCategory, businessProducts] = await Promise.all([
+  const seasonal = getActiveSeasonalHook();
+
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, featured, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, seasonalCategory, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
@@ -69,11 +117,9 @@ export default async function HomePage() {
     getProductsByNameKeywords(LAUNDRY_KEYWORDS),
     getProductsByNameKeywords(WINTER_KEYWORDS),
     getProductsByCategory('hogar'),
-    getProductsByCategory('bebes-ninos'),
+    seasonal ? getProductsByCategory(seasonal.hook.categorySlug) : Promise.resolve(null),
     getProductsBySku(BUSINESS_SECTION_SKUS),
   ]);
-
-  const childrensDayLabel = getChildrensDayLabel();
 
   return (
     <main>
@@ -89,37 +135,19 @@ export default async function HomePage() {
         <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
       <ScrollReveal>
-        <ThemedCollection
-          eyebrow="Temporada de invierno"
-          title="Preparate para el frío"
-          products={winterProducts}
-          whatsappNumber={settings.whatsappNumber}
-          promoImage="/images/promo-6-cuotas-calefaccion.webp"
-        />
+        <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
-      {childrensDayLabel && (
+      {seasonal && (
         <ScrollReveal>
           <ThemedCollection
-            eyebrow={`Día del Niño · ${childrensDayLabel}`}
-            title="Regalos para los más chicos"
-            products={kidsCategory.products}
+            eyebrow={`${seasonal.hook.eyebrowPrefix} · ${seasonal.label}`}
+            title={seasonal.hook.title}
+            products={seasonalCategory?.products ?? []}
             whatsappNumber={settings.whatsappNumber}
-            promoImage="/images/promo-6-cuotas-ninos.webp"
+            promoImage={seasonal.hook.promoImage}
           />
         </ScrollReveal>
       )}
-      <ScrollReveal>
-        <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
-      </ScrollReveal>
-      <ScrollReveal>
-        <ProductGrid
-          title="El mejor precio de contado"
-          subtitle="Retirando por el local, con descuento en efectivo del 10% al 15% según el producto."
-          products={featured}
-          whatsappNumber={settings.whatsappNumber}
-        />
-      </ScrollReveal>
-      <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <ScrollReveal>
         <ThemedCollection
           eyebrow="Seleccionados"
@@ -127,6 +155,15 @@ export default async function HomePage() {
           products={laundryProducts}
           whatsappNumber={settings.whatsappNumber}
           promoImage="/images/promo-6-cuotas-lavarropas.webp"
+        />
+      </ScrollReveal>
+      <ScrollReveal>
+        <ThemedCollection
+          eyebrow="Temporada de invierno"
+          title="Preparate para el frío"
+          products={winterProducts}
+          whatsappNumber={settings.whatsappNumber}
+          promoImage="/images/promo-6-cuotas-calefaccion.webp"
         />
       </ScrollReveal>
       <ScrollReveal>
@@ -139,6 +176,15 @@ export default async function HomePage() {
         />
       </ScrollReveal>
       <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
+      <ScrollReveal>
+        <ProductGrid
+          title="El mejor precio de contado"
+          subtitle="Retirando por el local, con descuento en efectivo del 10% al 15% según el producto."
+          products={featured}
+          whatsappNumber={settings.whatsappNumber}
+        />
+      </ScrollReveal>
+      <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
       <ScrollReveal>
         <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />

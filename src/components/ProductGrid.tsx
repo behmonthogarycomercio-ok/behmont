@@ -23,7 +23,7 @@ export default function ProductGrid({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-8 lg:py-10">
       {title && (
         <div className="mb-6">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-steel-400 mb-1">
