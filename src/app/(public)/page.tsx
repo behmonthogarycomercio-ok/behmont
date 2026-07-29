@@ -119,6 +119,7 @@ export default async function HomePage() {
           whatsappNumber={settings.whatsappNumber}
         />
       </ScrollReveal>
+      <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <ScrollReveal>
         <ThemedCollection
           eyebrow="Seleccionados"
@@ -128,7 +129,6 @@ export default async function HomePage() {
           promoImage="/images/promo-6-cuotas-lavarropas.webp"
         />
       </ScrollReveal>
-      <ScrollReveal><PaymentSection /></ScrollReveal>
       <ScrollReveal>
         <ThemedCollection
           eyebrow="Para tu casa"
@@ -138,6 +138,7 @@ export default async function HomePage() {
           promoImage="/images/promo-6-cuotas-hogar.webp"
         />
       </ScrollReveal>
+      <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
       <ScrollReveal>
         <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />
@@ -151,8 +152,7 @@ export default async function HomePage() {
           businessHours={settings.businessHours}
         />
       </ScrollReveal>
-      <ScrollReveal><MercadoLibreBanner mlStoreUrl={settings.mlStoreUrl} /></ScrollReveal>
-      <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
+      <ScrollReveal><PaymentSection /></ScrollReveal>
       <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
     </main>
   );
