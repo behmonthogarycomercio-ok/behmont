@@ -154,13 +154,13 @@ export default function Navbar({
 
           <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-white/70">
             <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap shrink-0">
+              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <Truck className="h-3.5 w-3.5" /> Rastrear mi pedido
             </a>
-            <Link href="/faq" className="flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap shrink-0">
+            <Link href="/faq" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
             </Link>
-            <Link href="/financiacion" className="hover:text-white transition-colors whitespace-nowrap shrink-0">Financiación</Link>
+            <Link href="/financiacion" className="text-white/70 hover:text-white transition-colors whitespace-nowrap shrink-0">Financiación</Link>
             {phone && (
               <span className="flex items-center gap-1.5 text-white/90 whitespace-nowrap shrink-0">
                 <Phone className="h-3.5 w-3.5" /> {phone}
