@@ -54,17 +54,17 @@ export default function FlashOfferBar({ product }: { product: Product }) {
 
   return (
     <div className="bg-white border-b border-plate-200 text-steel-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4 sm:gap-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 sm:py-3 flex items-center gap-4 sm:gap-8">
         <Link href={`/producto/${product.slug}`} className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 sm:flex-none sm:w-[360px]">
-          <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-xl border border-plate-200 bg-plate-50 overflow-hidden">
+          <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl border border-plate-200 bg-plate-50 overflow-hidden">
             {product.images?.[0] && (
-              <Image src={product.images[0]} alt={product.name} fill sizes="64px" className="object-contain p-1.5" />
+              <Image src={product.images[0]} alt={product.name} fill sizes="48px" className="object-contain p-1.5" />
             )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-tight truncate text-steel-900">{product.name}</p>
             <p className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-lg sm:text-xl font-bold text-steel-950">${formatPrice(product.price)}</span>
+              <span className="text-base sm:text-lg font-bold text-steel-950">${formatPrice(product.price)}</span>
               {discountPct !== null && (
                 <>
                   <span className="text-xs font-medium text-steel-350 line-through">
@@ -83,13 +83,13 @@ export default function FlashOfferBar({ product }: { product: Product }) {
           <span className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.15em] text-amber-600">
             <Flame className="h-4 w-4" /> Oferta bomba · termina en
           </span>
-          <span className="font-mono text-3xl font-black tabular-nums tracking-wider text-steel-950">{countdown}</span>
+          <span className="font-mono text-2xl font-black tabular-nums tracking-wider text-steel-950">{countdown}</span>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto sm:ml-0">
           <Link
             href={`/producto/${product.slug}`}
-            className="rounded-full bg-amber-500 hover:bg-amber-600 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white transition-colors whitespace-nowrap shadow-sm"
+            className="rounded-full bg-amber-500 hover:bg-amber-600 px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white transition-colors whitespace-nowrap shadow-sm"
           >
             Llevalo hoy
           </Link>
