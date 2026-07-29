@@ -1,7 +1,6 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import DeleteButton from '@/components/admin/DeleteButton';
-import AndreaniShipmentPanel from '@/components/admin/AndreaniShipmentPanel';
 import { createServerSupabase, createServiceSupabase } from '@/lib/supabase/server';
 import { updateOrderStatus, deleteOrder } from '@/lib/actions';
 import { formatPrice } from '@/lib/price';
@@ -40,7 +39,7 @@ export default async function PedidosPage({
 
   let query = supabase
     .from('whatsapp_orders')
-    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at, financing_documents, andreani_tracking_number, andreani_numero_interno, andreani_delivery_mode, andreani_last_error')
+    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at, financing_documents')
     .order('created_at', { ascending: false });
 
   if (filterStatus) query = query.eq('status', filterStatus);
@@ -258,18 +257,6 @@ export default async function PedidosPage({
                       </div>
                     </div>
                   </div>
-
-                  {/* Envío Andreani */}
-                  {order.shipping_method !== 'retiro' && (
-                    <AndreaniShipmentPanel
-                      orderId={order.id}
-                      postalCode={order.customer_postal_code || ''}
-                      deliveryMode={order.andreani_delivery_mode}
-                      trackingNumber={order.andreani_tracking_number}
-                      numeroInterno={order.andreani_numero_interno}
-                      lastError={order.andreani_last_error}
-                    />
-                  )}
 
                   {/* Status changer */}
                   <div className="flex items-center justify-between gap-3 pt-2 border-t border-plate-100">
