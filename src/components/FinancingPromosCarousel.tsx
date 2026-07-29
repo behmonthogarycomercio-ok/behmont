@@ -32,7 +32,7 @@ export default function FinancingPromosCarousel({
   const generalLink = buildWhatsAppLink(whatsappNumber, buildPromoInquiryMessage('Promos en financiación'));
 
   return (
-    <section className="bg-steel-900 py-5 lg:py-6">
+    <section className="bg-steel-900 py-8 lg:py-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8">
           {/* Texto */}
