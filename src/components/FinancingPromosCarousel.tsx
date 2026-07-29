@@ -33,7 +33,7 @@ export default function FinancingPromosCarousel({
 
   return (
     <section className="bg-steel-900 py-8 lg:py-10">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="mx-auto max-w-[1382px] px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8">
           {/* Texto */}
           <div className="lg:w-[260px] shrink-0">
