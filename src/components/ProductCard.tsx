@@ -52,7 +52,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         </div>
         {/* Badges */}
         {discountPct && (
-          <span className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+          <span className="absolute top-3 left-3 -rotate-6 bg-[#ED3237] text-white text-sm font-extrabold px-3 py-1.5 rounded-md shadow-lg border-2 border-white">
             -{discountPct}%
           </span>
         )}
