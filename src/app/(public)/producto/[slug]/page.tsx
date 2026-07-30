@@ -173,27 +173,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {/* Medios de pago */}
           <ProductPaymentBadges />
 
-          {/* CTA actions */}
-          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
-
-          {/* Enganche a características técnicas */}
-          {filteredSpecs.length > 0 && (
-            <a
-              href="#caracteristicas"
-              className="mt-5 inline-flex items-center gap-1.5 self-start font-mono text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
-            >
-              Ver características técnicas
-              <ChevronDown className="h-3.5 w-3.5" />
-            </a>
-          )}
-
-          {/* Description */}
-          {product.description && (
-            <p className="mt-5 text-steel-600 leading-relaxed text-sm whitespace-pre-line border-t border-plate-200 pt-5">
-              {product.description}
-            </p>
-          )}
-
           {/* Trust strip */}
           <div className="mt-5 grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden text-center">
             <div className="bg-plate-50 px-3 py-3">
@@ -210,6 +189,20 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
           </div>
 
+          {/* CTA actions */}
+          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
+
+          {/* Enganche a características técnicas / descripción */}
+          {(filteredSpecs.length > 0 || product.description) && (
+            <a
+              href="#caracteristicas"
+              className="mt-5 inline-flex items-center gap-1.5 self-start font-mono text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+            >
+              Ver características técnicas
+              <ChevronDown className="h-3.5 w-3.5" />
+            </a>
+          )}
+
           {/* ML link */}
           {product.ml_permalink && (
             <a
@@ -224,27 +217,34 @@ export default async function ProductPage({ params }: { params: { slug: string }
         </div>
       </div>
 
-      {/* Specs — misma sección que el producto, sin corte visual fuerte */}
-      {filteredSpecs.length > 0 && (
+      {/* Descripción + specs — misma sección, sin corte visual fuerte */}
+      {(filteredSpecs.length > 0 || product.description) && (
         <div id="caracteristicas" className="mt-12 pt-10 border-t border-plate-200 scroll-mt-24">
           <h2 className="font-display text-xl font-bold text-steel-950 tracking-tight mb-6">
             Características técnicas
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-plate-200 rounded-xl overflow-hidden">
-            {filteredSpecs.map((spec, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between gap-6 px-5 py-3.5 bg-plate-50 border-b border-plate-200 last:border-b-0 even:sm:border-l"
-              >
-                <span className="font-mono text-[11px] uppercase tracking-wide text-steel-400 shrink-0">
-                  {spec.label}
-                </span>
-                <span className="text-sm font-semibold text-steel-900 text-right">
-                  {spec.value}
-                </span>
-              </div>
-            ))}
-          </div>
+          {product.description && (
+            <p className="text-steel-600 leading-relaxed text-sm whitespace-pre-line mb-6">
+              {product.description}
+            </p>
+          )}
+          {filteredSpecs.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-plate-200 rounded-xl overflow-hidden">
+              {filteredSpecs.map((spec, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-6 px-5 py-3.5 bg-plate-50 border-b border-plate-200 last:border-b-0 even:sm:border-l"
+                >
+                  <span className="font-mono text-[11px] uppercase tracking-wide text-steel-400 shrink-0">
+                    {spec.label}
+                  </span>
+                  <span className="text-sm font-semibold text-steel-900 text-right">
+                    {spec.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
       </div>

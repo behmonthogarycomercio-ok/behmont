@@ -16,49 +16,35 @@ type LocationContextType = ZoneState & {
 
 const LocationContext = createContext<LocationContextType | null>(null);
 
-const STORAGE_KEY = 'behmont_zone_v1';
-
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ZoneState>({ city: null, allowed: null });
   const [showPrompt, setShowPrompt] = useState(false);
 
+  // La confirmación de ubicación se pide siempre que se entra al sitio --
+  // no se guarda entre visitas (ni localStorage ni sessionStorage), así que
+  // una carga nueva de la página siempre vuelve a preguntar.
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as ZoneState;
-        setState(parsed);
-      } catch {
-        setShowPrompt(true);
-      }
-    } else {
-      const timer = setTimeout(() => setShowPrompt(true), 1800);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => setShowPrompt(true), 1800);
+    return () => clearTimeout(timer);
   }, []);
 
   function setZone(city: string, allowed: boolean) {
-    const next: ZoneState = { city, allowed };
-    setState(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setState({ city, allowed });
     setShowPrompt(false);
   }
 
   function clearZone() {
     setState({ city: null, allowed: null });
-    localStorage.removeItem(STORAGE_KEY);
     setShowPrompt(true);
   }
 
   // Confirmar la ubicación es obligatorio -- no hay forma de cerrar el
   // cartel sin responder (ni X, ni click afuera). La única salida sin
-  // elegir una zona puntual es declineZone, que igual guarda una respuesta.
-  // Respuesta explícita: el visitante confirmó que no está en ninguna
-  // zona con financiación. Esto sí se guarda.
+  // elegir una zona puntual es declineZone, que igual guarda una respuesta
+  // (para esta visita: el visitante confirmó que no está en ninguna zona
+  // con financiación).
   function declineZone() {
-    const next: ZoneState = { city: null, allowed: false };
-    setState(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setState({ city: null, allowed: false });
     setShowPrompt(false);
   }
 

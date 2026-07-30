@@ -28,13 +28,6 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
   const code = getProductCode(product);
 
   return (
-    <div className="relative">
-      {/* Etiqueta de descuento, colgando sobre el borde de la imagen */}
-      {discountPct && (
-        <span className="absolute -top-2 -left-2 z-10 -rotate-6 bg-[#ED3237] text-white text-sm font-extrabold px-3 py-1.5 rounded-md shadow-lg border-2 border-white">
-          -{discountPct}%
-        </span>
-      )}
     <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
 
       {/* Imagen */}
@@ -58,6 +51,11 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           )}
         </div>
         {/* Badges */}
+        {discountPct && (
+          <span className="absolute top-3 left-3 -rotate-6 bg-[#ED3237] text-white text-lg font-extrabold px-4 py-2 rounded-md shadow-lg border-2 border-white">
+            -{discountPct}%
+          </span>
+        )}
         {product.stock > 0 && product.stock <= 3 && (
           <span className="absolute bottom-3 left-3 bg-warning-500/15 text-warning-600 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
             Últimas {product.stock}
@@ -130,7 +128,6 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           </a>
         </div>
       </div>
-    </div>
     </div>
   );
 }
