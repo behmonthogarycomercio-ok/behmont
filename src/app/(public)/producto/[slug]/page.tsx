@@ -142,7 +142,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               3x ${formatPrice(roundPrice(product.price) / 3)} sin interés
             </p>
             {priceTest?.variant === 'cash-badge' && cashPrice !== null && (
-              <span className="bg-[#ED3237] text-white text-xs font-extrabold px-2.5 py-1 rounded-md whitespace-nowrap">
+              <span className="bg-[#ED3237] text-white text-base font-extrabold px-4 py-2.5 rounded-lg whitespace-nowrap leading-none">
                 -{priceTest.cashDiscountPct}% EFECTIVO
               </span>
             )}

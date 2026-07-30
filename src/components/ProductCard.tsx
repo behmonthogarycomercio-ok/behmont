@@ -90,12 +90,12 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           <p className="text-xl font-extrabold text-[#0B1C3A] leading-none">
             ${formatPrice(product.price)}
           </p>
-          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+          <div className="flex items-center gap-2 flex-wrap mt-1">
             <p className="text-xs font-semibold text-green-600">
               {CUOTAS}x ${formatPrice(cuotaPrice)} sin interés
             </p>
             {priceTest?.variant === 'cash-badge' && cashPrice !== null && (
-              <span className="bg-[#ED3237] text-white text-[10px] font-extrabold px-2 py-1 rounded-md whitespace-nowrap">
+              <span className="bg-[#ED3237] text-white text-sm font-extrabold px-3.5 py-2 rounded-lg whitespace-nowrap leading-none">
                 -{priceTest.cashDiscountPct}% EFECTIVO
               </span>
             )}
