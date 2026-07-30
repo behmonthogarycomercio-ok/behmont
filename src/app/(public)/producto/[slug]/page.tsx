@@ -170,11 +170,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
           </div>
 
+          {/* Medios de pago */}
+          <ProductPaymentBadges />
+
+          {/* CTA actions */}
+          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
+
           {/* Enganche a características técnicas */}
           {filteredSpecs.length > 0 && (
             <a
               href="#caracteristicas"
-              className="mt-3 inline-flex items-center gap-1.5 self-start font-mono text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+              className="mt-5 inline-flex items-center gap-1.5 self-start font-mono text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
             >
               Ver características técnicas
               <ChevronDown className="h-3.5 w-3.5" />
@@ -187,9 +193,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
               {product.description}
             </p>
           )}
-
-          {/* CTA actions */}
-          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
 
           {/* Trust strip */}
           <div className="mt-5 grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden text-center">
@@ -206,9 +209,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
               <p className="font-mono text-[10px] text-steel-400 mt-0.5">A y B</p>
             </div>
           </div>
-
-          {/* Medios de pago */}
-          <ProductPaymentBadges />
 
           {/* ML link */}
           {product.ml_permalink && (
