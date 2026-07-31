@@ -10,7 +10,7 @@ import ProductGrid from '@/components/ProductGrid';
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
 import { getProductCode } from '@/lib/product-display';
 import { roundPrice, formatPrice } from '@/lib/price';
-import { PRICE_TEST_SKUS } from '@/lib/price-test';
+import { getCashDiscountPct } from '@/lib/cash-discount';
 
 export const revalidate = 60;
 
@@ -51,8 +51,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
       : null;
 
   const code = getProductCode(product);
-  const priceTest = PRICE_TEST_SKUS[product.sku];
-  const cashPrice = priceTest ? Math.round(product.price * (1 - priceTest.cashDiscountPct / 100)) : null;
+  const cashDiscountPct = getCashDiscountPct(product.category?.slug);
+  const cashPrice = cashDiscountPct !== null ? Math.round(product.price * (1 - cashDiscountPct / 100)) : null;
   const filteredSpecs = product.specs?.filter(
     (s) => s.label.trim().toLowerCase() !== 'sku'
   ) ?? [];
@@ -137,17 +137,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </>
             )}
           </div>
-          <div className="mt-1 flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-green-600">
-              3x ${formatPrice(roundPrice(product.price) / 3)} sin interés
-            </p>
-            {priceTest?.variant === 'cash-badge' && cashPrice !== null && (
-              <span className="bg-[#ED3237] text-white text-base font-extrabold px-4 py-2.5 rounded-lg whitespace-nowrap leading-none">
-                -{priceTest.cashDiscountPct}% EFECTIVO
-              </span>
-            )}
-          </div>
-          {priceTest?.variant === 'cash-highlight' && cashPrice !== null && (
+          <p className="mt-1 text-sm font-semibold text-green-600">
+            3x ${formatPrice(roundPrice(product.price) / 3)} sin interés
+          </p>
+          {cashPrice !== null && (
             <p className="mt-2 inline-block w-fit bg-[#ED3237]/10 text-[#ED3237] text-base font-extrabold px-3 py-1.5 rounded-lg">
               Contado efectivo: ${formatPrice(cashPrice)}
             </p>

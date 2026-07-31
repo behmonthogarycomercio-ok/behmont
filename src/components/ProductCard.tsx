@@ -8,7 +8,7 @@ import { useFavorites } from '@/lib/favorites-context';
 import { buildQuickInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
-import { PRICE_TEST_SKUS } from '@/lib/price-test';
+import { getCashDiscountPct } from '@/lib/cash-discount';
 import type { Product } from '@/lib/types';
 
 const CUOTAS = 3;
@@ -22,8 +22,8 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
     ? Math.round(100 - (product.price / product.compare_at_price) * 100) : null;
 
   const cuotaPrice = Math.ceil(product.price / CUOTAS);
-  const priceTest = PRICE_TEST_SKUS[product.sku];
-  const cashPrice = priceTest ? Math.round(product.price * (1 - priceTest.cashDiscountPct / 100)) : null;
+  const cashDiscountPct = getCashDiscountPct(product.category?.slug);
+  const cashPrice = cashDiscountPct !== null ? Math.round(product.price * (1 - cashDiscountPct / 100)) : null;
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
   const code = getProductCode(product);
 
@@ -90,17 +90,10 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
           <p className="text-xl font-extrabold text-[#0B1C3A] leading-none">
             ${formatPrice(product.price)}
           </p>
-          <div className="flex items-center gap-2 flex-wrap mt-1">
-            <p className="text-xs font-semibold text-green-600">
-              {CUOTAS}x ${formatPrice(cuotaPrice)} sin interés
-            </p>
-            {priceTest?.variant === 'cash-badge' && cashPrice !== null && (
-              <span className="bg-[#ED3237] text-white text-sm font-extrabold px-3.5 py-2 rounded-lg whitespace-nowrap leading-none">
-                -{priceTest.cashDiscountPct}% EFECTIVO
-              </span>
-            )}
-          </div>
-          {priceTest?.variant === 'cash-highlight' && cashPrice !== null && (
+          <p className="text-xs font-semibold text-green-600 mt-1">
+            {CUOTAS}x ${formatPrice(cuotaPrice)} sin interés
+          </p>
+          {cashPrice !== null && (
             <p className="mt-1.5 inline-block w-fit bg-[#ED3237]/10 text-[#ED3237] text-xs font-extrabold px-2.5 py-1 rounded-lg">
               Contado efectivo: ${formatPrice(cashPrice)}
             </p>

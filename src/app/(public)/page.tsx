@@ -29,7 +29,6 @@ import {
   getProductsBySku,
   getSiteSettings,
 } from '@/lib/data';
-import { PRICE_TEST_EXTRA_SKUS } from '@/lib/price-test';
 
 const WINTER_KEYWORDS = ['calefactor', 'estufa', 'convector', 'caloventor', 'turboforzador', 'termotanque', 'calefon'];
 const LAUNDRY_KEYWORDS = ['lavarropa', 'secarropa'];
@@ -102,7 +101,7 @@ const BUSINESS_SECTION_SKUS = [
 export default async function HomePage() {
   const seasonal = getActiveSeasonalHook();
 
-  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, seasonalCategory, businessProducts, priceTestProducts] = await Promise.all([
+  const [settings, categories, heroPromos, stripPromos, financingPromos, brands, discounted, categoriesWithDiscounts, coupons, laundryProducts, winterProducts, hogarCategory, seasonalCategory, businessProducts] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getPromotions('hero'),
@@ -117,9 +116,7 @@ export default async function HomePage() {
     getProductsByCategory('hogar'),
     seasonal ? getProductsByCategory(seasonal.hook.categorySlug) : Promise.resolve(null),
     getProductsBySku(BUSINESS_SECTION_SKUS),
-    getProductsBySku(PRICE_TEST_EXTRA_SKUS),
   ]);
-  const flashOfferProducts = [...discounted, ...priceTestProducts];
 
   return (
     <main>
@@ -133,7 +130,7 @@ export default async function HomePage() {
         <CategoryDiscountCarousel categories={categoriesWithDiscounts} />
       </ScrollReveal>
       <ScrollReveal>
-        <FlashOffers products={flashOfferProducts} whatsappNumber={settings.whatsappNumber} />
+        <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
       </ScrollReveal>
       <ScrollReveal>
         <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
