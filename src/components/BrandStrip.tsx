@@ -69,11 +69,11 @@ export default function BrandStrip({ brands }: { brands: Brand[] }) {
           <Link
             key={brand.id}
             href={`/marca/${slugify(brand.name)}`}
-            className="group flex h-20 items-center justify-center rounded-xl2 border border-plate-200 bg-white px-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_16px_28px_-16px_rgba(10,18,38,0.2)]"
+            className="group flex h-28 items-center justify-center rounded-xl2 border border-plate-200 bg-white px-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_16px_28px_-16px_rgba(10,18,38,0.2)]"
           >
             {brand.logo_url ? (
-              <div className="relative h-9 w-full rounded-md bg-plate-50 grayscale opacity-70 transition group-hover:grayscale-0 group-hover:opacity-100">
-                <Image src={brand.logo_url} alt={brand.name} fill sizes="140px" className="object-contain" />
+              <div className="relative h-20 w-full rounded-md bg-plate-50 grayscale opacity-70 transition group-hover:grayscale-0 group-hover:opacity-100">
+                <Image src={brand.logo_url} alt={brand.name} fill sizes="200px" className="object-contain p-1" />
               </div>
             ) : (
               <span className="text-center text-sm font-semibold text-steel-500 transition-colors group-hover:text-amber-600">
