@@ -19,4 +19,5 @@ export const CATEGORY_PHOTOS: Record<string, string> = {
   oficina: '/images/categoria-oficina.webp',
   panaderia: '/images/categoria-panaderia.webp',
   'peluqueria-barberia': '/images/categoria-peluqueria-barberia.webp',
+  blanqueria: '/images/categoria-blanqueria.webp',
 };
