@@ -4,21 +4,17 @@ import NewsletterForm from './NewsletterForm';
 export default function NewsletterBanner() {
   return (
     <section className="bg-steel-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="relative w-full sm:w-[420px] md:w-[520px] h-20 sm:h-24 shrink-0 overflow-hidden rounded-lg">
-            <Image
-              src="/images/banner-suscripcion.webp"
-              alt="¡No te pierdas nada! Suscribite y recibí promos exclusivas"
-              fill
-              sizes="(max-width: 640px) 100vw, 520px"
-              className="object-cover object-left"
-            />
-          </div>
-          <div className="w-full sm:flex-1 flex sm:justify-end">
-            <NewsletterForm />
-          </div>
-        </div>
+      <div className="relative min-h-[70px] sm:min-h-0 sm:aspect-[2400/380] overflow-hidden">
+        <Image
+          src="/images/banner-suscripcion.webp"
+          alt="¡No te pierdas nada! Suscribite y recibí promos exclusivas y cuotas sin interés"
+          fill
+          sizes="100vw"
+          className="object-contain sm:object-cover"
+        />
+      </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-5 flex justify-center">
+        <NewsletterForm />
       </div>
     </section>
   );
