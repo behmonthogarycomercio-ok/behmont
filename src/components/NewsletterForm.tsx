@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Mail, Check } from 'lucide-react';
 
-export default function NewsletterForm() {
+export default function NewsletterForm({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [error, setError] = useState('');
@@ -34,9 +34,33 @@ export default function NewsletterForm() {
 
   if (status === 'sent') {
     return (
-      <p className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
-        <Check className="h-4 w-4" /> ¡Listo! Ya estás suscripto a nuestras promociones.
+      <p className={`flex items-center gap-1.5 font-semibold text-emerald-500 ${compact ? 'text-[2.4vw] sm:text-xs' : 'text-sm'}`}>
+        <Check className={compact ? 'h-3 w-3 shrink-0' : 'h-4 w-4'} />
+        <span className={compact ? 'truncate' : ''}>¡Listo! Ya estás suscripto.</span>
       </p>
+    );
+  }
+
+  if (compact) {
+    return (
+      <form onSubmit={handleSubmit} className="flex items-center gap-[1%] w-full h-full">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Tu correo"
+          className="min-w-0 flex-1 h-full rounded-full bg-white px-[6%] text-[2.4vw] sm:text-xs text-steel-900 placeholder:text-steel-400 outline-none"
+        />
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="shrink-0 h-full rounded-full bg-[#ED3237] hover:bg-[#c9282c] px-[5%] text-[2vw] sm:text-[11px] font-bold text-white transition-colors disabled:opacity-50 whitespace-nowrap"
+        >
+          <span className="hidden sm:inline">{status === 'sending' ? '...' : 'SUSCRIBIRME'}</span>
+          <Mail className="h-[2.6vw] w-[2.6vw] sm:h-3.5 sm:w-3.5 sm:hidden" />
+        </button>
+      </form>
     );
   }
 
