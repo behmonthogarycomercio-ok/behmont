@@ -67,7 +67,7 @@ export const SUBCATEGORIES: Record<string, Subcategory[]> = {
     { name: 'Ralladoras', keyword: 'ralladora', image: '/images/subcategorias/ralladoras-panaderia.webp' },
   ],
   hogar: [
-    { name: 'Cámaras de Seguridad', keyword: 'camara', image: '/images/products/TS-8854C/1.jpg' },
+    { name: 'Cámaras de Seguridad', keyword: 'camara', image: '/images/products/TS-8854C/1.webp' },
     { name: 'Bateas', keyword: 'batea', image: '/images/subcategorias/bateas.webp' },
     { name: 'Tablas de Corte', keyword: 'tabla', image: '/images/subcategorias/tablas-corte.webp' },
     { name: 'Nebulizadores', keyword: 'nebulizador', image: '/images/subcategorias/nebulizadores.webp' },
