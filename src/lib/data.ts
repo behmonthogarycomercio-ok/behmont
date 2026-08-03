@@ -316,7 +316,7 @@ export async function searchProducts(query: string): Promise<SearchResult> {
     .or(filters.join(','))
     .limit(40);
 
-  if (data && data.length > 0) return { products: data, isFuzzy: false };
+  if (data && data.length > 0) return { products: sortBehmontFirst(data), isFuzzy: false };
 
   const { data: fuzzyMatches } = await supabase.rpc('search_products_fuzzy', {
     search_query: safeQuery,
@@ -334,5 +334,5 @@ export async function searchProducts(query: string): Promise<SearchResult> {
   const sorted = (fuzzyProducts || []).sort(
     (a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0)
   );
-  return { products: sorted, isFuzzy: true };
+  return { products: sortBehmontFirst(sorted), isFuzzy: true };
 }
