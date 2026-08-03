@@ -1,0 +1,140 @@
+SUBCATEGORIAS QUE FALTAN - 2026-07-31
+=======================================
+Para cada una: crea una carpeta con el nombre de la categoria (si no
+existe) y adentro una subcarpeta con el nombre de la subcategoria, con
+una foto real del producto (no de otra marca ni de otro modelo).
+Ordenado de mayor a menor cantidad de productos reales que ya estan
+cargados en el catalogo y que hoy NO tienen ninguna tarjeta para
+encontrarlos facil.
+
+HOGAR — la que mas necesita fotos (67 de 70 productos sin clasificar)
+-----------------------------------------------------------------
+- Bateas (19 productos) <- la mas grande de toda la lista, prioridad 1
+- Tablas de corte (5)
+- Nebulizadores (4)
+- Almohadas (4)
+- Termos (3)
+- Espumaderas (3)
+- Sartenes (3)
+
+ELECTRODOMESTICOS
+-----------------------------------------------------------------
+- Termotanques (16)
+- Calefones (15)
+- Planchas (15)
+- Batidoras (14)
+- Caloventores (11)
+- Procesadoras de alimentos (10)
+- Exprimidores (9)
+- Tostadoras (6)
+- Minipimer (6)
+- Secarropas (5)
+
+MUEBLES
+-----------------------------------------------------------------
+- Mesas (24)
+- Sillones (14)
+- Mostradores (11)
+- Sommiers (10)
+- Camas (9)
+- Esquineros (3)
+- Futones (3)
+
+GASTRONOMIA
+-----------------------------------------------------------------
+- Hornos (46) <- la segunda mas grande de toda la lista
+- Batidoras (15)
+- Bandejas (12)
+- Campanas extractoras (10)
+- Mesas de trabajo (7)
+- Cacerolas (6)
+- Licuadoras (5)
+- Cortapapas (5)
+- Repulgadoras (4)
+- Churreras (4)
+
+ELECTRONICA
+-----------------------------------------------------------------
+- Soportes (para TV/celular) (15)
+- Impresoras (12)
+- Torres / Gabinetes PC (8)
+- Telefonos (8)
+- Monitores (3)
+- Radiograbadores (3)
+
+PELUQUERIA Y BARBERIA
+-----------------------------------------------------------------
+- Cortabarbas (5)
+- Cortacabellos (5)
+- Alfombras (4)
+- Afeitadoras (4)
+- Cepillos (3)
+- Taburetes (3)
+- Brochas (3)
+- Tijeras (3)
+
+NEGOCIOS
+-----------------------------------------------------------------
+- Carteleria (11)
+- Flybanners (6)
+- Otras cortadoras (6)
+- Carameleras (5)
+- Exhibidores (5)
+- Contadoras de billetes (4)
+
+DEPORTES Y AIRE LIBRE
+-----------------------------------------------------------------
+- Piletas (12)
+- Sombrillas (4)
+- Metegoles (3)
+- Sillones de jardin (3)
+
+HERRAMIENTAS
+-----------------------------------------------------------------
+- Bordeadoras (7)
+- Sierras (4)
+- Desmalezadoras (3)
+- Baterias/cargadores (3)
+- Compresores (3)
+
+CARNICERIA
+-----------------------------------------------------------------
+- Cuchillos (6)
+- Chairas (4)
+- Cuchillas (3)
+- Tiernizadores (3)
+
+BEBES Y NIÑOS — categoria completa sin ninguna subcategoria (17 productos)
+-----------------------------------------------------------------
+- Triciclos (4)
+- Cochecitos (4)
+- Caminadores (2)
+- Cunas / Practicunas (2)
+- Butacas para auto (2)
+
+BLANQUERIA — categoria completa sin ninguna subcategoria (9 productos)
+-----------------------------------------------------------------
+- Acolchados (3)
+- Sabanas (3, marca Arcoiris)
+- Frazadas (2)
+
+OFICINA
+-----------------------------------------------------------------
+- Calculadoras (5)
+- Sillones (4)
+
+CLIMATIZACION
+-----------------------------------------------------------------
+- Convectores (4)
+- Purificadores de aire (3)
+
+ESTETICA
+-----------------------------------------------------------------
+- Pufs (3)
+
+FRIO
+-----------------------------------------------------------------
+- Conservadoras (3)
+
+Categorias ya completas (no necesitan mas fotos por ahora):
+Panaderia, Decoracion, Almacenamiento, Motos.
