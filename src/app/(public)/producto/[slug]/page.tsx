@@ -5,6 +5,7 @@ import WhatsAppFloatButton from '@/components/WhatsAppFloatButton';
 import ProductActions from '@/components/ProductActions';
 import ProductGallery from '@/components/ProductGallery';
 import ProductPaymentBadges from '@/components/ProductPaymentBadges';
+import ProductFinancingPreview from '@/components/ProductFinancingPreview';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductBySlug, getRelatedProducts, getSiteSettings } from '@/lib/data';
@@ -165,6 +166,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
           {/* Medios de pago */}
           <ProductPaymentBadges />
+          <ProductFinancingPreview price={product.price} />
 
           {/* Trust strip */}
           <div className="mt-5 grid grid-cols-3 gap-px bg-plate-200 rounded-xl overflow-hidden text-center">
