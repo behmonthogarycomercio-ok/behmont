@@ -676,19 +676,9 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
 
         {form.shippingMethod === 'domicilio' && (
           <p className="text-xs text-steel-500 bg-plate-50 rounded-lg p-3">
-            Envío a domicilio: el monto se transfiere antes de coordinar el envío. Enviá tu pedido por WhatsApp para coordinar la transferencia, o pagá directo con MercadoPago.
+            Envío a domicilio: el monto se abona antes de coordinar el envío. Pagá directo con MercadoPago, o coordiná la transferencia por WhatsApp.
           </p>
         )}
-
-        <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
-          {sending ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
-        </Button>
-
-        <div className="flex items-center gap-3 pt-1">
-          <div className="flex-1 border-t border-plate-200" />
-          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o pagá online</span>
-          <div className="flex-1 border-t border-plate-200" />
-        </div>
 
         {mpError && <p className="text-xs text-red-600">{mpError}</p>}
 
@@ -742,6 +732,19 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           )}
           {mpLoading ? 'Redirigiendo...' : 'Pagar con MercadoPago'}
         </button>
+
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex-1 border-t border-plate-200" />
+          <span className="font-mono text-[11px] text-steel-300 uppercase tracking-wide">o coordiná el pago por WhatsApp</span>
+          <div className="flex-1 border-t border-plate-200" />
+        </div>
+
+        <Button type="submit" variant="whatsapp" size="lg" disabled={sending} className="w-full">
+          {sending ? 'Enviando...' : 'Coordinar pedido por WhatsApp'}
+        </Button>
+        <p className="text-xs text-steel-400 text-center -mt-2">
+          Para pagar por transferencia o efectivo. Primero coordinamos el pago por WhatsApp y recién después se confirma el envío.
+        </p>
       </form>
         </div>
       )}
