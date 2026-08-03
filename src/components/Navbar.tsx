@@ -21,7 +21,7 @@ export default function Navbar({
   const [megaOpen, setMegaOpen] = useState(false);
   const [q, setQ] = useState('');
   const { count } = useCart();
-  const { city, clearZone } = useLocation();
+  const { city, allowed, clearZone } = useLocation();
   const megaRef = useRef<HTMLDivElement>(null);
   const mobRef = useRef<HTMLDivElement>(null);
   const [mobL, setMobL] = useState(false);
@@ -145,12 +145,10 @@ export default function Navbar({
             Mayorista
           </Link>
 
-          {city && (
-            <button onClick={clearZone}
-              className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap shrink-0">
-              <MapPin className="h-3.5 w-3.5" /> Estás en: {city}
-            </button>
-          )}
+          <button onClick={clearZone}
+            className="hidden xl:flex items-center gap-1.5 px-3 h-9 rounded-full text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap shrink-0">
+            <MapPin className="h-3.5 w-3.5" /> {city ? `Estás en: ${city}` : allowed === false ? 'Confirmá tu ubicación' : '¿Dónde estás?'}
+          </button>
 
           <div className="ml-auto flex items-center gap-4 text-[12px] text-white/70">
             <a href="https://www.andreani.com/" target="_blank" rel="noopener noreferrer"
@@ -219,12 +217,11 @@ export default function Navbar({
             </button>
           </form>
 
-          {city && (
-            <button onClick={clearZone}
-              className="flex items-center gap-1.5 text-xs font-medium text-steel-500">
-              <MapPin className="h-3.5 w-3.5" /> Estás en: {city} · cambiar
-            </button>
-          )}
+          <button onClick={clearZone}
+            className="flex items-center gap-1.5 text-xs font-medium text-steel-500">
+            <MapPin className="h-3.5 w-3.5" />
+            {city ? `Estás en: ${city} · cambiar` : allowed === false ? 'Confirmá tu ubicación' : '¿Dónde estás?'}
+          </button>
 
           <div className="grid grid-cols-2 gap-0.5">
             {categories.map(cat => (
