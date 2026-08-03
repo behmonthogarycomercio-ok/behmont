@@ -1,5 +1,6 @@
 import AdminShell from '@/components/admin/AdminShell';
 import StockTable from '@/components/admin/StockTable';
+import PriceListImport from '@/components/admin/PriceListImport';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export default async function StockPage() {
@@ -17,6 +18,7 @@ export default async function StockPage() {
         (marcados con 🛒) se actualizan solos cada 30 minutos — el valor manual se pisa en el
         próximo sync.
       </p>
+      <PriceListImport />
       <StockTable products={products || []} />
     </AdminShell>
   );
