@@ -167,15 +167,20 @@ export function diffPriceList(rows: PriceListRow[], existing: ExistingProduct[])
   const bySku = new Map(existing.map((p) => [p.sku, p]));
   const listSkus = new Set(rows.map((r) => r.sku));
 
-  const toUpdate: PriceListDiff['toUpdate'] = [];
-  const toCreate: PriceListDiff['toCreate'] = [];
-  let unchanged = 0;
+  // Map por id (no array) porque la lista del distribuidor a veces trae el
+  // mismo SKU repetido dos veces (típico en los codigos que Excel mostro en
+  // notacion cientifica, ej. "7,8965E+12") -- si hubiera dos filas para el
+  // mismo producto, se queda con la ultima (mismo criterio que aplicar los
+  // updates en orden terminaria dejando igual).
+  const toUpdateById = new Map<string, PriceListDiff['toUpdate'][number]>();
+  const toCreateBySku = new Map<string, PriceListDiff['toCreate'][number]>();
+  const unchangedIds = new Set<string>();
 
   for (const row of rows) {
     const db = bySku.get(row.sku);
     if (!db) {
       const { brand, categorySlug, displayName } = parseProductName(row.rawName);
-      toCreate.push({
+      toCreateBySku.set(row.sku, {
         sku: row.sku,
         rawName: row.rawName,
         displayName,
@@ -189,7 +194,7 @@ export function diffPriceList(rows: PriceListRow[], existing: ExistingProduct[])
     const priceChanged = Math.round(db.price) !== Math.round(row.price);
     const stockChanged = db.stock !== row.stock;
     if (priceChanged || stockChanged) {
-      toUpdate.push({
+      toUpdateById.set(db.id, {
         id: db.id,
         sku: db.sku,
         name: db.name,
@@ -198,10 +203,14 @@ export function diffPriceList(rows: PriceListRow[], existing: ExistingProduct[])
         oldStock: db.stock,
         newStock: row.stock,
       });
-    } else {
-      unchanged++;
+      unchangedIds.delete(db.id);
+    } else if (!toUpdateById.has(db.id)) {
+      unchangedIds.add(db.id);
     }
   }
+  const toUpdate = Array.from(toUpdateById.values());
+  const toCreate = Array.from(toCreateBySku.values());
+  const unchanged = unchangedIds.size;
 
   const toDeactivate = existing
     .filter((p) => p.active && !/^MLA/i.test(p.sku) && !listSkus.has(p.sku))
