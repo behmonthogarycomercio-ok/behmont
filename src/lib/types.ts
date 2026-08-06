@@ -5,6 +5,7 @@ export type Category = {
   icon_url: string | null;
   sort_order: number;
   active: boolean;
+  cash_discount_pct: number | null;
 };
 
 export type Brand = {

@@ -28,6 +28,7 @@ export default async function CategoriasPage({
                 <th className="p-3 font-medium">Nombre</th>
                 <th className="p-3 font-medium">Slug</th>
                 <th className="p-3 font-medium">Orden</th>
+                <th className="p-3 font-medium">Desc. efectivo</th>
                 <th className="p-3 font-medium">Estado</th>
                 <th className="p-3"></th>
               </tr>
@@ -38,6 +39,9 @@ export default async function CategoriasPage({
                   <td className="p-3 font-medium text-steel-900">{c.name}</td>
                   <td className="p-3 font-mono text-xs text-steel-500">/{c.slug}</td>
                   <td className="p-3 text-steel-600">{c.sort_order}</td>
+                  <td className="p-3 text-steel-600">
+                    {c.cash_discount_pct != null ? `${c.cash_discount_pct}%` : '—'}
+                  </td>
                   <td className="p-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.active ? 'bg-emerald-100 text-emerald-700' : 'bg-plate-100 text-steel-500'}`}>
                       {c.active ? 'Activa' : 'Inactiva'}
@@ -75,6 +79,20 @@ export default async function CategoriasPage({
           <input name="name" required placeholder="Nombre (ej: Panadería)" defaultValue={editing?.name} className="input" />
           <input name="icon_url" placeholder="URL del ícono (opcional)" defaultValue={editing?.icon_url || ''} className="input" />
           <input type="number" name="sort_order" placeholder="Orden" defaultValue={editing?.sort_order ?? 0} className="input" />
+          <div>
+            <input
+              type="number"
+              name="cash_discount_pct"
+              placeholder="Descuento efectivo % (ej: 15)"
+              defaultValue={editing?.cash_discount_pct ?? ''}
+              min={0}
+              max={100}
+              className="input"
+            />
+            <p className="text-xs text-steel-400 -mt-1 mb-2">
+              % que se descuenta pagando en efectivo al retirar en el local. Dejalo vacío para no mostrar descuento en esta categoría.
+            </p>
+          </div>
           <label className="flex items-center gap-2 text-sm text-steel-700">
             <input type="checkbox" name="active" defaultChecked={editing ? editing.active : true} /> Activa
           </label>

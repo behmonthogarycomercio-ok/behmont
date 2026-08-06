@@ -150,11 +150,13 @@ export async function upsertCategory(formData: FormData): Promise<ActionResult> 
   const id = formData.get('id') as string;
   const name = formData.get('name') as string;
 
+  const cashDiscountRaw = formData.get('cash_discount_pct') as string;
   const basePayload = {
     name,
     icon_url: (formData.get('icon_url') as string) || null,
     sort_order: Number(formData.get('sort_order') || 0),
     active: formData.get('active') === 'on',
+    cash_discount_pct: cashDiscountRaw ? Number(cashDiscountRaw) : null,
   };
 
   if (id) {

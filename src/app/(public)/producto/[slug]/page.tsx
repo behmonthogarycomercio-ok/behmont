@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       : null;
 
   const code = getProductCode(product);
-  const cashDiscountPct = getCashDiscountPct(product.category?.slug);
+  const cashDiscountPct = getCashDiscountPct(product.category);
   const cashPrice = cashDiscountPct !== null ? Math.round(product.price * (1 - cashDiscountPct / 100)) : null;
   const filteredSpecs = product.specs?.filter(
     (s) => s.label.trim().toLowerCase() !== 'sku'

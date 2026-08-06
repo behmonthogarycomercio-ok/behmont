@@ -22,7 +22,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
     ? Math.round(100 - (product.price / product.compare_at_price) * 100) : null;
 
   const cuotaPrice = Math.ceil(product.price / CUOTAS);
-  const cashDiscountPct = getCashDiscountPct(product.category?.slug);
+  const cashDiscountPct = getCashDiscountPct(product.category);
   const cashPrice = cashDiscountPct !== null ? Math.round(product.price * (1 - cashDiscountPct / 100)) : null;
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
   const code = getProductCode(product);
