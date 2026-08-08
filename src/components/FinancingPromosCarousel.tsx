@@ -41,7 +41,7 @@ export default function FinancingPromosCarousel({
               <Wallet className="h-[35px] w-[35px] text-white" />
             </span>
             <p className="font-mono text-[19px] font-medium uppercase tracking-[0.2em] text-amber-400/90 mb-[14px]">
-              Julio · hasta agotar stock
+              Agosto · hasta agotar stock
             </p>
             <h2 className="font-display text-[42px] sm:text-[53px] font-bold text-white leading-tight tracking-tight mb-[21px]">
               Promos en financiación
