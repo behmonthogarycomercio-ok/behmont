@@ -96,7 +96,7 @@ export const revalidate = 60; // ISR: refresca catálogo cada 60s (precio/stock 
 // Curada a mano para el carrusel de "Equipamos tu negocio".
 const BUSINESS_SECTION_SKUS = [
   '400AS-B', 'HF-100', 'MLA3481742598', 'HF-150', '250ES-10', '300ES-12',
-  'LF-470', 'LF-910', 'LF-1440', 'FC-400-105', 'FC-850-12', 'FC-1250-19',
+  'LF-470', 'LF-910', 'LF-1440', 'FC-400-105', 'FC-850-12', 'FC-1250-19', '400AS',
 ];
 
 export default async function HomePage() {
