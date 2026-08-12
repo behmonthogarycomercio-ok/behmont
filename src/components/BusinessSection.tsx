@@ -88,7 +88,7 @@ export default function BusinessSection({ products }: { products: Product[] }) {
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
-              <Link href={`/producto/${current.slug}`}
+              <Link href={`/producto/${encodeURIComponent(current.sku)}`}
                 className={buttonClasses({ variant: 'tactile-red', size: 'lg', className: 'rounded-full !px-7 !py-3.5 !text-sm' })}>
                 Ver producto <ArrowRight className="h-4 w-4" />
               </Link>

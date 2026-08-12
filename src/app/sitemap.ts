@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
 
   const [{ data: products }, { data: categories }, { data: brands }] = await Promise.all([
-    supabase.from('products').select('slug, updated_at').eq('active', true),
+    supabase.from('products').select('sku, updated_at').eq('active', true),
     supabase.from('categories').select('slug').eq('active', true),
     supabase.from('brands').select('id, name').not('name', 'is', null),
   ]);
@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
 
     ...(products || []).map((p) => ({
-      url: `${SITE_URL}/producto/${p.slug}`,
+      url: `${SITE_URL}/producto/${encodeURIComponent(p.sku)}`,
       lastModified: p.updated_at ?? now,
       changeFrequency: 'daily' as const,
       priority: 0.9,

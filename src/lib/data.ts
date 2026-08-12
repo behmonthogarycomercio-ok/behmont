@@ -263,7 +263,18 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .eq('slug', slug)
     .eq('active', true)
     .maybeSingle();
-  return data;
+  if (data) return data;
+
+  // Enlace corto por código (ej. /producto/MR-7BLACK) además del slug largo
+  // con el título -- se resuelve al mismo producto.
+  const escapedSku = slug.replace(/[%_]/g, (m) => `\\${m}`);
+  const { data: bySku } = await supabase
+    .from('products')
+    .select('*, category:categories(*), brand:brands(*)')
+    .ilike('sku', escapedSku)
+    .eq('active', true)
+    .maybeSingle();
+  return bySku;
 }
 
 export async function getRelatedProducts(

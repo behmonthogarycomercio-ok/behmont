@@ -31,7 +31,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
     <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
 
       {/* Imagen */}
-      <Link href={`/producto/${product.slug}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '68%' }}>
+      <Link href={`/producto/${encodeURIComponent(product.sku)}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '68%' }}>
         <div className="absolute inset-0">
           {product.images?.[0] ? (
             <>
@@ -74,7 +74,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
         {product.brand && (
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{product.brand.name}</p>
         )}
-        <Link href={`/producto/${product.slug}`}
+        <Link href={`/producto/${encodeURIComponent(product.sku)}`}
           className="text-sm font-medium text-gray-800 leading-snug line-clamp-2 hover:text-[#0B1C3A] transition-colors">
           {product.name}
         </Link>
