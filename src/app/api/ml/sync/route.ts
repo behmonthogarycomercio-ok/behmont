@@ -101,16 +101,18 @@ async function runSync(request: Request, fromCron: boolean) {
     // duplicado, silenciosamente, sin aparecer ni en "synced" ni en "skipped").
     const disconnectedSkus = new Set<string>();
     const disconnectedSlugMlIds = new Set<string>();
+    const idBySku = new Map<string, string>();
     for (let from2 = 0; ; from2 += 1000) {
       const { data: rows } = await supabase
         .from('products')
-        .select('sku, slug')
+        .select('id, sku, slug')
         .is('ml_item_id', null)
         .range(from2, from2 + 999);
       if (!rows || rows.length === 0) break;
-      for (const r of rows as { sku: string; slug: string }[]) {
+      for (const r of rows as { id: string; sku: string; slug: string }[]) {
         disconnectedSkus.add(r.sku.trim().toLowerCase());
         disconnectedSlugMlIds.add(r.slug.split('-').pop() || '');
+        idBySku.set(r.sku.trim().toLowerCase(), r.id);
       }
       if (rows.length < 1000) break;
     }
@@ -118,6 +120,30 @@ async function runSync(request: Request, fromCron: boolean) {
     let synced = 0;
     let skipped = 0;
     for (const item of items) {
+      // Publicaciones de ML que en realidad son el mismo producto físico que
+      // ya está cargado con otro SKU propio (ej. un espejo que también se
+      // vende por MercadoLibre) -- se detecta por el atributo "SKU" que ML
+      // trae en item.attributes, cargado ahí a mano en su momento. En vez de
+      // crear/actualizar una fila aparte (duplicando la ficha con fotos y
+      // nombre distintos), esto solo actualiza el stock de la ficha real,
+      // para que no queden números de stock distintos entre plataformas.
+      // Nunca toca nombre, slug, imágenes, descripción ni precio de esa
+      // ficha -- eso lo sigue manejando el catálogo propio, no ML.
+      const skuAttr = (item.attributes || []).find(
+        (a) => (a.name || a.id || '').trim().toLowerCase() === 'sku'
+      );
+      const mappedSku = skuAttr?.value_name?.trim().toLowerCase();
+      const mappedId = mappedSku ? idBySku.get(mappedSku) : undefined;
+      if (mappedId) {
+        const { error: mapError } = await supabase
+          .from('products')
+          .update({ stock: item.available_quantity })
+          .eq('id', mappedId);
+        if (!mapError) synced++;
+        else console.error(`[ml/sync] no se pudo actualizar stock mapeado (${item.id} -> ${mappedSku}):`, mapError);
+        continue;
+      }
+
       // Si el item no está linkeado hoy pero coincide (por SKU o por el
       // ml_item_id embebido en el slug) con un producto ya desvinculado a
       // propósito, se salta antes de gastar la consulta de descripción y sin
