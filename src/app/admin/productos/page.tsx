@@ -104,7 +104,7 @@ export default async function ProductosPage({
               {(products || []).map((p) => (
                 <tr key={p.id} className="border-b border-plate-100 last:border-0">
                   <td className="p-3 flex items-center gap-3">
-                    <div className="relative h-10 w-10 rounded-md bg-plate-50 overflow-hidden shrink-0">
+                    <div className="relative h-10 w-10 rounded-md bg-white overflow-hidden shrink-0">
                       {p.images?.[0] && (
                         <Image src={p.images[0]} alt={p.name} fill sizes="40px" className="object-contain" />
                       )}

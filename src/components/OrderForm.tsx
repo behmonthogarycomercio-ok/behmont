@@ -320,7 +320,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
           <ul className="divide-y divide-plate-200 rounded-xl2 border border-plate-200">
             {items.map((item) => (
               <li key={item.sku} className="flex items-center gap-4 p-4">
-                <div className="relative h-14 w-14 shrink-0 rounded-lg bg-plate-50 overflow-hidden">
+                <div className="relative h-14 w-14 shrink-0 rounded-lg bg-white overflow-hidden">
                   {item.image ? (
                     <Image src={item.image} alt={item.name} fill sizes="56px" className="object-contain p-1" />
                   ) : (
@@ -510,7 +510,7 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
             <ul className="divide-y divide-plate-100">
               {items.map((item) => (
                 <li key={item.sku} className="flex items-center gap-3 py-2 text-sm">
-                  <div className="relative h-9 w-9 shrink-0 rounded-md bg-plate-50 overflow-hidden">
+                  <div className="relative h-9 w-9 shrink-0 rounded-md bg-white overflow-hidden">
                     {item.image ? (
                       <Image src={item.image} alt={item.name} fill sizes="36px" className="object-contain p-0.5" />
                     ) : (

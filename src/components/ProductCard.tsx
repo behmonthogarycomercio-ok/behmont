@@ -31,7 +31,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
     <div className="group flex flex-col bg-white border border-plate-200 rounded-[18px] overflow-hidden transition-all duration-200 hover:shadow-[0_20px_40px_-14px_rgba(10,18,38,0.2)] hover:-translate-y-1 hover:border-steel-300">
 
       {/* Imagen */}
-      <Link href={`/producto/${encodeURIComponent(product.sku)}`} className="relative bg-gray-50 overflow-hidden" style={{ paddingBottom: '68%' }}>
+      <Link href={`/producto/${encodeURIComponent(product.sku)}`} className="relative bg-white overflow-hidden" style={{ paddingBottom: '68%' }}>
         <div className="absolute inset-0">
           {product.images?.[0] ? (
             <>

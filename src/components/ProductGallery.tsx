@@ -22,7 +22,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
 
   if (!images || images.length === 0) {
     return (
-      <div className="relative aspect-square rounded-xl2 bg-plate-50 border border-plate-200 grid place-items-center text-steel-300">
+      <div className="relative aspect-square rounded-xl2 bg-white border border-plate-200 grid place-items-center text-steel-300">
         Sin imagen
       </div>
     );
@@ -38,7 +38,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
   return (
     <div>
       <div
-        className="group relative aspect-square overflow-hidden rounded-xl2 bg-plate-50 border border-plate-200 cursor-zoom-in"
+        className="group relative aspect-square overflow-hidden rounded-xl2 bg-white border border-plate-200 cursor-zoom-in"
         onMouseMove={handleMouseMove}
         onClick={() => setOpen(true)}
       >
@@ -56,7 +56,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
               key={src + i}
               onClick={() => setActive(i)}
               className={clsx(
-                'relative h-16 w-16 shrink-0 rounded-lg border bg-plate-50 overflow-hidden',
+                'relative h-16 w-16 shrink-0 rounded-lg border bg-white overflow-hidden',
                 active === i ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-plate-200'
               )}
               aria-label={`Ver imagen ${i + 1}`}

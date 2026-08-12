@@ -56,7 +56,7 @@ export default function FlashOfferBar({ product }: { product: Product }) {
     <div className="bg-white border-b border-plate-200 text-steel-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 sm:py-3 flex items-center gap-4 sm:gap-8">
         <Link href={`/producto/${encodeURIComponent(product.sku)}`} className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 sm:flex-none sm:w-[360px]">
-          <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl border border-plate-200 bg-plate-50 overflow-hidden">
+          <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl border border-plate-200 bg-white overflow-hidden">
             {product.images?.[0] && (
               <Image src={product.images[0]} alt={product.name} fill sizes="48px" className="object-contain p-1.5" />
             )}
