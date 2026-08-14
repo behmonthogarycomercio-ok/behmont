@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import { Instagram, Facebook, MessageCircle, MapPin, Mail, ArrowUpRight, Clock } from 'lucide-react';
+import { buildWhatsAppLink, buildQuickInquiryMessage } from '@/lib/whatsapp';
 import NewsletterForm from './NewsletterForm';
 
 type FooterProps = {
   whatsappNumber: string;
+  whatsappNumber2?: string;
   contactEmail?: string;
-  contactPhone?: string;
   contactAddress?: string;
   instagramUrl?: string;
   facebookUrl?: string;
@@ -14,8 +15,8 @@ type FooterProps = {
 
 export default function Footer({
   whatsappNumber,
+  whatsappNumber2,
   contactEmail,
-  contactPhone,
   contactAddress,
   instagramUrl,
   facebookUrl,
@@ -143,10 +144,30 @@ export default function Footer({
             Contacto
           </h3>
           <ul className="space-y-3 text-sm">
-            {(contactPhone || whatsappNumber) && (
-              <li className="flex items-center gap-2 text-plate-100/70">
-                <MessageCircle className="h-3.5 w-3.5 shrink-0 text-amber-500/70" />
-                {contactPhone || `+${whatsappNumber}`}
+            {whatsappNumber && (
+              <li>
+                <a
+                  href={buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage())}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-plate-100/70 hover:text-amber-400 transition-colors"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 shrink-0 text-amber-500/70" />
+                  Lucas: +{whatsappNumber}
+                </a>
+              </li>
+            )}
+            {whatsappNumber2 && (
+              <li>
+                <a
+                  href={buildWhatsAppLink(whatsappNumber2, buildQuickInquiryMessage())}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-plate-100/70 hover:text-amber-400 transition-colors"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 shrink-0 text-amber-500/70" />
+                  Luz: +{whatsappNumber2}
+                </a>
               </li>
             )}
             {contactEmail && (

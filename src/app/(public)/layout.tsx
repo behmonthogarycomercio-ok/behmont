@@ -15,12 +15,12 @@ export default async function PublicLayout({ children }: { children: React.React
     <>
       {bombOffer && <FlashOfferBar product={bombOffer} />}
       <PickupDiscountBanner />
-      <Navbar categories={categories} contactPhone={settings.contactPhone} whatsappNumber={settings.whatsappNumber} />
+      <Navbar categories={categories} />
       {children}
       <Footer
         whatsappNumber={settings.whatsappNumber}
+        whatsappNumber2={settings.whatsappNumber2}
         contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
         contactAddress={settings.contactAddress}
         instagramUrl={settings.instagramUrl}
         facebookUrl={settings.facebookUrl}

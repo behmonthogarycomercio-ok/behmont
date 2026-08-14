@@ -3,19 +3,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Menu, X, MapPin, LifeBuoy, Truck, Phone } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, MapPin, LifeBuoy, Truck } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useLocation } from '@/lib/location-context';
 import type { Category } from '@/lib/types';
 
 export default function Navbar({
   categories,
-  contactPhone,
-  whatsappNumber,
 }: {
   categories: Category[];
-  contactPhone?: string;
-  whatsappNumber?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -26,8 +22,6 @@ export default function Navbar({
   const mobRef = useRef<HTMLDivElement>(null);
   const [mobL, setMobL] = useState(false);
   const [mobR, setMobR] = useState(false);
-
-  const phone = contactPhone || whatsappNumber;
 
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -158,11 +152,6 @@ export default function Navbar({
             <Link href="/faq" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors whitespace-nowrap shrink-0">
               <LifeBuoy className="h-3.5 w-3.5" /> Centro de ayuda
             </Link>
-            {phone && (
-              <span className="flex items-center gap-1.5 text-white/90 whitespace-nowrap shrink-0">
-                <Phone className="h-3.5 w-3.5" /> {phone}
-              </span>
-            )}
           </div>
         </div>
 
