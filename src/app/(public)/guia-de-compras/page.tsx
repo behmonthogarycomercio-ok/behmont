@@ -130,7 +130,7 @@ export default async function GuiaDeComprasPage() {
         </section>
       </div>
 
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

@@ -5,7 +5,15 @@ import { Ticket, Copy, Check } from 'lucide-react';
 import { buildCouponInquiryMessage, buildWhatsAppLink } from '@/lib/whatsapp';
 import type { Coupon } from '@/lib/data';
 
-export default function CouponsSection({ coupons, whatsappNumber }: { coupons: Coupon[]; whatsappNumber: string }) {
+export default function CouponsSection({
+  coupons,
+  whatsappNumber,
+  whatsappNumber2,
+}: {
+  coupons: Coupon[];
+  whatsappNumber: string;
+  whatsappNumber2?: string;
+}) {
   const [copied, setCopied] = useState<string | null>(null);
 
   if (coupons.length === 0) return null;
@@ -52,14 +60,26 @@ export default function CouponsSection({ coupons, whatsappNumber }: { coupons: C
                 <Copy className="h-4 w-4 text-steel-400 shrink-0" />
               )}
             </button>
-            <a
-              href={buildWhatsAppLink(whatsappNumber, buildCouponInquiryMessage(coupon.code))}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-center text-xs font-semibold text-amber-700 hover:text-amber-800"
-            >
-              Usar por WhatsApp →
-            </a>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href={buildWhatsAppLink(whatsappNumber, buildCouponInquiryMessage(coupon.code))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`text-center text-xs font-semibold ${whatsappNumber2 ? 'text-[#ED3237] hover:text-[#c9282c]' : 'text-amber-700 hover:text-amber-800'}`}
+              >
+                {whatsappNumber2 ? 'Usar con Lucas →' : 'Usar por WhatsApp →'}
+              </a>
+              {whatsappNumber2 && (
+                <a
+                  href={buildWhatsAppLink(whatsappNumber2, buildCouponInquiryMessage(coupon.code))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-center text-xs font-semibold text-whatsapp-700 hover:text-whatsapp-600"
+                >
+                  Usar con Luz →
+                </a>
+              )}
+            </div>
           </div>
         ))}
       </div>

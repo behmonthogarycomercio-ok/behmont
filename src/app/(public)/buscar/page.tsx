@@ -100,7 +100,7 @@ export default async function SearchPage({
               <ProductCard
                 key={product.id}
                 product={product}
-                whatsappNumber={settings.whatsappNumber}
+                whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
               />
             ))}
           </div>
@@ -136,10 +136,20 @@ export default async function SearchPage({
                 href={`https://wa.me/${settings.whatsappNumber}?text=Hola%2C+busco+${encodeURIComponent(q)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 ${settings.whatsappNumber2 ? 'bg-[#ED3237]' : 'bg-[#25D366]'}`}
               >
-                Consultar por WhatsApp
+                {settings.whatsappNumber2 ? 'Consultar con Lucas' : 'Consultar por WhatsApp'}
               </a>
+              {settings.whatsappNumber2 && (
+                <a
+                  href={`https://wa.me/${settings.whatsappNumber2}?text=Hola%2C+busco+${encodeURIComponent(q)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Consultar con Luz
+                </a>
+              )}
               <Link
                 href="/buscar"
                 className="inline-flex items-center gap-2 rounded-full border border-plate-200 px-5 py-2.5 text-sm font-semibold text-steel-700 transition hover:border-steel-900"
@@ -170,7 +180,7 @@ export default async function SearchPage({
         </div>
       )}
 
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

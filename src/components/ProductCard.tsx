@@ -13,7 +13,15 @@ import type { Product } from '@/lib/types';
 
 const CUOTAS = 3;
 
-export default function ProductCard({ product, whatsappNumber }: { product: Product; whatsappNumber: string }) {
+export default function ProductCard({
+  product,
+  whatsappNumber,
+  whatsappNumber2,
+}: {
+  product: Product;
+  whatsappNumber: string;
+  whatsappNumber2?: string;
+}) {
   const { addItem }   = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav           = isFavorite(product.sku);
@@ -25,6 +33,7 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
   const cashDiscountPct = getCashDiscountPct(product.category);
   const cashPrice = cashDiscountPct !== null ? Math.round(product.price * (1 - cashDiscountPct / 100)) : null;
   const inquiryLink = buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage());
+  const inquiryLink2 = whatsappNumber2 ? buildWhatsAppLink(whatsappNumber2, buildQuickInquiryMessage()) : null;
   const code = getProductCode(product);
 
   return (
@@ -115,10 +124,19 @@ export default function ProductCard({ product, whatsappNumber }: { product: Prod
             Agregar al pedido
           </button>
           <a href={inquiryLink} target="_blank" rel="noopener noreferrer"
-            className="h-8 w-8 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
-            aria-label="WhatsApp">
+            className={`h-8 w-8 shrink-0 rounded-xl text-white flex items-center justify-center transition active:scale-[.97] ${inquiryLink2 ? 'bg-[#ED3237] hover:bg-[#c9282c]' : 'bg-[#25D366] hover:bg-[#1eb358]'}`}
+            aria-label={inquiryLink2 ? 'Consultar con Lucas por WhatsApp' : 'WhatsApp'}
+            title={inquiryLink2 ? 'Lucas' : undefined}>
             <MessageCircle className="h-4 w-4" />
           </a>
+          {inquiryLink2 && (
+            <a href={inquiryLink2} target="_blank" rel="noopener noreferrer"
+              className="h-8 w-8 shrink-0 rounded-xl bg-[#25D366] hover:bg-[#1eb358] text-white flex items-center justify-center transition active:scale-[.97]"
+              aria-label="Consultar con Luz por WhatsApp"
+              title="Luz">
+              <MessageCircle className="h-4 w-4" />
+            </a>
+          )}
         </div>
       </div>
     </div>

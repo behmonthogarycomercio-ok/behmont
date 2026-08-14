@@ -10,9 +10,11 @@ import type { Promotion } from '@/lib/types';
 export default function FinancingPromosCarousel({
   promotions,
   whatsappNumber,
+  whatsappNumber2,
 }: {
   promotions: Promotion[];
   whatsappNumber: string;
+  whatsappNumber2?: string;
 }) {
   const items = promotions.filter((p) => p.image_url);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
@@ -29,7 +31,9 @@ export default function FinancingPromosCarousel({
 
   const detail = openIdx !== null ? items[openIdx] : null;
   const detailLink = detail ? buildWhatsAppLink(whatsappNumber, buildPromoInquiryMessage(detail.title)) : '';
+  const detailLink2 = detail && whatsappNumber2 ? buildWhatsAppLink(whatsappNumber2, buildPromoInquiryMessage(detail.title)) : '';
   const generalLink = buildWhatsAppLink(whatsappNumber, buildPromoInquiryMessage('Promos en financiación'));
+  const generalLink2 = whatsappNumber2 ? buildWhatsAppLink(whatsappNumber2, buildPromoInquiryMessage('Promos en financiación')) : null;
 
   return (
     <section className="bg-steel-900 py-[74px] lg:py-[92px]">
@@ -49,14 +53,26 @@ export default function FinancingPromosCarousel({
             <p className="text-white/60 text-[25px] leading-relaxed mb-[28px]">
               Tocá una imagen para ver el detalle de la promo.
             </p>
-            <a
-              href={generalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ED3237] px-[35px] py-[21px] text-[25px] font-bold text-white transition hover:bg-[#c9282c]"
-            >
-              <MessageCircle className="h-[28px] w-[28px]" /> Me interesa esta promo
-            </a>
+            <div className="flex flex-wrap items-center gap-4">
+              <a
+                href={generalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#ED3237] px-[35px] py-[21px] text-[25px] font-bold text-white transition hover:bg-[#c9282c]"
+              >
+                <MessageCircle className="h-[28px] w-[28px]" /> {generalLink2 ? 'Me interesa (Lucas)' : 'Me interesa esta promo'}
+              </a>
+              {generalLink2 && (
+                <a
+                  href={generalLink2}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-[35px] py-[21px] text-[25px] font-bold text-white transition hover:brightness-110"
+                >
+                  <MessageCircle className="h-[28px] w-[28px]" /> Me interesa (Luz)
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Carrusel de imagenes, una al lado de la otra */}
@@ -109,14 +125,26 @@ export default function FinancingPromosCarousel({
               {detail.subtitle && (
                 <p className="text-steel-600 text-sm leading-relaxed mb-4">{detail.subtitle}</p>
               )}
-              <a
-                href={detailLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#ED3237] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#c9282c]"
-              >
-                <MessageCircle className="h-4 w-4" /> Me interesa esta promo
-              </a>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={detailLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#ED3237] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#c9282c]"
+                >
+                  <MessageCircle className="h-4 w-4" /> {detailLink2 ? 'Me interesa (Lucas)' : 'Me interesa esta promo'}
+                </a>
+                {detailLink2 && (
+                  <a
+                    href={detailLink2}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
+                  >
+                    <MessageCircle className="h-4 w-4" /> Me interesa (Luz)
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>

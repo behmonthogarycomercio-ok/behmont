@@ -151,14 +151,14 @@ export default async function CategoryPage({
               <ProductCard
                 key={product.id}
                 product={product}
-                whatsappNumber={settings.whatsappNumber}
+                whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
               />
             ))}
           </div>
         </div>
       )}
 
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

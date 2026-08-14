@@ -131,10 +131,10 @@ export default async function HomePage() {
         <CategoryDiscountCarousel categories={categoriesWithDiscounts} />
       </ScrollReveal>
       <ScrollReveal>
-        <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} />
+        <FlashOffers products={discounted} whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
       </ScrollReveal>
       <ScrollReveal>
-        <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} />
+        <CouponsSection coupons={coupons} whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
       </ScrollReveal>
       {seasonal && (
         <ScrollReveal>
@@ -142,7 +142,7 @@ export default async function HomePage() {
             eyebrow={`${seasonal.hook.eyebrowPrefix} · ${seasonal.label}`}
             title={seasonal.hook.title}
             products={seasonalCategory?.products ?? []}
-            whatsappNumber={settings.whatsappNumber}
+            whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
             promoImage={seasonal.hook.promoImage}
           />
         </ScrollReveal>
@@ -152,7 +152,7 @@ export default async function HomePage() {
           eyebrow="Seleccionados"
           title="Lavarropas y secarropas"
           products={laundryProducts}
-          whatsappNumber={settings.whatsappNumber}
+          whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
           promoImage="/images/promo-6-cuotas-lavarropas.webp"
         />
       </ScrollReveal>
@@ -161,7 +161,7 @@ export default async function HomePage() {
           eyebrow="Temporada de invierno"
           title="Preparate para el frío"
           products={winterProducts}
-          whatsappNumber={settings.whatsappNumber}
+          whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
           promoImage="/images/promo-6-cuotas-calefaccion.webp"
         />
       </ScrollReveal>
@@ -170,27 +170,27 @@ export default async function HomePage() {
           eyebrow="Para tu casa"
           title="Todo para el hogar"
           products={hogarCategory.products}
-          whatsappNumber={settings.whatsappNumber}
+          whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
           promoImage="/images/promo-6-cuotas-hogar.webp"
         />
       </ScrollReveal>
       <ScrollReveal><ReviewsBanner reviewUrl={settings.googleReviewUrl} /></ScrollReveal>
       <ScrollReveal><PromoStrip promotions={stripPromos} /></ScrollReveal>
       <ScrollReveal>
-        <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} />
+        <FinancingPromosCarousel promotions={financingPromos} whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
       </ScrollReveal>
-      <ScrollReveal><WhatsAppSection whatsappNumber={settings.whatsappNumber} /></ScrollReveal>
+      <ScrollReveal><WhatsAppSection whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} /></ScrollReveal>
       <ScrollReveal><BrandStrip brands={brands} /></ScrollReveal>
       <ScrollReveal><NewsletterBanner /></ScrollReveal>
       <ScrollReveal>
         <LocationSection
           address={settings.contactAddress}
-          whatsappNumber={settings.whatsappNumber}
+          whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
           businessHours={settings.businessHours}
         />
       </ScrollReveal>
       <ScrollReveal><PaymentSection /></ScrollReveal>
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

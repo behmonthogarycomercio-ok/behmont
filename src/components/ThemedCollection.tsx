@@ -10,12 +10,14 @@ export default function ThemedCollection({
   title,
   products,
   whatsappNumber,
+  whatsappNumber2,
   promoImage,
 }: {
   eyebrow?: string;
   title: string;
   products: Product[];
   whatsappNumber: string;
+  whatsappNumber2?: string;
   /** Reemplaza el tile de "Hasta N cuotas" calculado por una imagen ya diseñada (formato vertical). */
   promoImage?: string;
 }) {
@@ -73,7 +75,7 @@ export default function ThemedCollection({
           <ProductCarousel>
             {products.map((product) => (
               <div key={product.id} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]">
-                <ProductCard product={product} whatsappNumber={whatsappNumber} />
+                <ProductCard product={product} whatsappNumber={whatsappNumber} whatsappNumber2={whatsappNumber2} />
               </div>
             ))}
           </ProductCarousel>

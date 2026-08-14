@@ -85,9 +85,15 @@ export default async function MarcasPage({
         <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
           <h2 className="font-display font-semibold text-steel-900 mb-1">WhatsApp</h2>
           <p className="text-sm text-steel-500 mb-4">
-            Número donde llegan todos los pedidos del sitio (formato internacional, sin +).
+            Número principal (Lucas) — donde llegan todos los pedidos del sitio (formato internacional, sin +).
           </p>
           <SettingField settingKey="whatsapp_number" defaultValue={settings.whatsapp_number || ''} placeholder="5493416373092" />
+
+          <p className="text-xs font-semibold text-steel-500 mt-4 mb-1">Número secundario (Luz)</p>
+          <p className="text-sm text-steel-500 mb-4">
+            Aparece como segunda opción junto al principal en los botones de consulta. Dejalo vacío para ocultarlo.
+          </p>
+          <SettingField settingKey="whatsapp_number_2" defaultValue={settings.whatsapp_number_2 || ''} placeholder="5493454015358" />
         </div>
       </div>
 

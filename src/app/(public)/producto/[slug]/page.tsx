@@ -185,7 +185,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </div>
 
           {/* CTA actions */}
-          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} />
+          <ProductActions product={product} whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
 
           {/* Enganche a características técnicas / descripción */}
           {(filteredSpecs.length > 0 || product.description) && (
@@ -249,11 +249,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
         <ProductGrid
           title="También te puede interesar"
           products={related}
-          whatsappNumber={settings.whatsappNumber}
+          whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2}
         />
       )}
 
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

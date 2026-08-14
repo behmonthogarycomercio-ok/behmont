@@ -85,7 +85,7 @@ export default async function FaqPage() {
         <FaqAccordion categories={FAQ_CATEGORIES} />
       </div>
 
-      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} />
+      <WhatsAppFloatButton whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} />
     </main>
   );
 }

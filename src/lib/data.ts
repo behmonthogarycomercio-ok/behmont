@@ -10,6 +10,7 @@ export const getSiteSettings = cache(async () => {
   const settings = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
   return {
     whatsappNumber: settings.whatsapp_number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
+    whatsappNumber2: settings.whatsapp_number_2 || '',
     mlStoreUrl: settings.ml_store_url || '',
     siteName: settings.site_name || 'BEHMONT — Comercio y Hogar',
     contactEmail: settings.contact_email || '',

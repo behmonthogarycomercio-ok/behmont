@@ -7,9 +7,11 @@ import type { Product } from '@/lib/types';
 export default function FlashOffers({
   products,
   whatsappNumber,
+  whatsappNumber2,
 }: {
   products: Product[];
   whatsappNumber: string;
+  whatsappNumber2?: string;
 }) {
   if (products.length === 0) return null;
 
@@ -38,7 +40,7 @@ export default function FlashOffers({
         <ProductCarousel>
           {products.slice(0, 12).map((product) => (
             <div key={product.id} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]">
-              <ProductCard product={product} whatsappNumber={whatsappNumber} />
+              <ProductCard product={product} whatsappNumber={whatsappNumber} whatsappNumber2={whatsappNumber2} />
             </div>
           ))}
         </ProductCarousel>

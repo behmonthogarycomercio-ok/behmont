@@ -12,9 +12,11 @@ import type { Product } from '@/lib/types';
 export default function ProductActions({
   product,
   whatsappNumber,
+  whatsappNumber2,
 }: {
   product: Product;
   whatsappNumber: string;
+  whatsappNumber2?: string;
 }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -25,6 +27,9 @@ export default function ProductActions({
     whatsappNumber,
     buildQuickInquiryMessage()
   );
+  const inquiryLink2 = whatsappNumber2
+    ? buildWhatsAppLink(whatsappNumber2, buildQuickInquiryMessage())
+    : null;
 
   return (
     <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -63,10 +68,21 @@ export default function ProductActions({
         href={inquiryLink}
         target="_blank"
         rel="noopener noreferrer"
-        className={buttonClasses({ variant: 'whatsapp', size: 'lg' })}
+        className={buttonClasses({ variant: inquiryLink2 ? 'brand-red' : 'whatsapp', size: 'lg' })}
       >
-        <MessageCircle className="h-4 w-4" /> Consultar
+        <MessageCircle className="h-4 w-4" /> {inquiryLink2 ? 'Consultar con Lucas' : 'Consultar'}
       </a>
+
+      {inquiryLink2 && (
+        <a
+          href={inquiryLink2}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonClasses({ variant: 'whatsapp', size: 'lg' })}
+        >
+          <MessageCircle className="h-4 w-4" /> Consultar con Luz
+        </a>
+      )}
 
       {allowed && (
         <div className="flex flex-col gap-1">

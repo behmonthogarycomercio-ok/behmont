@@ -1,12 +1,14 @@
 import { clsx } from 'clsx';
 import type { ButtonHTMLAttributes } from 'react';
 
-export type ButtonVariant = 'primary' | 'whatsapp' | 'outline' | 'tactile-navy' | 'tactile-red';
+export type ButtonVariant = 'primary' | 'whatsapp' | 'whatsapp-outline' | 'brand-red' | 'outline' | 'tactile-navy' | 'tactile-red';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-steel-900 text-white hover:bg-steel-800',
   whatsapp: 'bg-whatsapp-600 text-white hover:bg-whatsapp-700',
+  'whatsapp-outline': 'border border-whatsapp-600 bg-white text-whatsapp-700 hover:bg-whatsapp-600/10',
+  'brand-red': 'bg-[#ED3237] text-white hover:bg-[#c9282c]',
   outline: 'border border-plate-200 bg-white text-steel-800 hover:bg-plate-100',
   'tactile-navy':
     'bg-gradient-to-b from-[#182548] to-[#111C38] hover:from-[#213262] hover:to-[#182548] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_16px_-6px_rgba(10,18,38,0.5)] hover:-translate-y-px active:translate-y-px',

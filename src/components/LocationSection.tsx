@@ -6,10 +6,12 @@ import { buttonClasses } from '@/components/ui/Button';
 export default function LocationSection({
   address,
   whatsappNumber,
+  whatsappNumber2,
   businessHours,
 }: {
   address: string;
   whatsappNumber: string;
+  whatsappNumber2?: string;
   businessHours?: string;
 }) {
   if (!address) return null;
@@ -18,6 +20,9 @@ export default function LocationSection({
   const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   const whatsappLink = whatsappNumber
     ? buildWhatsAppLink(whatsappNumber, buildQuickInquiryMessage())
+    : '';
+  const whatsappLink2 = whatsappNumber2
+    ? buildWhatsAppLink(whatsappNumber2, buildQuickInquiryMessage())
     : '';
 
   return (
@@ -74,9 +79,19 @@ export default function LocationSection({
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonClasses({ variant: 'tactile-navy', size: 'lg', className: 'rounded-full' })}
+                className={buttonClasses({ variant: whatsappLink2 ? 'brand-red' : 'tactile-navy', size: 'lg', className: 'rounded-full' })}
               >
-                <MessageCircle className="h-4 w-4" /> Escribinos por WhatsApp
+                <MessageCircle className="h-4 w-4" /> {whatsappLink2 ? 'Escribile a Lucas' : 'Escribinos por WhatsApp'}
+              </a>
+            )}
+            {whatsappLink2 && (
+              <a
+                href={whatsappLink2}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonClasses({ variant: 'whatsapp', size: 'lg', className: 'rounded-full' })}
+              >
+                <MessageCircle className="h-4 w-4" /> Escribile a Luz
               </a>
             )}
           </div>
