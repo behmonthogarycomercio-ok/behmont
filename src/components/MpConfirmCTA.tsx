@@ -22,7 +22,8 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
     if (!raw) return;
 
     try {
-      const { items, payer } = JSON.parse(raw) as {
+      const { orderId, items, payer } = JSON.parse(raw) as {
+        orderId?: string;
         items: { name: string; price: number; qty: number }[];
         payer: { name: string; phone: string; address?: string; city?: string; province?: string; postalCode?: string; shippingMethod?: string };
       };
@@ -34,12 +35,18 @@ export default function MpConfirmCTA({ paymentId, status }: { paymentId?: string
         clear();
       }
 
-      // Save order to DB (fire and forget — don't block the UI)
-      fetch('/api/mp/save-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId, status, items, payer }),
-      }).catch(() => {});
+      // El pedido ya se guardó server-side al crear la preferencia, y el
+      // webhook de MP (/api/mp/webhook) lo confirma solo cuando el pago se
+      // aprueba -- esto es un respaldo para actualizar el estado más rápido
+      // si el cliente vuelve a la pestaña, no la única vía. Fire and forget:
+      // aunque falle, el webhook igual va a dejar el pedido al día.
+      if (orderId) {
+        fetch('/api/mp/save-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, paymentId, status }),
+        }).catch(() => {});
+      }
 
       const message = buildMpOrderMessage({
         customerName: payer.name,

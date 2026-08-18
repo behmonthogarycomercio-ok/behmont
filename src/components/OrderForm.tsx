@@ -698,12 +698,17 @@ export default function OrderForm({ storeAddress }: { storeAddress?: string }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
-                  payer: { name: form.name, phone: form.phone, email: form.email },
+                  payer: {
+                    name: form.name, phone: form.phone, email: form.email,
+                    address: form.address, city: form.city, province: form.province,
+                    postalCode: form.postalCode, shippingMethod: form.shippingMethod,
+                  },
                 }),
               });
               const data = await res.json();
               if (!res.ok || !data.init_point) throw new Error(data.error ?? 'Error');
               sessionStorage.setItem('behmont-mp-pending', JSON.stringify({
+                orderId: data.orderId,
                 items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
                 payer: {
                   name: form.name, phone: form.phone, address: form.address,

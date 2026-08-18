@@ -19,6 +19,7 @@ import {
   Instagram,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import PushSubscribeButton from './PushSubscribeButton';
 
 const NAV = [
   { href: '/admin/dashboard',   label: 'Inicio',               icon: LayoutDashboard },
@@ -93,6 +94,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           })}
         </nav>
         <div className="p-3 border-t border-white/10 space-y-1">
+          <PushSubscribeButton />
           <Link
             href="/"
             target="_blank"
