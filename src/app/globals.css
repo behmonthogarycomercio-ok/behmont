@@ -63,3 +63,89 @@ a:hover {
   );
   background-color: #eef0f2;
 }
+
+/* Etiquetas de producto para imprimir y pegar en el local — una por hoja,
+   22 x 15 cm, A4 apaisada. El tamaño está fijo en cm para que la vista
+   previa en pantalla coincida con lo que efectivamente sale impreso. */
+.etiquetas-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.etiqueta-card {
+  width: 22cm;
+  height: 15cm;
+  box-sizing: border-box;
+  border: 2px dashed theme('colors.plate.200');
+  border-radius: 12px;
+  padding: 1.2cm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6cm;
+}
+
+.etiqueta-sku {
+  font-family: var(--font-mono);
+  font-size: 22pt;
+  color: theme('colors.steel.400');
+  letter-spacing: 0.05em;
+}
+
+.etiqueta-nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34pt;
+  line-height: 1.15;
+  color: theme('colors.steel.950');
+}
+
+.etiqueta-precio {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 72pt;
+  line-height: 1;
+  color: theme('colors.steel.950');
+}
+
+.etiqueta-cuotas {
+  font-size: 26pt;
+  font-weight: 700;
+  color: theme('colors.emerald.600');
+}
+
+.etiqueta-contado {
+  display: inline-block;
+  width: fit-content;
+  font-size: 26pt;
+  font-weight: 800;
+  color: #ED3237;
+  background: rgba(237, 50, 55, 0.1);
+  padding: 0.15cm 0.5cm;
+  border-radius: 10px;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  .etiquetas-grid {
+    gap: 0;
+  }
+
+  .etiqueta-card {
+    border: none;
+    border-radius: 0;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .etiqueta-card:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}

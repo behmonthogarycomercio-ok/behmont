@@ -17,6 +17,7 @@ import {
   ExternalLink,
   ShoppingBag,
   Instagram,
+  Printer,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PushSubscribeButton from './PushSubscribeButton';
@@ -30,6 +31,7 @@ const NAV = [
   { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
   { href: '/admin/cupones',     label: 'Cupones',               icon: Ticket },
   { href: '/admin/stock',       label: 'Stock y precios',       icon: Boxes },
+  { href: '/admin/etiquetas',   label: 'Etiquetas',             icon: Printer },
   { href: '/admin/marcas',      label: 'Marcas y MercadoLibre', icon: Tag },
   { href: '/admin/contenido',   label: 'Contenido',             icon: Instagram },
 ];
@@ -63,7 +65,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen flex bg-plate-50">
-      <aside className="w-64 shrink-0 bg-steel-950 text-plate-100 flex flex-col">
+      <aside className="print:hidden w-64 shrink-0 bg-steel-950 text-plate-100 flex flex-col">
         <div className="p-5 border-b border-white/10">
           <div className="relative h-12 w-28 mx-auto sm:mx-0">
             <Image src="/images/logo-behmont-oval.png" alt="BEHMONT" fill className="object-contain object-left" />
@@ -110,7 +112,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </button>
         </div>
       </aside>
-      <main className="flex-1 min-w-0 p-6 sm:p-8">{children}</main>
+      <main className="flex-1 min-w-0 p-6 sm:p-8 print:p-0">{children}</main>
     </div>
   );
 }
