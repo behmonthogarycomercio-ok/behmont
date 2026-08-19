@@ -104,21 +104,25 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3cm;
-  width: 3.6cm;
+  gap: 0.35cm;
+  width: 4cm;
 }
 
 .etiqueta-logo {
-  width: 3.2cm;
+  width: 3.6cm;
   height: auto;
 }
 
 .etiqueta-sku {
   font-family: var(--font-mono);
-  font-size: 12pt;
-  color: theme('colors.steel.400');
-  letter-spacing: 0.03em;
+  font-size: 11pt;
+  font-weight: 600;
+  color: theme('colors.steel.600');
+  letter-spacing: 0.04em;
   text-align: center;
+  background: theme('colors.plate.100');
+  padding: 0.12cm 0.4cm;
+  border-radius: 999px;
 }
 
 .etiqueta-info-col {
@@ -127,60 +131,74 @@ a:hover {
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
+  gap: 0.3cm;
   padding: 0.3cm 0;
 }
 
 .etiqueta-nombre {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 16pt;
-  line-height: 1.2;
+  font-weight: 800;
+  font-size: 18pt;
+  line-height: 1.25;
   color: theme('colors.steel.950');
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.etiqueta-divisor {
+  width: 2.2cm;
+  height: 3px;
+  background: #ED3237;
+  border-radius: 2px;
+}
+
+.etiqueta-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24cm;
+}
+
+.etiqueta-spec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3cm;
+  font-size: 14pt;
+  line-height: 1.3;
+}
+
+.etiqueta-spec-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ED3237;
+  flex-shrink: 0;
+  margin-top: 0.22cm;
+}
+
+.etiqueta-spec-label {
+  font-weight: 700;
+  color: theme('colors.steel.950');
+}
+
+.etiqueta-spec-value {
+  color: theme('colors.steel.500');
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.etiqueta-subtitulo {
-  font-size: 10.5pt;
-  color: theme('colors.steel.400');
-  white-space: nowrap;
+.etiqueta-descripcion {
+  font-size: 13pt;
+  line-height: 1.45;
+  color: theme('colors.steel.500');
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.etiqueta-precio {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 56pt;
-  line-height: 1;
-  color: theme('colors.steel.950');
-}
-
-.etiqueta-precios-extra {
-  display: flex;
-  align-items: center;
-  gap: 0.6cm;
-  flex-wrap: wrap;
-}
-
-.etiqueta-cuotas {
-  font-size: 16pt;
-  font-weight: 700;
-  color: theme('colors.emerald.600');
-}
-
-.etiqueta-contado {
-  display: inline-block;
-  width: fit-content;
-  font-size: 16pt;
-  font-weight: 800;
-  color: #ED3237;
-  background: rgba(237, 50, 55, 0.1);
-  padding: 0.12cm 0.4cm;
-  border-radius: 8px;
 }
 
 @media print {

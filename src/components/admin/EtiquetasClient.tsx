@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
-import { getCashDiscountPct } from '@/lib/cash-discount';
 
 type LabelProduct = {
   id: string;
@@ -16,19 +15,15 @@ type LabelProduct = {
   category: { name: string; cash_discount_pct: number | null } | null;
 };
 
-/** Línea corta con 3 specs ("Label: valor") o, si no hay specs cargados, el arranque de la descripción. */
-function shortSubtitle(p: LabelProduct): string | null {
-  if (p.specs.length > 0) {
-    return p.specs
-      .slice(0, 3)
-      .map((s) => `${s.label}: ${s.value}`)
-      .join('  ·  ');
-  }
-  if (p.description) {
-    const clean = p.description.replace(/\s+/g, ' ').trim();
-    return clean.length > 110 ? clean.slice(0, 110) + '…' : clean;
-  }
-  return null;
+/** Hasta 4 características o, si no hay specs cargados, el arranque de la descripción como texto corrido. */
+function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
+  return p.specs.slice(0, 4);
+}
+
+function getDescriptionFallback(p: LabelProduct): string | null {
+  if (p.specs.length > 0 || !p.description) return null;
+  const clean = p.description.replace(/\s+/g, ' ').trim();
+  return clean.length > 160 ? clean.slice(0, 160) + '…' : clean;
 }
 
 export default function EtiquetasClient({ products }: { products: LabelProduct[] }) {
@@ -149,10 +144,8 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
           <div className="etiquetas-grid">
             {selectedProducts.map((p) => {
               const code = getProductCode(p) ?? p.sku;
-              const cashPct = getCashDiscountPct(p.category);
-              const cashPrice = cashPct !== null ? Math.round(p.price * (1 - cashPct / 100)) : null;
-              const cuotaPrice = p.price / 3;
-              const subtitle = shortSubtitle(p);
+              const specItems = getSpecItems(p);
+              const descriptionFallback = getDescriptionFallback(p);
 
               return (
                 <div key={p.id} className="etiqueta-card">
@@ -165,14 +158,20 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                     </div>
                     <div className="etiqueta-info-col">
                       <p className="etiqueta-nombre">{p.name}</p>
-                      {subtitle && <p className="etiqueta-subtitulo">{subtitle}</p>}
-                      <p className="etiqueta-precio">${formatPrice(p.price)}</p>
-                      <div className="etiqueta-precios-extra">
-                        <p className="etiqueta-cuotas">3x ${formatPrice(cuotaPrice)} sin interés</p>
-                        {cashPrice !== null && (
-                          <p className="etiqueta-contado">Contado: ${formatPrice(cashPrice)}</p>
-                        )}
-                      </div>
+                      <div className="etiqueta-divisor" />
+                      {specItems.length > 0 ? (
+                        <ul className="etiqueta-specs">
+                          {specItems.map((s, i) => (
+                            <li key={i} className="etiqueta-spec-item">
+                              <span className="etiqueta-spec-dot" />
+                              <span className="etiqueta-spec-label">{s.label}:</span>
+                              <span className="etiqueta-spec-value">{s.value}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : descriptionFallback ? (
+                        <p className="etiqueta-descripcion">{descriptionFallback}</p>
+                      ) : null}
                     </div>
                   </div>
                   <div className="etiqueta-franja" />
