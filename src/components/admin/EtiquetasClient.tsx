@@ -9,11 +9,27 @@ type LabelProduct = {
   id: string;
   sku: string;
   name: string;
+  description: string | null;
   price: number;
   ml_item_id: string | null;
   specs: { label: string; value: string }[];
   category: { name: string; cash_discount_pct: number | null } | null;
 };
+
+/** Línea corta con 3 specs ("Label: valor") o, si no hay specs cargados, el arranque de la descripción. */
+function shortSubtitle(p: LabelProduct): string | null {
+  if (p.specs.length > 0) {
+    return p.specs
+      .slice(0, 3)
+      .map((s) => `${s.label}: ${s.value}`)
+      .join('  ·  ');
+  }
+  if (p.description) {
+    const clean = p.description.replace(/\s+/g, ' ').trim();
+    return clean.length > 110 ? clean.slice(0, 110) + '…' : clean;
+  }
+  return null;
+}
 
 export default function EtiquetasClient({ products }: { products: LabelProduct[] }) {
   const [q, setQ] = useState('');
@@ -136,16 +152,30 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
               const cashPct = getCashDiscountPct(p.category);
               const cashPrice = cashPct !== null ? Math.round(p.price * (1 - cashPct / 100)) : null;
               const cuotaPrice = p.price / 3;
+              const subtitle = shortSubtitle(p);
 
               return (
                 <div key={p.id} className="etiqueta-card">
-                  <p className="etiqueta-sku">{code}</p>
-                  <p className="etiqueta-nombre">{p.name}</p>
-                  <p className="etiqueta-precio">${formatPrice(p.price)}</p>
-                  <p className="etiqueta-cuotas">3x ${formatPrice(cuotaPrice)} sin interés</p>
-                  {cashPrice !== null && (
-                    <p className="etiqueta-contado">Contado: ${formatPrice(cashPrice)}</p>
-                  )}
+                  <div className="etiqueta-franja" />
+                  <div className="etiqueta-contenido">
+                    <div className="etiqueta-logo-col">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- se imprime, no navega por rutas de Next Image */}
+                      <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
+                      <p className="etiqueta-sku">{code}</p>
+                    </div>
+                    <div className="etiqueta-info-col">
+                      <p className="etiqueta-nombre">{p.name}</p>
+                      {subtitle && <p className="etiqueta-subtitulo">{subtitle}</p>}
+                      <p className="etiqueta-precio">${formatPrice(p.price)}</p>
+                      <div className="etiqueta-precios-extra">
+                        <p className="etiqueta-cuotas">3x ${formatPrice(cuotaPrice)} sin interés</p>
+                        {cashPrice !== null && (
+                          <p className="etiqueta-contado">Contado: ${formatPrice(cashPrice)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="etiqueta-franja" />
                 </div>
               );
             })}

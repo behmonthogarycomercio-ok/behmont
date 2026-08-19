@@ -64,54 +64,110 @@ a:hover {
   background-color: #eef0f2;
 }
 
-/* Etiquetas de producto para imprimir y pegar en el local — una por hoja,
-   22 x 15 cm, A4 apaisada. El tamaño está fijo en cm para que la vista
-   previa en pantalla coincida con lo que efectivamente sale impreso. */
+/* Etiquetas de producto para imprimir y pegar en el local — 3 por hoja A4
+   vertical, apiladas, 19 x 9 cm cada una. El tamaño está fijo en cm para
+   que la vista previa en pantalla coincida con lo que sale impreso. */
 .etiquetas-grid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.5cm;
 }
 
 .etiqueta-card {
-  width: 22cm;
-  height: 15cm;
+  width: 19cm;
+  height: 9cm;
   box-sizing: border-box;
   border: 2px dashed theme('colors.plate.200');
   border-radius: 12px;
-  padding: 1.2cm;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.6cm;
+}
+
+.etiqueta-franja {
+  height: 0.5cm;
+  flex-shrink: 0;
+  background: theme('colors.steel.900');
+}
+
+.etiqueta-contenido {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.7cm;
+  padding: 0 1cm;
+}
+
+.etiqueta-logo-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3cm;
+  width: 3.6cm;
+}
+
+.etiqueta-logo {
+  width: 3.2cm;
+  height: auto;
 }
 
 .etiqueta-sku {
   font-family: var(--font-mono);
-  font-size: 22pt;
+  font-size: 12pt;
   color: theme('colors.steel.400');
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+.etiqueta-info-col {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 0.3cm 0;
 }
 
 .etiqueta-nombre {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 34pt;
-  line-height: 1.15;
+  font-size: 16pt;
+  line-height: 1.2;
   color: theme('colors.steel.950');
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.etiqueta-subtitulo {
+  font-size: 10.5pt;
+  color: theme('colors.steel.400');
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .etiqueta-precio {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 72pt;
+  font-size: 56pt;
   line-height: 1;
   color: theme('colors.steel.950');
 }
 
+.etiqueta-precios-extra {
+  display: flex;
+  align-items: center;
+  gap: 0.6cm;
+  flex-wrap: wrap;
+}
+
 .etiqueta-cuotas {
-  font-size: 26pt;
+  font-size: 16pt;
   font-weight: 700;
   color: theme('colors.emerald.600');
 }
@@ -119,27 +175,30 @@ a:hover {
 .etiqueta-contado {
   display: inline-block;
   width: fit-content;
-  font-size: 26pt;
+  font-size: 16pt;
   font-weight: 800;
   color: #ED3237;
   background: rgba(237, 50, 55, 0.1);
-  padding: 0.15cm 0.5cm;
-  border-radius: 10px;
+  padding: 0.12cm 0.4cm;
+  border-radius: 8px;
 }
 
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 0;
+    size: A4 portrait;
+    margin: 1cm;
   }
 
   .etiquetas-grid {
-    gap: 0;
+    gap: 0.35cm;
   }
 
   .etiqueta-card {
     border: none;
     border-radius: 0;
+  }
+
+  .etiqueta-card:nth-child(3n) {
     page-break-after: always;
     break-after: page;
   }

@@ -7,7 +7,7 @@ export default async function EtiquetasPage() {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, sku, name, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct)')
+    .select('id, sku, name, description, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct)')
     .eq('active', true)
     .order('name')
     .range(0, 4999);
