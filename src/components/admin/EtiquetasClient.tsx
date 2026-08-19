@@ -151,11 +151,6 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                 <div key={p.id} className="etiqueta-card">
                   <div className="etiqueta-franja" />
                   <div className="etiqueta-contenido">
-                    <div className="etiqueta-logo-col">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- se imprime, no navega por rutas de Next Image */}
-                      <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
-                      <p className="etiqueta-sku">{code}</p>
-                    </div>
                     <div className="etiqueta-info-col">
                       <p className="etiqueta-nombre">{p.name}</p>
                       <div className="etiqueta-divisor" />
@@ -172,6 +167,11 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                       ) : descriptionFallback ? (
                         <p className="etiqueta-descripcion">{descriptionFallback}</p>
                       ) : null}
+                    </div>
+                    <div className="etiqueta-marca-row">
+                      <p className="etiqueta-sku">{code}</p>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- se imprime, no navega por rutas de Next Image */}
+                      <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
                     </div>
                   </div>
                   <div className="etiqueta-franja" />

@@ -94,28 +94,26 @@ a:hover {
 .etiqueta-contenido {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 0.7cm;
-  padding: 0 1cm;
+  flex-direction: column;
+  padding: 0.5cm 1cm;
 }
 
-.etiqueta-logo-col {
-  flex-shrink: 0;
+.etiqueta-marca-row {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.35cm;
-  width: 4cm;
+  justify-content: flex-end;
+  gap: 0.4cm;
+  flex-shrink: 0;
 }
 
 .etiqueta-logo {
-  width: 3.6cm;
+  width: 2.6cm;
   height: auto;
 }
 
 .etiqueta-sku {
   font-family: var(--font-mono);
-  font-size: 11pt;
+  font-size: 12pt;
   font-weight: 600;
   color: theme('colors.steel.600');
   letter-spacing: 0.04em;
@@ -128,18 +126,16 @@ a:hover {
 .etiqueta-info-col {
   flex: 1;
   min-width: 0;
-  align-self: stretch;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0.3cm;
-  padding: 0.3cm 0;
 }
 
 .etiqueta-nombre {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 18pt;
+  font-size: 20pt;
   line-height: 1.25;
   color: theme('colors.steel.950');
   display: -webkit-box;
@@ -165,7 +161,7 @@ a:hover {
   display: flex;
   align-items: flex-start;
   gap: 0.3cm;
-  font-size: 14pt;
+  font-size: 15pt;
   line-height: 1.3;
 }
 
