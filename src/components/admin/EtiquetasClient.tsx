@@ -149,7 +149,6 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
 
               return (
                 <div key={p.id} className="etiqueta-card">
-                  <div className="etiqueta-franja" />
                   <div className="etiqueta-contenido">
                     <div className="etiqueta-info-col">
                       {brandName ? (
@@ -181,7 +180,6 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                       <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
                     </div>
                   </div>
-                  <div className="etiqueta-franja" />
                 </div>
               );
             })}

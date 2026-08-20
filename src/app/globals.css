@@ -86,12 +86,6 @@ a:hover {
   flex-direction: column;
 }
 
-.etiqueta-franja {
-  height: 0.5cm;
-  flex-shrink: 0;
-  background: theme('colors.steel.900');
-}
-
 .etiqueta-contenido {
   flex: 1;
   min-height: 0;
@@ -211,6 +205,7 @@ a:hover {
 }
 
 .etiqueta-spec-value {
+  font-weight: 700;
   color: theme('colors.steel.500');
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -244,10 +239,6 @@ a:hover {
     border-radius: 0;
     page-break-inside: avoid;
     break-inside: avoid;
-  }
-
-  .etiqueta-franja {
-    display: none;
   }
 
   .etiqueta-card:nth-child(3n) {

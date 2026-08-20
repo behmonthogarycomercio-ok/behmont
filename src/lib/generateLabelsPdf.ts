@@ -128,7 +128,6 @@ function drawCard(
     const value = s.value;
     doc.setFont('Inter', 'bold');
     const labelW = hasLabel ? doc.getTextWidth(label) : 0;
-    doc.setFont('Inter', 'normal');
     const valueW = doc.getTextWidth(value);
     const dotSpace = 4;
     const totalW = dotSpace + labelW + valueW;
@@ -146,7 +145,7 @@ function drawCard(
       x += labelW;
     }
 
-    doc.setFont('Inter', 'normal');
+    doc.setFont('Inter', 'bold');
     doc.setTextColor(...STEEL_500);
     doc.text(value, x, y, { maxWidth: contentW - (x - (centerX - totalW / 2)) });
 
