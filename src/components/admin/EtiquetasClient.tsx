@@ -3,41 +3,13 @@
 import { useMemo, useState } from 'react';
 import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
-
-type LabelProduct = {
-  id: string;
-  sku: string;
-  name: string;
-  description: string | null;
-  price: number;
-  ml_item_id: string | null;
-  specs: { label: string; value: string }[];
-  category: { name: string; cash_discount_pct: number | null } | null;
-  brand: { name: string } | null;
-};
-
-/** Título grande de la etiqueta: marca real del producto, spec "Marca" si no está la relación, o la categoría como último respaldo. */
-function getBrandName(p: LabelProduct): string | null {
-  if (p.brand?.name) return p.brand.name;
-  const spec = p.specs.find((s) => s.label.trim().toLowerCase() === 'marca');
-  if (spec?.value) return spec.value;
-  return p.category?.name || null;
-}
-
-/** Hasta 2 características (sin repetir la marca, que ya se muestra arriba como título). */
-function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  return p.specs.filter((s) => s.label.trim().toLowerCase() !== 'marca').slice(0, 2);
-}
-
-function getDescriptionFallback(p: LabelProduct): string | null {
-  if (p.specs.length > 0 || !p.description) return null;
-  const clean = p.description.replace(/\s+/g, ' ').trim();
-  return clean.length > 160 ? clean.slice(0, 160) + '…' : clean;
-}
+import { getBrandName, getSpecItems, getDescriptionFallback, type LabelProduct } from '@/lib/etiqueta-content';
+import { generateLabelsPdf } from '@/lib/generateLabelsPdf';
 
 export default function EtiquetasClient({ products }: { products: LabelProduct[] }) {
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -74,18 +46,36 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
     setSelected(new Set());
   }
 
+  async function handleDownloadPdf() {
+    setGeneratingPdf(true);
+    try {
+      await generateLabelsPdf(selectedProducts);
+    } finally {
+      setGeneratingPdf(false);
+    }
+  }
+
   return (
     <div>
       <div className="print:hidden">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <h1 className="font-display text-2xl font-bold text-steel-950">Etiquetas de producto</h1>
-          <button
-            onClick={() => window.print()}
-            disabled={selected.size === 0}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Imprimir {selected.size > 0 ? `(${selected.size})` : ''}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={selected.size === 0 || generatingPdf}
+              className="rounded-lg border border-steel-950 px-4 py-2 text-sm font-semibold text-steel-950 hover:bg-plate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {generatingPdf ? 'Generando PDF…' : `Descargar PDF ${selected.size > 0 ? `(${selected.size})` : ''}`}
+            </button>
+            <button
+              onClick={() => window.print()}
+              disabled={selected.size === 0}
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Imprimir {selected.size > 0 ? `(${selected.size})` : ''}
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 mb-4 flex-wrap">
