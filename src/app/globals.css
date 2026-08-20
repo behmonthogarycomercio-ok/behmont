@@ -232,11 +232,11 @@ a:hover {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0.5cm;
+    margin: 0;
   }
 
   .etiquetas-grid {
-    gap: 0.25cm;
+    gap: 0;
   }
 
   .etiqueta-card {
