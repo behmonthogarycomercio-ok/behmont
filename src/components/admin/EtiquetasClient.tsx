@@ -16,11 +16,12 @@ type LabelProduct = {
   brand: { name: string } | null;
 };
 
-/** Marca a mostrar como título grande: la relación real del producto, o si no está cargada, la spec "Marca" si existe. */
+/** Título grande de la etiqueta: marca real del producto, spec "Marca" si no está la relación, o la categoría como último respaldo. */
 function getBrandName(p: LabelProduct): string | null {
   if (p.brand?.name) return p.brand.name;
   const spec = p.specs.find((s) => s.label.trim().toLowerCase() === 'marca');
-  return spec?.value || null;
+  if (spec?.value) return spec.value;
+  return p.category?.name || null;
 }
 
 /** Hasta 3 características (sin repetir la marca, que ya se muestra arriba como título). */
