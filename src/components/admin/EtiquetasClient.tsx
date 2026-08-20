@@ -24,9 +24,9 @@ function getBrandName(p: LabelProduct): string | null {
   return p.category?.name || null;
 }
 
-/** Hasta 3 características (sin repetir la marca, que ya se muestra arriba como título). */
+/** Hasta 2 características (sin repetir la marca, que ya se muestra arriba como título). */
 function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  return p.specs.filter((s) => s.label.trim().toLowerCase() !== 'marca').slice(0, 3);
+  return p.specs.filter((s) => s.label.trim().toLowerCase() !== 'marca').slice(0, 2);
 }
 
 function getDescriptionFallback(p: LabelProduct): string | null {
