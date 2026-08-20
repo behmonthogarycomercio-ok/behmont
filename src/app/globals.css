@@ -246,6 +246,10 @@ a:hover {
     break-inside: avoid;
   }
 
+  .etiqueta-franja {
+    display: none;
+  }
+
   .etiqueta-card:nth-child(3n) {
     page-break-after: always;
     break-after: page;
