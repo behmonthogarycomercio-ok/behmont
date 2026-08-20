@@ -65,8 +65,9 @@ a:hover {
 }
 
 /* Etiquetas de producto para imprimir y pegar en el local — 3 por hoja A4
-   vertical, apiladas, 19 x 9 cm cada una. El tamaño está fijo en cm para
-   que la vista previa en pantalla coincida con lo que sale impreso. */
+   vertical, apiladas, 19 x 9.5 cm cada una (el maximo que entran 3 juntas
+   en una A4). El tamaño está fijo en cm para que la vista previa en
+   pantalla coincida con lo que sale impreso. */
 .etiquetas-grid {
   display: flex;
   flex-direction: column;
@@ -76,7 +77,7 @@ a:hover {
 
 .etiqueta-card {
   width: 19cm;
-  height: 9cm;
+  height: 9.5cm;
   box-sizing: border-box;
   border: 2px dashed theme('colors.plate.200');
   border-radius: 12px;
@@ -137,16 +138,36 @@ a:hover {
   overflow: hidden;
 }
 
-.etiqueta-nombre {
+.etiqueta-marca {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 30pt;
-  line-height: 1.15;
+  font-weight: 900;
+  font-size: 36pt;
+  line-height: 1.1;
   color: theme('colors.steel.950');
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.etiqueta-variacion {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16pt;
+  line-height: 1.2;
+  color: theme('colors.steel.600');
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.etiqueta-variacion--sola {
+  font-size: 24pt;
+  font-weight: 800;
+  color: theme('colors.steel.950');
 }
 
 .etiqueta-divisor {
@@ -209,11 +230,11 @@ a:hover {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 1cm;
+    margin: 0.35cm;
   }
 
   .etiquetas-grid {
-    gap: 0.35cm;
+    gap: 0.15cm;
   }
 
   .etiqueta-card {

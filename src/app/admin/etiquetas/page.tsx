@@ -9,7 +9,7 @@ async function fetchAllActiveProducts(supabase: ReturnType<typeof createServerSu
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data } = await supabase
       .from('products')
-      .select('id, sku, name, description, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct)')
+      .select('id, sku, name, description, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct), brand:brands(name)')
       .eq('active', true)
       .order('name')
       .range(from, from + PAGE_SIZE - 1);
@@ -30,6 +30,7 @@ export default async function EtiquetasPage() {
   const normalized = products.map((p) => ({
     ...p,
     category: Array.isArray(p.category) ? p.category[0] ?? null : p.category,
+    brand: Array.isArray(p.brand) ? p.brand[0] ?? null : p.brand,
   }));
 
   return (

@@ -13,11 +13,19 @@ type LabelProduct = {
   ml_item_id: string | null;
   specs: { label: string; value: string }[];
   category: { name: string; cash_discount_pct: number | null } | null;
+  brand: { name: string } | null;
 };
 
-/** Hasta 3 características o, si no hay specs cargados, el arranque de la descripción como texto corrido. */
+/** Marca a mostrar como título grande: la relación real del producto, o si no está cargada, la spec "Marca" si existe. */
+function getBrandName(p: LabelProduct): string | null {
+  if (p.brand?.name) return p.brand.name;
+  const spec = p.specs.find((s) => s.label.trim().toLowerCase() === 'marca');
+  return spec?.value || null;
+}
+
+/** Hasta 3 características (sin repetir la marca, que ya se muestra arriba como título). */
 function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  return p.specs.slice(0, 3);
+  return p.specs.filter((s) => s.label.trim().toLowerCase() !== 'marca').slice(0, 3);
 }
 
 function getDescriptionFallback(p: LabelProduct): string | null {
@@ -146,13 +154,21 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
               const code = getProductCode(p) ?? p.sku;
               const specItems = getSpecItems(p);
               const descriptionFallback = getDescriptionFallback(p);
+              const brandName = getBrandName(p);
 
               return (
                 <div key={p.id} className="etiqueta-card">
                   <div className="etiqueta-franja" />
                   <div className="etiqueta-contenido">
                     <div className="etiqueta-info-col">
-                      <p className="etiqueta-nombre">{p.name}</p>
+                      {brandName ? (
+                        <>
+                          <p className="etiqueta-marca">{brandName}</p>
+                          <p className="etiqueta-variacion">{p.name}</p>
+                        </>
+                      ) : (
+                        <p className="etiqueta-variacion etiqueta-variacion--sola">{p.name}</p>
+                      )}
                       <div className="etiqueta-divisor" />
                       {specItems.length > 0 ? (
                         <ul className="etiqueta-specs">
