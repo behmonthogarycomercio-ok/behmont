@@ -103,7 +103,7 @@ a:hover {
 .etiqueta-marca-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.4cm;
   flex-shrink: 0;
 }
