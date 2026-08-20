@@ -190,6 +190,11 @@ a:hover {
   text-align: left;
 }
 
+/* Con 3 o 4 caracteristicas hay que achicar la letra para que entren en la tarjeta. */
+.etiqueta-specs--compact .etiqueta-spec-item {
+  font-size: 14pt;
+}
+
 .etiqueta-spec-dot {
   width: 6px;
   height: 6px;

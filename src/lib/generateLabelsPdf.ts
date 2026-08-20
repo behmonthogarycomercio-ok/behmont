@@ -121,7 +121,9 @@ function drawCard(
   doc.line(centerX - 11, y, centerX + 11, y);
   y += 6;
 
-  doc.setFontSize(17.3);
+  // Con 3 o 4 caracteristicas hay que achicar la letra para que entren en la tarjeta.
+  const specFontSize = specItems.length >= 3 ? 14 : 17.3;
+  doc.setFontSize(specFontSize);
   specItems.forEach((s) => {
     const hasLabel = s.label.length > 0;
     const label = hasLabel ? `${s.label}: ` : '';
@@ -133,7 +135,7 @@ function drawCard(
     const totalW = dotSpace + labelW + valueW;
     let x = centerX - totalW / 2;
 
-    y += ptToMm(17.3) * 0.8;
+    y += ptToMm(specFontSize) * 0.8;
     doc.setFillColor(...RED);
     doc.circle(x + 1, y - 1.4, 0.7, 'F');
     x += dotSpace;
@@ -149,7 +151,7 @@ function drawCard(
     doc.setTextColor(...STEEL_500);
     doc.text(value, x, y, { maxWidth: contentW - (x - (centerX - totalW / 2)) });
 
-    y += ptToMm(17.3) * 0.5 + 2.4;
+    y += ptToMm(specFontSize) * 0.5 + 2;
   });
 
   // Codigo (izquierda, subrayado) + logo (derecha)

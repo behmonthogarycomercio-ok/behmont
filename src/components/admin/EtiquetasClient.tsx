@@ -161,7 +161,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                       )}
                       <div className="etiqueta-divisor" />
                       {specItems.length > 0 ? (
-                        <ul className="etiqueta-specs">
+                        <ul className={`etiqueta-specs ${specItems.length >= 3 ? 'etiqueta-specs--compact' : ''}`}>
                           {specItems.map((s, i) => (
                             <li key={i} className="etiqueta-spec-item">
                               <span className="etiqueta-spec-dot" />

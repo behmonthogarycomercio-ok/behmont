@@ -24,14 +24,14 @@ const EXCLUDED_SPEC_LABELS = new Set(['marca', 'modelo']);
 // Labels genéricos que no aportan info -- se muestra el valor solo, sin prefijo.
 const NO_PREFIX_SPEC_LABELS = new Set(['detalle', 'detalles']);
 
-/** Hasta 2 características (sin repetir marca/modelo, que ya se muestran aparte). */
+/** Hasta 4 características (sin repetir marca/modelo, que ya se muestran aparte). */
 export function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
   return p.specs
     .filter((s) => !EXCLUDED_SPEC_LABELS.has(s.label.trim().toLowerCase()))
     .map((s) =>
       NO_PREFIX_SPEC_LABELS.has(s.label.trim().toLowerCase()) ? { label: '', value: s.value } : s
     )
-    .slice(0, 2);
+    .slice(0, 4);
 }
 
 export function getDescriptionFallback(p: LabelProduct): string | null {
