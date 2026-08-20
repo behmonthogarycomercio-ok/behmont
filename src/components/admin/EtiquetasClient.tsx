@@ -15,9 +15,9 @@ type LabelProduct = {
   category: { name: string; cash_discount_pct: number | null } | null;
 };
 
-/** Hasta 4 características o, si no hay specs cargados, el arranque de la descripción como texto corrido. */
+/** Hasta 3 características o, si no hay specs cargados, el arranque de la descripción como texto corrido. */
 function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  return p.specs.slice(0, 4);
+  return p.specs.slice(0, 3);
 }
 
 function getDescriptionFallback(p: LabelProduct): string | null {
