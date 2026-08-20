@@ -166,7 +166,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                           {specItems.map((s, i) => (
                             <li key={i} className="etiqueta-spec-item">
                               <span className="etiqueta-spec-dot" />
-                              <span className="etiqueta-spec-label">{s.label}:</span>
+                              {s.label && <span className="etiqueta-spec-label">{s.label}:</span>}
                               <span className="etiqueta-spec-value">{s.value}</span>
                             </li>
                           ))}
