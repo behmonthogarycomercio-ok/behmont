@@ -17,7 +17,12 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
     if (!term) return products;
     return products.filter((p) => {
       const code = getProductCode(p) ?? p.sku;
-      return p.name.toLowerCase().includes(term) || code.toLowerCase().includes(term);
+      const brand = getBrandName(p) ?? '';
+      return (
+        p.name.toLowerCase().includes(term) ||
+        code.toLowerCase().includes(term) ||
+        brand.toLowerCase().includes(term)
+      );
     });
   }, [q, products]);
 
@@ -86,7 +91,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nombre o código (SKU)..."
+            placeholder="Buscar por nombre, marca o código (SKU)..."
             className="w-full max-w-md rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
           />
           <button
