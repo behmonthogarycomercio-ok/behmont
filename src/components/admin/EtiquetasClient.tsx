@@ -1,15 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
 import { getBrandName, getSpecItems, getDescriptionFallback, type LabelProduct } from '@/lib/etiqueta-content';
-import { generateLabelsPdf } from '@/lib/generateLabelsPdf';
+import { generateLabelsPdfFromDom } from '@/lib/generateLabelsPdf';
 
 export default function EtiquetasClient({ products }: { products: LabelProduct[] }) {
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -47,9 +48,11 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
   }
 
   async function handleDownloadPdf() {
+    if (!gridRef.current) return;
     setGeneratingPdf(true);
     try {
-      await generateLabelsPdf(selectedProducts);
+      const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>('.etiqueta-card'));
+      await generateLabelsPdfFromDom(cards);
     } finally {
       setGeneratingPdf(false);
     }
@@ -140,7 +143,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
           <p className="print:hidden text-sm font-semibold text-steel-500 mb-3">
             Vista previa de impresión
           </p>
-          <div className="etiquetas-grid">
+          <div className="etiquetas-grid" ref={gridRef}>
             {selectedProducts.map((p) => {
               const code = getProductCode(p) ?? p.sku;
               const specItems = getSpecItems(p);
