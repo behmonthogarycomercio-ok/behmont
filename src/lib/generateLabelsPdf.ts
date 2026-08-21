@@ -57,12 +57,14 @@ export async function generateLabelsPdfFromDom(cardElements: HTMLElement[]) {
         });
       },
     });
-    const imgData = canvas.toDataURL('image/png');
+    // JPEG en vez de PNG -- a esta calidad no se nota diferencia en texto
+    // solido, pero el archivo pesa una fraccion (importa para tandas grandes).
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
 
     const posInPage = i % CARDS_PER_PAGE;
     if (i > 0 && posInPage === 0) doc.addPage();
     const cardTop = startY + posInPage * CARD_H;
-    doc.addImage(imgData, 'PNG', CARD_X, cardTop, CARD_W, CARD_H);
+    doc.addImage(imgData, 'JPEG', CARD_X, cardTop, CARD_W, CARD_H);
   }
 
   doc.save('etiquetas-behmont.pdf');
