@@ -57,14 +57,19 @@ async function loadFontBase64(url: string): Promise<string> {
 
 // Mismas tipografias que usa el sitio (next/font/google en layout.tsx):
 // Manrope para titulos (--font-display), Inter para el resto (--font-body / --font-mono).
+// La marca (etiqueta-marca) usa weight 900/800 y la variacion (etiqueta-variacion)
+// usa weight 700 -- por eso se cargan dos pesos distintos de Manrope, igual que en CSS.
 async function loadFonts(doc: jsPDF) {
-  const [manropeExtraBold, interRegular, interBold] = await Promise.all([
+  const [manropeExtraBold, manropeBold, interRegular, interBold] = await Promise.all([
     loadFontBase64('/fonts/Manrope-ExtraBold.ttf'),
+    loadFontBase64('/fonts/Manrope-Bold.ttf'),
     loadFontBase64('/fonts/Inter-Regular.ttf'),
     loadFontBase64('/fonts/Inter-Bold.ttf'),
   ]);
   doc.addFileToVFS('Manrope-ExtraBold.ttf', manropeExtraBold);
   doc.addFont('Manrope-ExtraBold.ttf', 'Manrope', 'bold');
+  doc.addFileToVFS('Manrope-Bold.ttf', manropeBold);
+  doc.addFont('Manrope-Bold.ttf', 'ManropeVariacion', 'bold');
   doc.addFileToVFS('Inter-Regular.ttf', interRegular);
   doc.addFont('Inter-Regular.ttf', 'Inter', 'normal');
   doc.addFileToVFS('Inter-Bold.ttf', interBold);
@@ -94,7 +99,7 @@ function drawCard(
     doc.text(brandName.toUpperCase(), centerX, y, { align: 'center', maxWidth: contentW });
     y += ptToMm(42) * 0.3 + 3;
 
-    doc.setFont('Manrope', 'bold');
+    doc.setFont('ManropeVariacion', 'bold');
     doc.setFontSize(18.5);
     doc.setTextColor(...STEEL_600);
     const lines = doc.splitTextToSize(p.name, contentW).slice(0, 2);
