@@ -115,6 +115,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
               <tr className="border-b border-plate-200 text-left text-steel-500">
                 <th className="p-3 font-medium w-10"></th>
                 <th className="p-3 font-medium">Producto</th>
+                <th className="p-3 font-medium">Marca</th>
                 <th className="p-3 font-medium">Código</th>
                 <th className="p-3 font-medium">Precio</th>
               </tr>
@@ -134,6 +135,7 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
                     />
                   </td>
                   <td className="p-3 font-medium text-steel-900">{p.name}</td>
+                  <td className="p-3 text-steel-600">{getBrandName(p) ?? '—'}</td>
                   <td className="p-3 font-mono text-xs text-steel-500">{getProductCode(p) ?? p.sku}</td>
                   <td className="p-3 font-semibold text-steel-900">${formatPrice(p.price)}</td>
                 </tr>
