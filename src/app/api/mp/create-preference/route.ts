@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { roundPrice } from '@/lib/price';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { buildMpOrderMessage } from '@/lib/whatsapp';
+import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
 
@@ -19,6 +20,11 @@ type Payer = {
 };
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (await isRateLimited(`mp-create-preference:${ip}`, 20, 600)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+  }
+
   try {
     const { items, payer } = (await req.json()) as { items: Item[]; payer: Payer };
 

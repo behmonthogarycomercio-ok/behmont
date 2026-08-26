@@ -1,9 +1,40 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { buildMpOrderMessage } from '@/lib/whatsapp';
 import { notifyAdmins } from '@/lib/push';
 
 const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
+
+// Verificación de firma según la documentación de Mercado Pago (header
+// x-signature: "ts=...,v1=..."). Requiere configurar el "Secreto de firma"
+// del webhook en el panel de MP y copiarlo a MP_WEBHOOK_SECRET. Si esa
+// variable no está configurada todavía, se omite la verificación (no se
+// rompe el webhook existente) -- el flujo ya es seguro igual porque el
+// estado del pago siempre se re-consulta contra la API de MP, nunca se
+// confía en el body de la notificación.
+function isValidMpSignature(req: NextRequest, dataId: string | null): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true;
+
+  const signatureHeader = req.headers.get('x-signature');
+  const requestId = req.headers.get('x-request-id');
+  if (!signatureHeader || !requestId || !dataId) return false;
+
+  const parts = Object.fromEntries(
+    signatureHeader.split(',').map((p) => p.trim().split('=').map((s) => s.trim())) as [string, string][]
+  );
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const expected = createHmac('sha256', secret).update(manifest).digest('hex');
+
+  const a = Buffer.from(expected, 'hex');
+  const b = Buffer.from(v1, 'hex');
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 // Notificación server-to-server de Mercado Pago. A diferencia del flujo
 // anterior (que dependía de que el cliente volviera al navegador después de
@@ -35,6 +66,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { id: paymentId, type } = extractPaymentId(req, body);
+
+  if (!isValidMpSignature(req, paymentId)) {
+    return NextResponse.json({ ok: false, error: 'invalid_signature' }, { status: 401 });
+  }
 
   if (!paymentId || (type && type !== 'payment')) {
     return NextResponse.json({ ok: true, ignored: true });

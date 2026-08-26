@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceSupabase } from '@/lib/supabase/server';
+import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 const schema = z.object({
   email: z.string().email('Ingresá un email válido'),
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (await isRateLimited(`newsletter-subscribe:${ip}`, 10, 600)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+  }
+
   const body = await request.json();
   const parsed = schema.safeParse(body);
 

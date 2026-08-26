@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { buildOrderMessage, buildWhatsAppLink } from '@/lib/whatsapp';
+import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 const orderSchema = z.object({
   customerName: z.string().min(2, 'Ingresá tu nombre'),
@@ -31,6 +32,11 @@ const orderSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (await isRateLimited(`whatsapp-order:${ip}`, 20, 600)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+  }
+
   const body = await request.json();
   const parsed = orderSchema.safeParse(body);
 

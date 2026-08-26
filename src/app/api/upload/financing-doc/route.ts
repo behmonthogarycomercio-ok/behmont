@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
+import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: Request) {
+  // Ruta pública sin login (el cliente todavía no tiene cuenta al subir
+  // documentos de financiación en el checkout) -- el storage de Supabase
+  // está en plan gratuito con 1GB total, así que sin límite un script podría
+  // llenarlo en minutos subiendo archivos de 10MB en loop.
+  const ip = getClientIp(request);
+  if (await isRateLimited(`upload-financing-doc:${ip}`, 10, 600)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+  }
+
   const formData = await request.formData();
   const file = formData.get('file') as File | null;
   const label = formData.get('label') as string | null;

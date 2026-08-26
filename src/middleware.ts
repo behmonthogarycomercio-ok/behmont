@@ -2,13 +2,25 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  const isAdminRoute =
+    request.nextUrl.pathname.startsWith('/admin') &&
+    request.nextUrl.pathname !== '/admin';
+
   try {
     let response = NextResponse.next({ request: { headers: request.headers } });
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+    // Sin config de Supabase no hay forma de verificar sesión — no se puede
+    // confirmar que el visitante es admin, así que las rutas /admin se
+    // bloquean (fail closed) en vez de dejarlas pasar.
     if (!supabaseUrl || !supabaseKey) {
+      if (isAdminRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin';
+        return NextResponse.redirect(url);
+      }
       return NextResponse.next({ request: { headers: request.headers } });
     }
 
@@ -30,10 +42,6 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const isAdminRoute =
-      request.nextUrl.pathname.startsWith('/admin') &&
-      request.nextUrl.pathname !== '/admin';
-
     if (isAdminRoute && !user) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
@@ -42,6 +50,14 @@ export async function middleware(request: NextRequest) {
 
     return response;
   } catch {
+    // Si algo falla al verificar la sesión (ej. Supabase caído), las rutas
+    // /admin se bloquean en vez de dejarse pasar sin chequeo (antes esto
+    // dejaba pasar cualquier request a /admin sin verificar login).
+    if (isAdminRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin';
+      return NextResponse.redirect(url);
+    }
     return NextResponse.next({ request: { headers: request.headers } });
   }
 }

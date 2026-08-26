@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 const wholesaleSchema = z.object({
   businessName: z.string().min(2, 'Ingresá el nombre de tu negocio'),
@@ -15,6 +16,11 @@ const wholesaleSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (await isRateLimited(`whatsapp-mayorista:${ip}`, 10, 600)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+  }
+
   const body = await request.json();
   const parsed = wholesaleSchema.safeParse(body);
 
