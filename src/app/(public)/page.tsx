@@ -13,7 +13,6 @@ import WhatsAppSection from '@/components/WhatsAppSection';
 import PromoStrip from '@/components/PromoStrip';
 import FinancingPromosCarousel from '@/components/FinancingPromosCarousel';
 import BrandStrip from '@/components/BrandStrip';
-import NewsletterBanner from '@/components/NewsletterBanner';
 import LocationSection from '@/components/LocationSection';
 import MercadoLibreBanner from '@/components/MercadoLibreBanner';
 import ReviewsBanner from '@/components/ReviewsBanner';
@@ -181,7 +180,6 @@ export default async function HomePage() {
       </ScrollReveal>
       <ScrollReveal><WhatsAppSection whatsappNumber={settings.whatsappNumber} whatsappNumber2={settings.whatsappNumber2} /></ScrollReveal>
       <ScrollReveal><BrandStrip brands={brands} /></ScrollReveal>
-      <ScrollReveal><NewsletterBanner /></ScrollReveal>
       <ScrollReveal>
         <LocationSection
           address={settings.contactAddress}
