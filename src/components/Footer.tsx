@@ -184,10 +184,18 @@ export default function Footer({
       <div className="border-t border-white/10 py-[22px] px-4 sm:px-6">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <p className="font-mono text-[10px] text-plate-100/30 uppercase tracking-wide">
-            © {new Date().getFullYear()} BEHMONT — Comercio y Hogar
+            © {new Date().getFullYear()} BEHMONT — Comercio y Hogar · Concordia, Entre Ríos · Argentina
           </p>
           <p className="font-mono text-[10px] text-plate-100/30 uppercase tracking-wide">
-            Concordia, Entre Ríos · Argentina
+            Desarrollado por{' '}
+            <a
+              href="https://www.neuraldigitalbrand.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-plate-100/50 transition-colors hover:text-amber-400"
+            >
+              Neural Digital Brand
+            </a>
           </p>
         </div>
       </div>
