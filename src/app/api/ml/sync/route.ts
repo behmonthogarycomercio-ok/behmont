@@ -133,7 +133,15 @@ async function runSync(request: Request, fromCron: boolean) {
         (a) => (a.name || a.id || '').trim().toLowerCase() === 'sku'
       );
       const mappedSku = skuAttr?.value_name?.trim().toLowerCase();
-      const mappedId = mappedSku ? idBySku.get(mappedSku) : undefined;
+      // Algunas publicaciones de ML son republicaciones del mismo producto con
+      // el sufijo "-LU" agregado al SKU (ej. "BX-3112-LU" para el producto
+      // "BX-3112") -- se saca el sufijo antes de buscar el match, si no el
+      // string no coincide nunca contra el SKU real y termina creando un
+      // producto duplicado en vez de solo actualizar el stock.
+      const baseMappedSku = mappedSku?.replace(/-lu$/, '');
+      const mappedId = mappedSku
+        ? (idBySku.get(mappedSku) ?? (baseMappedSku ? idBySku.get(baseMappedSku) : undefined))
+        : undefined;
       if (mappedId) {
         const { error: mapError } = await supabase
           .from('products')
