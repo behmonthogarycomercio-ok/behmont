@@ -18,6 +18,7 @@ import {
   ShoppingBag,
   Instagram,
   Printer,
+  Users,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PushSubscribeButton from './PushSubscribeButton';
@@ -26,6 +27,7 @@ const NAV = [
   { href: '/admin/dashboard',   label: 'Inicio',               icon: LayoutDashboard },
   { href: '/admin/pedidos',     label: 'Pedidos',               icon: ShoppingBag },
   { href: '/admin/metricas',    label: 'Métricas',              icon: BarChart3 },
+  { href: '/admin/turnero',     label: 'Turnero',               icon: Users },
   { href: '/admin/productos',   label: 'Productos',             icon: Package },
   { href: '/admin/categorias',  label: 'Categorías',            icon: FolderTree },
   { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
