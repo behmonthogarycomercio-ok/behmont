@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { notifyStaff } from '@/lib/push';
-import { visitSchema, STAFF_LABELS } from '@/lib/turnero';
+import { visitSchema, STAFF_LABELS, type Relation } from '@/lib/turnero';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
+
+const RELATION_NOTIFICATION_BODY: Record<Relation, string> = {
+  same: 'Tu cliente ya está en el salón.',
+  other: 'Cliente de la casa (no tuyo) — hoy te eligió a vos.',
+  social: 'Te consultó antes por redes — ya está en el salón.',
+  new: 'Cliente nuevo en BEHMONT te espera.',
+};
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -15,28 +22,20 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { attendedBy, regularOf } = parsed.data;
+  const { attendedBy, relation } = parsed.data;
 
   const supabase = createServiceSupabase();
   const { error } = await supabase.from('turnero_visits').insert({
     attended_by: attendedBy,
-    regular_of: regularOf,
+    relation,
   });
   if (error) {
     return NextResponse.json({ error: 'No se pudo registrar el turno' }, { status: 500 });
   }
 
-  const attendedLabel = STAFF_LABELS[attendedBy];
-  const body2 =
-    regularOf === attendedBy
-      ? 'Tu cliente ya está en el salón.'
-      : regularOf
-        ? `Cliente de ${STAFF_LABELS[regularOf]} — hoy te eligió a vos.`
-        : 'Cliente nuevo en BEHMONT te espera.';
-
   await notifyStaff(attendedBy, {
-    title: `🔔 ${attendedLabel}, te están esperando`,
-    body: body2,
+    title: `🔔 ${STAFF_LABELS[attendedBy]}, te están esperando`,
+    body: RELATION_NOTIFICATION_BODY[relation],
     url: '/',
   });
 

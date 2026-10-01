@@ -1,9 +1,9 @@
 import AdminShell from '@/components/admin/AdminShell';
 import TurneroDateFilter from '@/components/admin/TurneroDateFilter';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { STAFF, STAFF_LABELS } from '@/lib/turnero';
+import { STAFF, STAFF_LABELS, RELATION_LABELS, type Relation } from '@/lib/turnero';
 import type { StaffName } from '@/lib/push';
-import { Users, UserPlus, UserCheck, Clock } from 'lucide-react';
+import { Users, UserPlus, UserCheck, Share2, Clock } from 'lucide-react';
 
 // Argentina no tiene horario de verano desde 2009 -- UTC-3 fijo todo el año.
 const AR_OFFSET = '-03:00';
@@ -12,7 +12,7 @@ function todayAR(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 }
 
-type Visit = { id: string; attended_by: StaffName; regular_of: StaffName | null; created_at: string };
+type Visit = { id: string; attended_by: StaffName; relation: Relation; created_at: string };
 
 export default async function TurneroPage({ searchParams }: { searchParams: { date?: string } }) {
   const date = searchParams.date || todayAR();
@@ -22,15 +22,16 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from('turnero_visits')
-    .select('id, attended_by, regular_of, created_at')
+    .select('id, attended_by, relation, created_at')
     .gte('created_at', start.toISOString())
     .lt('created_at', end.toISOString())
     .order('created_at', { ascending: false });
 
   const visits = (data || []) as Visit[];
   const total = visits.length;
-  const nuevos = visits.filter((v) => !v.regular_of).length;
-  const fidelizados = total - nuevos;
+  const nuevos = visits.filter((v) => v.relation === 'new').length;
+  const fidelizados = visits.filter((v) => v.relation === 'same' || v.relation === 'other').length;
+  const porRedes = visits.filter((v) => v.relation === 'social').length;
 
   return (
     <AdminShell>
@@ -44,8 +45,9 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard icon={Users} label="Personas hoy" value={String(total)} />
-        <StatCard icon={UserPlus} label="Primera vez" value={String(nuevos)} />
         <StatCard icon={UserCheck} label="Ya eran clientes" value={String(fidelizados)} />
+        <StatCard icon={Share2} label="Consultaron por redes" value={String(porRedes)} />
+        <StatCard icon={UserPlus} label="Primera vez" value={String(nuevos)} />
         {STAFF.map((staff) => (
           <StatCard
             key={staff}
@@ -76,9 +78,7 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
                   })}
                 </td>
                 <td className="px-4 py-3 text-steel-950">{STAFF_LABELS[v.attended_by]}</td>
-                <td className="px-4 py-3 text-steel-500">
-                  {v.regular_of ? `Cliente de ${STAFF_LABELS[v.regular_of]}` : 'Primera vez'}
-                </td>
+                <td className="px-4 py-3 text-steel-500">{RELATION_LABELS[v.relation]}</td>
               </tr>
             ))}
             {visits.length === 0 && (

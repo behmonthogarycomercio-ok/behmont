@@ -12,8 +12,8 @@ export default function ActivarTurneroPage({ params }: { params: { staff: string
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-steel-950 px-6 py-12 text-center">
-      <div className="relative h-14 w-36 mb-10">
-        <Image src="/images/logo-behmont.png" alt="BEHMONT" fill className="object-contain" priority />
+      <div className="relative h-20 w-48 mb-10">
+        <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
       </div>
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
         Avisos del turnero — {label}
