@@ -3,7 +3,7 @@ import TurneroDateFilter from '@/components/admin/TurneroDateFilter';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { STAFF, STAFF_LABELS, RELATION_LABELS, type Relation } from '@/lib/turnero';
 import type { StaffName } from '@/lib/push';
-import { Users, UserPlus, UserCheck, Share2, Clock } from 'lucide-react';
+import { Users, UserPlus, UserCheck, Share2, Clock, Receipt } from 'lucide-react';
 
 // Argentina no tiene horario de verano desde 2009 -- UTC-3 fijo todo el año.
 const AR_OFFSET = '-03:00';
@@ -12,7 +12,13 @@ function todayAR(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 }
 
-type Visit = { id: string; attended_by: StaffName; relation: Relation; created_at: string };
+type Visit = {
+  id: string;
+  visit_type: 'ventas' | 'administracion';
+  attended_by: StaffName | null;
+  relation: Relation | null;
+  created_at: string;
+};
 
 export default async function TurneroPage({ searchParams }: { searchParams: { date?: string } }) {
   const date = searchParams.date || todayAR();
@@ -22,16 +28,18 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from('turnero_visits')
-    .select('id, attended_by, relation, created_at')
+    .select('id, visit_type, attended_by, relation, created_at')
     .gte('created_at', start.toISOString())
     .lt('created_at', end.toISOString())
     .order('created_at', { ascending: false });
 
   const visits = (data || []) as Visit[];
   const total = visits.length;
-  const nuevos = visits.filter((v) => v.relation === 'new').length;
-  const fidelizados = visits.filter((v) => v.relation === 'same' || v.relation === 'other').length;
-  const porRedes = visits.filter((v) => v.relation === 'social').length;
+  const ventas = visits.filter((v) => v.visit_type === 'ventas');
+  const administracion = visits.filter((v) => v.visit_type === 'administracion').length;
+  const nuevos = ventas.filter((v) => v.relation === 'new').length;
+  const fidelizados = ventas.filter((v) => v.relation === 'same' || v.relation === 'other').length;
+  const porRedes = ventas.filter((v) => v.relation === 'social').length;
 
   return (
     <AdminShell>
@@ -48,12 +56,13 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
         <StatCard icon={UserCheck} label="Ya eran clientes" value={String(fidelizados)} />
         <StatCard icon={Share2} label="Consultaron por redes" value={String(porRedes)} />
         <StatCard icon={UserPlus} label="Primera vez" value={String(nuevos)} />
+        <StatCard icon={Receipt} label="Administración / Pagos" value={String(administracion)} />
         {STAFF.map((staff) => (
           <StatCard
             key={staff}
             icon={Clock}
             label={`Atendió ${STAFF_LABELS[staff]}`}
-            value={String(visits.filter((v) => v.attended_by === staff).length)}
+            value={String(ventas.filter((v) => v.attended_by === staff).length)}
           />
         ))}
       </div>
@@ -63,6 +72,7 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
           <thead className="bg-plate-50 text-left text-steel-500">
             <tr>
               <th className="px-4 py-3 font-medium">Hora</th>
+              <th className="px-4 py-3 font-medium">Motivo</th>
               <th className="px-4 py-3 font-medium">Atendido por</th>
               <th className="px-4 py-3 font-medium">Relación</th>
             </tr>
@@ -77,13 +87,16 @@ export default async function TurneroPage({ searchParams }: { searchParams: { da
                     minute: '2-digit',
                   })}
                 </td>
-                <td className="px-4 py-3 text-steel-950">{STAFF_LABELS[v.attended_by]}</td>
-                <td className="px-4 py-3 text-steel-500">{RELATION_LABELS[v.relation]}</td>
+                <td className="px-4 py-3 text-steel-950">
+                  {v.visit_type === 'ventas' ? 'Ventas' : 'Administración / Pagos'}
+                </td>
+                <td className="px-4 py-3 text-steel-950">{v.attended_by ? STAFF_LABELS[v.attended_by] : '—'}</td>
+                <td className="px-4 py-3 text-steel-500">{v.relation ? RELATION_LABELS[v.relation] : '—'}</td>
               </tr>
             ))}
             {visits.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-steel-400">
+                <td colSpan={4} className="px-4 py-8 text-center text-steel-400">
                   Sin turnos registrados este día.
                 </td>
               </tr>

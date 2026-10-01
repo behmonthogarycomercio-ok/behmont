@@ -22,10 +22,21 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { attendedBy, relation } = parsed.data;
+  const data = parsed.data;
 
   const supabase = createServiceSupabase();
+
+  if (data.visitType === 'administracion') {
+    const { error } = await supabase.from('turnero_visits').insert({ visit_type: 'administracion' });
+    if (error) {
+      return NextResponse.json({ error: 'No se pudo registrar el turno' }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  const { attendedBy, relation } = data;
   const { error } = await supabase.from('turnero_visits').insert({
+    visit_type: 'ventas',
     attended_by: attendedBy,
     relation,
   });

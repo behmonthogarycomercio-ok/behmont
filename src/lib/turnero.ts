@@ -17,7 +17,7 @@ export const RELATION_LABELS: Record<Relation, string> = {
   new: 'Primera vez en BEHMONT',
 };
 
-export const visitSchema = z.object({
-  attendedBy: staffSchema,
-  relation: relationSchema,
-});
+export const visitSchema = z.discriminatedUnion('visitType', [
+  z.object({ visitType: z.literal('ventas'), attendedBy: staffSchema, relation: relationSchema }),
+  z.object({ visitType: z.literal('administracion') }),
+]);
