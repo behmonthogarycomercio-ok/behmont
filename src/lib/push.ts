@@ -53,7 +53,7 @@ export type StaffName = 'lucas' | 'luz' | 'lito';
  * (Lucas, Luz o Lito), suscriptos desde su link privado /turnero/<nombre>/activar.
  * Mismo mecanismo que notifyAdmins pero filtrado por destinatario.
  */
-export async function notifyStaff(staff: StaffName, payload: { title: string; body: string; url?: string }) {
+export async function notifyStaff(staff: StaffName, payload: { title: string; body: string; url?: string; image?: string }) {
   if (!process.env.VAPID_PRIVATE_KEY || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return;
   ensureConfigured();
 

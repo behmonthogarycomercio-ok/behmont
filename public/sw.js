@@ -16,6 +16,7 @@ self.addEventListener('push', (event) => {
         body: data.body,
         icon: '/images/logo-behmont-oval.png',
         badge: '/images/logo-behmont-oval.png',
+        image: data.image,
         data: { url: data.url },
         // Sin esto, Windows cierra el aviso solo a los pocos segundos y es
         // fácil no llegar a verlo -- queda fijo hasta que lo cierren o lo toquen.

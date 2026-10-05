@@ -45,9 +45,10 @@ export async function POST(request: Request) {
   }
 
   await notifyStaff(attendedBy, {
-    title: `🔔 ${STAFF_LABELS[attendedBy]}, te están esperando`,
+    title: `🏪 CLIENTE EN SALÓN — ${STAFF_LABELS[attendedBy]}`,
     body: RELATION_NOTIFICATION_BODY[relation],
     url: '/',
+    image: '/images/logo-behmont-turnero.png',
   });
 
   return NextResponse.json({ ok: true });
