@@ -17,6 +17,9 @@ self.addEventListener('push', (event) => {
         icon: '/images/logo-behmont-oval.png',
         badge: '/images/logo-behmont-oval.png',
         data: { url: data.url },
+        // Sin esto, Windows cierra el aviso solo a los pocos segundos y es
+        // fácil no llegar a verlo -- queda fijo hasta que lo cierren o lo toquen.
+        requireInteraction: true,
       }),
       // Si hay una pestaña del sitio abierta en esta PC, le pedimos que
       // reproduzca el sonido de alerta -- la Web Notifications API no permite
