@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Bell, BellOff, BellRing } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bell, BellOff, BellRing, Volume2 } from 'lucide-react';
 import type { StaffName } from '@/lib/push';
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -19,6 +19,8 @@ type State = 'unsupported' | 'checking' | 'off' | 'on' | 'busy';
 // la tablet del salón (/turnero).
 export default function ActivarAvisosStaff({ staff, label }: { staff: StaffName; label: string }) {
   const [state, setState] = useState<State>('checking');
+  const [soundReady, setSoundReady] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -30,6 +32,54 @@ export default function ActivarAvisosStaff({ staff, label }: { staff: StaffName;
       setState(sub ? 'on' : 'off');
     }).catch(() => setState('unsupported'));
   }, []);
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    function onMessage(event: MessageEvent) {
+      if (event.data?.type === 'turnero-push') playAlertSound();
+    }
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+  }, []);
+
+  function getAudioCtx() {
+    if (!audioCtxRef.current) {
+      const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtxRef.current = new Ctor();
+    }
+    return audioCtxRef.current;
+  }
+
+  // Beep propio reproducido desde esta pestaña -- la Web Notifications API no
+  // deja adjuntar un sonido a la notificación del sistema, así que esto es el
+  // refuerzo sonoro mientras esta página quede abierta en la PC.
+  function playAlertSound() {
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      const now = ctx.currentTime;
+      [0, 0.35, 0.7].forEach((offset, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = i === 2 ? 1100 : 880;
+        gain.gain.setValueAtTime(0.0001, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.6, now + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.32);
+      });
+    } catch {
+      // audio no soportado -- la notificación del sistema ya se mostró igual
+    }
+  }
+
+  function enableSound() {
+    getAudioCtx().resume().then(() => setSoundReady(true));
+    playAlertSound();
+  }
 
   async function subscribe() {
     setState('busy');
@@ -46,11 +96,15 @@ export default function ActivarAvisosStaff({ staff, label }: { staff: StaffName;
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
-      await fetch('/api/turnero/subscribe', {
+      const res = await fetch('/api/turnero/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ staff, subscription: sub.toJSON() }),
       });
+      if (!res.ok) {
+        await sub.unsubscribe();
+        throw new Error('No se pudo guardar la suscripción en el servidor');
+      }
       setState('on');
     } catch {
       setState('off');
@@ -94,12 +148,27 @@ export default function ActivarAvisosStaff({ staff, label }: { staff: StaffName;
 
   if (state === 'on') {
     return (
-      <button
-        onClick={unsubscribe}
-        className="flex items-center gap-2 rounded-xl2 px-6 py-4 text-lg font-semibold text-white bg-success-600 hover:bg-success-700 shadow-card transition-colors"
-      >
-        <BellRing className="h-5 w-5" /> Avisos activados para {label}
-      </button>
+      <div className="flex flex-col items-center gap-4">
+        <button
+          onClick={unsubscribe}
+          className="flex items-center gap-2 rounded-xl2 px-6 py-4 text-lg font-semibold text-white bg-success-600 hover:bg-success-700 shadow-card transition-colors"
+        >
+          <BellRing className="h-5 w-5" /> Avisos activados para {label}
+        </button>
+        {!soundReady && (
+          <button
+            onClick={enableSound}
+            className="flex items-center gap-2 rounded-xl2 px-5 py-3 text-base font-semibold text-steel-900 bg-white hover:bg-steel-100 shadow-card transition-colors"
+          >
+            <Volume2 className="h-5 w-5" /> Activar sonido en esta PC
+          </button>
+        )}
+        {soundReady && (
+          <p className="text-sm text-white/60 max-w-xs">
+            Sonido activado. Dejá esta pestaña abierta en la PC para escucharlo cuando te avisen.
+          </p>
+        )}
+      </div>
     );
   }
 

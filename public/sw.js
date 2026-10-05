@@ -11,12 +11,20 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/images/logo-behmont-oval.png',
-      badge: '/images/logo-behmont-oval.png',
-      data: { url: data.url },
-    })
+    Promise.all([
+      self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: '/images/logo-behmont-oval.png',
+        badge: '/images/logo-behmont-oval.png',
+        data: { url: data.url },
+      }),
+      // Si hay una pestaña del sitio abierta en esta PC, le pedimos que
+      // reproduzca el sonido de alerta -- la Web Notifications API no permite
+      // adjuntar un audio propio a la notificación del sistema.
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
+        clientsList.forEach((client) => client.postMessage({ type: 'turnero-push' }));
+      }),
+    ])
   );
 });
 

@@ -114,7 +114,7 @@ export default function TurneroPage() {
           <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white mb-12 max-w-3xl">
             ¿YA NOS CONOCÉS?
           </h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-3xl">
             <button
               onClick={() => chooseRelation('same')}
               className={`${BUTTON_RED} rounded-xl2 py-10 px-4 text-xl sm:text-2xl font-display font-bold text-white shadow-card transition-colors`}
@@ -126,12 +126,6 @@ export default function TurneroPage() {
               className={`${BUTTON_RED} rounded-xl2 py-10 px-4 text-xl sm:text-2xl font-display font-bold text-white shadow-card transition-colors`}
             >
               Le consulté por redes
-            </button>
-            <button
-              onClick={() => chooseRelation('other')}
-              className={`${BUTTON_RED} rounded-xl2 py-10 px-4 text-xl sm:text-2xl font-display font-bold text-white shadow-card transition-colors`}
-            >
-              Soy cliente viejo, pero no de {STAFF_LABELS[attendedBy].toUpperCase()}
             </button>
             <button
               onClick={() => chooseRelation('new')}
