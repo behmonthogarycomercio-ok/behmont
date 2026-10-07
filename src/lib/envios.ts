@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { MLOrderDetail, MLShipment } from './mercadolibre';
+import { STAFF, STAFF_LABELS, staffSchema } from './turnero';
 
 export const DESTINO_LABELS: Record<string, string> = {
   domicilio: 'Entregar en domicilio',
@@ -27,6 +28,15 @@ export const manualShipmentSchema = z.object({
   destinoTipo: z.enum(['domicilio', 'sucursal_andreani', 'otro']),
   destinoDetalle: z.string().trim().max(1000).optional(),
 });
+
+/** Carga de un vendedor (Lucas/Luz/Lito) desde /envios/vendedor -- venta hecha
+ * fuera del sistema (ej. en el local, sin pasar por MercadoLibre), sin cuenta
+ * de admin. Igual que manualShipmentSchema pero identifica quién la cargó. */
+export const vendorManualShipmentSchema = manualShipmentSchema.extend({
+  addedBy: staffSchema,
+});
+
+export { STAFF, STAFF_LABELS };
 
 // Tipos de logística de ML: self_service (Flex) y custom se entregan directo
 // en el domicilio del comprador; drop_off y cross_docking son cuando el
