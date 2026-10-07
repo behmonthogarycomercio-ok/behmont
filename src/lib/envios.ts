@@ -31,10 +31,36 @@ export const manualShipmentSchema = z.object({
 
 /** Carga de un vendedor (Lucas/Luz/Lito) desde /envios/vendedor -- venta hecha
  * fuera del sistema (ej. en el local, sin pasar por MercadoLibre), sin cuenta
- * de admin. Igual que manualShipmentSchema pero identifica quién la cargó. */
+ * de admin. Agrega los datos del comprador que no vienen de MercadoLibre
+ * (ahí ya los trae la API) y que el repartidor necesita para entregar o
+ * identificar a la persona: DNI, contacto y código postal; el email es solo
+ * para registro, no hace falta para la entrega. */
 export const vendorManualShipmentSchema = manualShipmentSchema.extend({
   addedBy: staffSchema,
+  dni: z.string().trim().max(20).optional(),
+  contacto: z.string().trim().max(50).optional(),
+  email: z.string().trim().max(150).optional(),
+  codigoPostal: z.string().trim().max(15).optional(),
 });
+
+/** Arma el texto final de destino combinando la dirección con los datos
+ * del comprador cargados a mano -- mismo campo que usan todas las vistas. */
+export function formatManualDestino(parts: {
+  destinoDetalle?: string;
+  dni?: string;
+  contacto?: string;
+  email?: string;
+  codigoPostal?: string;
+}): string | null {
+  const bits = [
+    parts.destinoDetalle,
+    parts.codigoPostal ? `CP: ${parts.codigoPostal}` : null,
+    parts.contacto ? `Tel: ${parts.contacto}` : null,
+    parts.dni ? `DNI: ${parts.dni}` : null,
+    parts.email ? `Email: ${parts.email}` : null,
+  ].filter(Boolean);
+  return bits.length > 0 ? bits.join(' — ') : null;
+}
 
 export { STAFF, STAFF_LABELS };
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
-import { vendorManualShipmentSchema, STAFF_LABELS } from '@/lib/envios';
+import { vendorManualShipmentSchema, formatManualDestino, STAFF_LABELS } from '@/lib/envios';
 import { notifyDrivers } from '@/lib/push';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
@@ -17,14 +17,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { productTitle, buyerNickname, destinoTipo, destinoDetalle, addedBy } = parsed.data;
+  const { productTitle, buyerNickname, destinoTipo, destinoDetalle, addedBy, dni, contacto, email, codigoPostal } = parsed.data;
 
   const supabase = createServiceSupabase();
   const { error } = await supabase.from('ml_shipments').insert({
     ml_order_id: -Date.now(), // negativo para no chocar nunca con un id real de ML
     status: 'pendiente',
     destino_tipo: destinoTipo,
-    destino_detalle: destinoDetalle || null,
+    destino_detalle: formatManualDestino({ destinoDetalle, dni, contacto, email, codigoPostal }),
     buyer_nickname: buyerNickname || null,
     items: [{ title: productTitle, quantity: 1 }],
     notes: `Agregado por ${STAFF_LABELS[addedBy]} (venta fuera de MercadoLibre)`,

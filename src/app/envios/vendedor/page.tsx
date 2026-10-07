@@ -41,6 +41,10 @@ export default function VendedorEnviosPage() {
   const [buyerNickname, setBuyerNickname] = useState('');
   const [destinoTipo, setDestinoTipo] = useState<'domicilio' | 'sucursal_andreani' | 'otro'>('domicilio');
   const [destinoDetalle, setDestinoDetalle] = useState('');
+  const [dni, setDni] = useState('');
+  const [contacto, setContacto] = useState('');
+  const [email, setEmail] = useState('');
+  const [codigoPostal, setCodigoPostal] = useState('');
 
   async function loadShipments() {
     try {
@@ -75,12 +79,20 @@ export default function VendedorEnviosPage() {
           destinoTipo,
           destinoDetalle: destinoDetalle.trim() || undefined,
           addedBy,
+          dni: dni.trim() || undefined,
+          contacto: contacto.trim() || undefined,
+          email: email.trim() || undefined,
+          codigoPostal: codigoPostal.trim() || undefined,
         }),
       });
       if (!res.ok) throw new Error();
       setProductTitle('');
       setBuyerNickname('');
       setDestinoDetalle('');
+      setDni('');
+      setContacto('');
+      setEmail('');
+      setCodigoPostal('');
       setShowForm(false);
       loadShipments();
     } catch {
@@ -159,6 +171,36 @@ export default function VendedorEnviosPage() {
               onChange={(e) => setDestinoDetalle(e.target.value)}
               className="rounded-lg px-3 py-2 text-steel-900"
             />
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                placeholder="DNI"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+                className="rounded-lg px-3 py-2 text-steel-900"
+              />
+              <input
+                type="text"
+                placeholder="Contacto (teléfono)"
+                value={contacto}
+                onChange={(e) => setContacto(e.target.value)}
+                className="rounded-lg px-3 py-2 text-steel-900"
+              />
+              <input
+                type="text"
+                placeholder="Código postal"
+                value={codigoPostal}
+                onChange={(e) => setCodigoPostal(e.target.value)}
+                className="rounded-lg px-3 py-2 text-steel-900"
+              />
+              <input
+                type="email"
+                placeholder="Email (opcional)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-lg px-3 py-2 text-steel-900"
+              />
+            </div>
             {formError && <p className="text-sm text-red-400">{formError}</p>}
             <div className="flex gap-2">
               <button
