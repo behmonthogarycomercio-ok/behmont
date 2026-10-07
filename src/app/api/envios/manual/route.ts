@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { productTitle, buyerNickname, destinoTipo, destinoDetalle, addedBy, dni, contacto, email, codigoPostal } = parsed.data;
+  const { productTitle, buyerNickname, destinoTipo, destinoDetalle, addedBy, dni, contacto, email, codigoPostal, paymentStatus } = parsed.data;
 
   const supabase = createServiceSupabase();
   const { error } = await supabase.from('ml_shipments').insert({
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     destino_detalle: formatManualDestino({ destinoDetalle, dni, contacto, email, codigoPostal }),
     buyer_nickname: buyerNickname || null,
     items: [{ title: productTitle, quantity: 1 }],
+    payment_status: paymentStatus,
     notes: `Agregado por ${STAFF_LABELS[addedBy]} (venta fuera de MercadoLibre)`,
   });
 

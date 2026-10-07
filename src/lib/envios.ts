@@ -8,9 +8,54 @@ export const DESTINO_LABELS: Record<string, string> = {
   otro: 'Ver detalle',
 };
 
-export const deliverSchema = z.object({
+// Pasos del envío, en orden: el repartidor busca el producto en depósito y
+// lo retira, queda en camino, y lo entrega. "pendiente"/"cancelado" no los
+// pone el repartidor (los crea el sistema o los corrige un admin).
+export const SHIPMENT_STATUSES = ['pendiente', 'retirado', 'en_camino', 'entregado', 'cancelado'] as const;
+export type ShipmentStatus = (typeof SHIPMENT_STATUSES)[number];
+
+export const STATUS_LABELS: Record<ShipmentStatus, string> = {
+  pendiente: 'Pendiente',
+  retirado: 'Retirado de depósito',
+  en_camino: 'En camino',
+  entregado: 'Entregado',
+  cancelado: 'Cancelado',
+};
+
+// Próximo paso que puede tomar el repartidor desde cada estado -- null si no
+// hay acción de repartidor disponible (recién creado por el sistema espera
+// "retirado", por ejemplo, nunca al revés).
+export const NEXT_DRIVER_STATUS: Partial<Record<ShipmentStatus, ShipmentStatus>> = {
+  pendiente: 'retirado',
+  retirado: 'en_camino',
+  en_camino: 'entregado',
+};
+
+export const DRIVER_ACTION_LABELS: Record<string, string> = {
+  retirado: 'Retiré del depósito',
+  en_camino: 'Salió en camino',
+  entregado: 'Marcar entregado',
+};
+
+export const shipmentStatusSchema = z.object({
   id: z.string().uuid(),
-  deliveredBy: z.string().trim().min(1).max(100),
+  status: z.enum(['retirado', 'en_camino', 'entregado']),
+  by: z.string().trim().min(1).max(100).optional(),
+});
+
+// Las ventas de MercadoLibre siempre llegan ya pagadas (el pendiente se crea
+// recién cuando ML confirma el pago) -- esto es solo relevante para lo
+// cargado a mano, que puede ser contra entrega.
+export const PAYMENT_STATUSES = ['abonado', 'pendiente_pago'] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  abonado: 'Abonado',
+  pendiente_pago: 'Pendiente de abonar',
+};
+
+export const paymentStatusSchema = z.object({
+  id: z.string().uuid(),
+  paymentStatus: z.enum(PAYMENT_STATUSES),
 });
 
 export const subscribeSchema = z.object({
@@ -27,6 +72,7 @@ export const manualShipmentSchema = z.object({
   buyerNickname: z.string().trim().max(100).optional(),
   destinoTipo: z.enum(['domicilio', 'sucursal_andreani', 'otro']),
   destinoDetalle: z.string().trim().max(1000).optional(),
+  paymentStatus: z.enum(PAYMENT_STATUSES).default('abonado'),
 });
 
 /** Carga de un vendedor (Lucas/Luz/Lito) desde /envios/vendedor -- venta hecha
@@ -143,12 +189,15 @@ export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
     logistic_type: shipment.logistic_type,
     ml_status: shipment.status,
     estimated_delivery_date: destino.estimatedDeliveryDate,
+    payment_status: 'abonado' as const, // ML solo crea el pendiente cuando ya se pagó
   };
 }
 
-/** Un pendiente está retrasado si ya pasó la fecha estimada de ML, o (sin fecha) a los 3 días de creado. */
+/** Un envío está retrasado si todavía no se entregó (en cualquiera de sus
+ * pasos: pendiente, retirado o en camino) y ya pasó la fecha estimada de ML,
+ * o (sin fecha) pasaron más de 3 días desde que se creó. */
 export function isRetrasado(row: { status: string; created_at: string; estimated_delivery_date: string | null }): boolean {
-  if (row.status !== 'pendiente') return false;
+  if (row.status === 'entregado' || row.status === 'cancelado') return false;
   const today = new Date().toISOString().slice(0, 10);
   if (row.estimated_delivery_date) return row.estimated_delivery_date < today;
   const FALLBACK_DAYS = 3;

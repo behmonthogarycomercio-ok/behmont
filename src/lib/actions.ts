@@ -415,14 +415,35 @@ export async function deleteCoupon(id: string): Promise<ActionResult> {
 }
 
 // ── ENVÍOS (MercadoLibre → repartidor) ──────────────────
-export async function markShipmentDelivered(formData: FormData): Promise<ActionResult> {
+/** El admin puede forzar cualquier paso (retirado/en_camino/entregado) como override manual. */
+export async function updateShipmentStatus(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
-  const deliveredBy = (formData.get('deliveredBy') as string) || 'Admin';
-  const { error } = await supabase
-    .from('ml_shipments')
-    .update({ status: 'entregado', delivered_at: new Date().toISOString(), delivered_by: deliveredBy })
-    .eq('id', id);
+  const status = formData.get('status') as string;
+  const by = (formData.get('by') as string) || 'Admin';
+
+  const payload: Record<string, unknown> = { status };
+  if (status === 'retirado') {
+    payload.retirado_at = new Date().toISOString();
+    payload.retirado_by = by;
+  } else if (status === 'en_camino') {
+    payload.en_camino_at = new Date().toISOString();
+  } else if (status === 'entregado') {
+    payload.delivered_at = new Date().toISOString();
+    payload.delivered_by = by;
+  }
+
+  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}
+
+export async function updateShipmentPayment(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const paymentStatus = formData.get('paymentStatus') as string;
+  const { error } = await supabase.from('ml_shipments').update({ payment_status: paymentStatus }).eq('id', id);
   if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/envios');
   return {};
@@ -455,6 +476,7 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
     destino_detalle: (formData.get('destino_detalle') as string) || null,
     buyer_nickname: (formData.get('buyerNickname') as string) || null,
     items: [{ title: productTitle, quantity: 1 }],
+    payment_status: (formData.get('paymentStatus') as string) || 'abonado',
   };
   const { error } = await supabase.from('ml_shipments').insert(payload);
   if (error) return { error: friendlyDbError(error) };

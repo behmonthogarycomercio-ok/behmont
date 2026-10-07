@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Bell, BellOff, BellRing, Volume2, Home, Package, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '@/lib/price';
-import { isRetrasado } from '@/lib/envios';
+import {
+  isRetrasado,
+  NEXT_DRIVER_STATUS,
+  DRIVER_ACTION_LABELS,
+  STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  type ShipmentStatus,
+  type PaymentStatus,
+} from '@/lib/envios';
 
 type Shipment = {
   id: string;
@@ -15,13 +23,14 @@ type Shipment = {
   total: number | null;
   estimated_delivery_date: string | null;
   created_at: string;
-  status: 'pendiente';
+  status: ShipmentStatus;
+  payment_status: PaymentStatus;
 };
 
 type PushState = 'unsupported' | 'checking' | 'off' | 'on' | 'busy';
 
 const POLL_MS = 45000;
-const DELIVERED_BY_KEY = 'envios_delivered_by';
+const DRIVER_NAME_KEY = 'envios_driver_name';
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -37,11 +46,14 @@ export default function EnviosPage() {
 
   const [shipments, setShipments] = useState<Shipment[] | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const [deliveringId, setDeliveringId] = useState<string | null>(null);
-  const [deliveredBy, setDeliveredBy] = useState('');
+  // Tarjeta donde se está por confirmar un paso que requiere nombre (retirado/entregado)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [confirmingStatus, setConfirmingStatus] = useState<ShipmentStatus | null>(null);
+  const [driverName, setDriverName] = useState('');
+  const [advancingId, setAdvancingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setDeliveredBy(localStorage.getItem(DELIVERED_BY_KEY) || '');
+    setDriverName(localStorage.getItem(DRIVER_NAME_KEY) || '');
   }, []);
 
   useEffect(() => {
@@ -167,21 +179,72 @@ export default function EnviosPage() {
     return () => clearInterval(interval);
   }, []);
 
-  async function markDelivered(id: string) {
-    const name = deliveredBy.trim();
-    if (!name) return;
-    localStorage.setItem(DELIVERED_BY_KEY, name);
+  async function sendStatus(id: string, status: ShipmentStatus, by?: string) {
+    const res = await fetch('/api/envios/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status, by }),
+    });
+    if (!res.ok) throw new Error();
+  }
+
+  // "en_camino" no pide nombre -- avanza directo al tocar el botón.
+  // "retirado" y "entregado" sí, porque identifican quién hizo ese paso.
+  async function advance(s: Shipment) {
+    const next = NEXT_DRIVER_STATUS[s.status];
+    if (!next) return;
+    if (next === 'en_camino') {
+      setAdvancingId(s.id);
+      try {
+        await sendStatus(s.id, next);
+        setShipments((prev) => (prev ? prev.map((x) => (x.id === s.id ? { ...x, status: next } : x)) : prev));
+      } catch {
+        alert('No se pudo actualizar el estado. Probá de nuevo.');
+      } finally {
+        setAdvancingId(null);
+      }
+      return;
+    }
+    setConfirmingId(s.id);
+    setConfirmingStatus(next);
+  }
+
+  async function confirmAdvance(id: string) {
+    const name = driverName.trim();
+    const status = confirmingStatus;
+    if (!name || !status) return;
+    localStorage.setItem(DRIVER_NAME_KEY, name);
+    setAdvancingId(id);
     try {
-      const res = await fetch('/api/envios/deliver', {
+      await sendStatus(id, status, name);
+      if (status === 'entregado') {
+        setShipments((prev) => (prev ? prev.filter((s) => s.id !== id) : prev));
+      } else {
+        setShipments((prev) => (prev ? prev.map((s) => (s.id === id ? { ...s, status } : s)) : prev));
+      }
+      setConfirmingId(null);
+      setConfirmingStatus(null);
+    } catch {
+      alert('No se pudo actualizar el estado. Probá de nuevo.');
+    } finally {
+      setAdvancingId(null);
+    }
+  }
+
+  async function markPaid(id: string) {
+    setAdvancingId(id);
+    try {
+      const res = await fetch('/api/envios/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, deliveredBy: name }),
+        body: JSON.stringify({ id, paymentStatus: 'abonado' }),
       });
       if (!res.ok) throw new Error();
-      setShipments((prev) => (prev ? prev.filter((s) => s.id !== id) : prev));
-      setDeliveringId(null);
+      setShipments((prev) => (prev ? prev.map((s) => (s.id === id ? { ...s, payment_status: 'abonado' } : s)) : prev));
     } catch {
-      alert('No se pudo marcar como entregado. Probá de nuevo.');
+      alert('No se pudo marcar como cobrado. Probá de nuevo.');
+    } finally {
+      setAdvancingId(null);
     }
   }
 
@@ -245,13 +308,25 @@ export default function EnviosPage() {
             const firstTitle = s.items[0]?.title || 'Producto';
             const extra = s.items.length > 1 ? ` + ${s.items.length - 1} más` : '';
 
+            const next = NEXT_DRIVER_STATUS[s.status];
+
             return (
               <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
-                {retrasado && (
-                  <span className="inline-block mb-2 rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase">
-                    Retrasado
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="rounded-full bg-steel-800 px-3 py-1 text-xs font-bold uppercase text-white/70">
+                    {STATUS_LABELS[s.status]}
                   </span>
-                )}
+                  {retrasado && (
+                    <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase">
+                      Retrasado
+                    </span>
+                  )}
+                  <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+                    s.payment_status === 'abonado' ? 'bg-emerald-600' : 'bg-amber-500'
+                  }`}>
+                    {PAYMENT_STATUS_LABELS[s.payment_status]}
+                  </span>
+                </div>
                 <p className="font-display text-lg font-bold">{firstTitle}{extra}</p>
                 {s.total != null && <p className="text-sm text-white/50">${formatPrice(s.total)}</p>}
 
@@ -271,25 +346,25 @@ export default function EnviosPage() {
                   <p className="mt-1 text-xs text-white/40">Comprador: {s.buyer_nickname}</p>
                 )}
 
-                {deliveringId === s.id ? (
+                {confirmingId === s.id ? (
                   <div className="mt-3 flex flex-col gap-2">
                     <input
                       type="text"
                       placeholder="Tu nombre"
-                      value={deliveredBy}
-                      onChange={(e) => setDeliveredBy(e.target.value)}
+                      value={driverName}
+                      onChange={(e) => setDriverName(e.target.value)}
                       className="rounded-lg px-3 py-2 text-steel-900"
                     />
                     <div className="flex gap-2">
                       <button
-                        onClick={() => markDelivered(s.id)}
-                        disabled={!deliveredBy.trim()}
+                        onClick={() => confirmAdvance(s.id)}
+                        disabled={!driverName.trim() || advancingId === s.id}
                         className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-2 font-semibold text-white"
                       >
-                        Confirmar entrega
+                        Confirmar
                       </button>
                       <button
-                        onClick={() => setDeliveringId(null)}
+                        onClick={() => { setConfirmingId(null); setConfirmingStatus(null); }}
                         className="rounded-lg bg-steel-800 hover:bg-steel-700 py-2 px-4 text-white/70"
                       >
                         Cancelar
@@ -297,11 +372,24 @@ export default function EnviosPage() {
                     </div>
                   </div>
                 ) : (
+                  next && (
+                    <button
+                      onClick={() => advance(s)}
+                      disabled={advancingId === s.id}
+                      className="mt-3 w-full rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-2 font-semibold text-white"
+                    >
+                      {DRIVER_ACTION_LABELS[next]}
+                    </button>
+                  )
+                )}
+
+                {s.payment_status === 'pendiente_pago' && (
                   <button
-                    onClick={() => setDeliveringId(s.id)}
-                    className="mt-3 w-full rounded-lg bg-steel-800 hover:bg-steel-700 py-2 font-semibold text-white"
+                    onClick={() => markPaid(s.id)}
+                    disabled={advancingId === s.id}
+                    className="mt-2 w-full rounded-lg border border-amber-500 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 py-2 font-semibold"
                   >
-                    Marcar entregado
+                    💰 Marcar cobrado
                   </button>
                 )}
               </div>

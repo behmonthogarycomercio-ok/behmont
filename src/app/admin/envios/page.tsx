@@ -1,14 +1,15 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { markShipmentDelivered, createManualShipment } from '@/lib/actions';
-import { isRetrasado } from '@/lib/envios';
+import { updateShipmentStatus, updateShipmentPayment, createManualShipment } from '@/lib/actions';
+import { isRetrasado, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus } from 'lucide-react';
 
 type ShipmentRow = {
   id: string;
-  status: 'pendiente' | 'entregado' | 'cancelado';
+  status: ShipmentStatus;
+  payment_status: PaymentStatus;
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
@@ -33,7 +34,7 @@ export default async function EnviosPage({
 
   const { data: allRows } = await supabase
     .from('ml_shipments')
-    .select('id, status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at')
+    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at')
     .order('created_at', { ascending: false })
     .limit(300);
 
@@ -43,14 +44,16 @@ export default async function EnviosPage({
     retrasado: isRetrasado({ status: r.status, created_at: r.created_at, estimated_delivery_date: r.estimated_delivery_date }),
   }));
 
+  const enCurso = (r: ShipmentRow) => r.status === 'pendiente' || r.status === 'retirado' || r.status === 'en_camino';
+
   const counts = {
-    pendientes: withRetraso.filter((r) => r.status === 'pendiente').length,
+    pendientes: withRetraso.filter(enCurso).length,
     retrasados: withRetraso.filter((r) => r.retrasado).length,
     entregados: withRetraso.filter((r) => r.status === 'entregado').length,
   };
 
   const filtered = withRetraso.filter((r) => {
-    if (filter === 'pendientes') return r.status === 'pendiente';
+    if (filter === 'pendientes') return enCurso(r);
     if (filter === 'retrasados') return r.retrasado;
     if (filter === 'entregados') return r.status === 'entregado';
     return true;
@@ -101,6 +104,10 @@ export default async function EnviosPage({
               <option value="otro">Otro</option>
             </select>
             <input name="destino_detalle" placeholder="Dirección / detalle" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <select name="paymentStatus" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" defaultValue="abonado">
+              <option value="abonado">Abonado</option>
+              <option value="pendiente_pago">Pendiente de abonar</option>
+            </select>
             <button type="submit" className="sm:col-span-2 rounded-lg bg-steel-900 text-white hover:bg-steel-800 py-2 text-sm font-semibold">
               Agregar
             </button>
@@ -122,6 +129,7 @@ export default async function EnviosPage({
                 <th className="px-4 py-3 font-semibold">Comprador</th>
                 <th className="px-4 py-3 font-semibold">Fecha</th>
                 <th className="px-4 py-3 font-semibold">Estado</th>
+                <th className="px-4 py-3 font-semibold">Pago</th>
                 <th className="px-4 py-3 font-semibold"></th>
               </tr>
             </thead>
@@ -148,26 +156,46 @@ export default async function EnviosPage({
                     <td className="px-4 py-3 text-steel-500">{r.buyer_nickname || '—'}</td>
                     <td className="px-4 py-3 text-steel-400 font-mono text-xs">{dateFmt(r.created_at)}</td>
                     <td className="px-4 py-3">
-                      {r.status === 'entregado' ? (
-                        <span className="rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-0.5 text-xs font-semibold">
-                          Entregado{r.delivered_by ? ` — ${r.delivered_by}` : ''}
+                      <div className="flex flex-wrap gap-1">
+                        {r.retrasado && (
+                          <span className="rounded-full bg-red-100 text-red-600 px-2.5 py-0.5 text-xs font-semibold">Retrasado</span>
+                        )}
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          r.status === 'entregado' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {STATUS_LABELS[r.status]}{r.status === 'entregado' && r.delivered_by ? ` — ${r.delivered_by}` : ''}
                         </span>
-                      ) : r.retrasado ? (
-                        <span className="rounded-full bg-red-100 text-red-600 px-2.5 py-0.5 text-xs font-semibold">Retrasado</span>
-                      ) : (
-                        <span className="rounded-full bg-yellow-100 text-yellow-700 px-2.5 py-0.5 text-xs font-semibold">Pendiente</span>
-                      )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
-                      {r.status === 'pendiente' && (
-                        <AdminActionForm action={markShipmentDelivered}>
-                          <input type="hidden" name="id" value={r.id} />
-                          <input type="hidden" name="deliveredBy" value="Admin" />
-                          <button type="submit" className="rounded-lg bg-steel-900 text-white hover:bg-steel-800 px-3 py-1.5 text-xs font-semibold">
-                            Marcar entregado
-                          </button>
-                        </AdminActionForm>
-                      )}
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        r.payment_status === 'abonado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {PAYMENT_STATUS_LABELS[r.payment_status]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1.5 items-start">
+                        {NEXT_DRIVER_STATUS[r.status] && (
+                          <AdminActionForm action={updateShipmentStatus}>
+                            <input type="hidden" name="id" value={r.id} />
+                            <input type="hidden" name="status" value={NEXT_DRIVER_STATUS[r.status]} />
+                            <input type="hidden" name="by" value="Admin" />
+                            <button type="submit" className="rounded-lg bg-steel-900 text-white hover:bg-steel-800 px-3 py-1.5 text-xs font-semibold">
+                              {DRIVER_ACTION_LABELS[NEXT_DRIVER_STATUS[r.status]!]}
+                            </button>
+                          </AdminActionForm>
+                        )}
+                        {r.payment_status === 'pendiente_pago' && (
+                          <AdminActionForm action={updateShipmentPayment}>
+                            <input type="hidden" name="id" value={r.id} />
+                            <input type="hidden" name="paymentStatus" value="abonado" />
+                            <button type="submit" className="rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 px-3 py-1.5 text-xs font-semibold">
+                              Marcar cobrado
+                            </button>
+                          </AdminActionForm>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

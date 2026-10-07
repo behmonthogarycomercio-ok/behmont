@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Home, Package, Plus, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '@/lib/price';
-import { isRetrasado } from '@/lib/envios';
+import { isRetrasado, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 
 type StaffName = 'lucas' | 'luz' | 'lito';
 const STAFF_OPTIONS: { value: StaffName; label: string }[] = [
@@ -15,7 +15,8 @@ const STAFF_OPTIONS: { value: StaffName; label: string }[] = [
 
 type Shipment = {
   id: string;
-  status: 'pendiente' | 'entregado' | 'cancelado';
+  status: ShipmentStatus;
+  payment_status: PaymentStatus;
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
@@ -45,6 +46,7 @@ export default function VendedorEnviosPage() {
   const [contacto, setContacto] = useState('');
   const [email, setEmail] = useState('');
   const [codigoPostal, setCodigoPostal] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('abonado');
 
   async function loadShipments() {
     try {
@@ -83,6 +85,7 @@ export default function VendedorEnviosPage() {
           contacto: contacto.trim() || undefined,
           email: email.trim() || undefined,
           codigoPostal: codigoPostal.trim() || undefined,
+          paymentStatus,
         }),
       });
       if (!res.ok) throw new Error();
@@ -93,6 +96,7 @@ export default function VendedorEnviosPage() {
       setContacto('');
       setEmail('');
       setCodigoPostal('');
+      setPaymentStatus('abonado');
       setShowForm(false);
       loadShipments();
     } catch {
@@ -201,6 +205,29 @@ export default function VendedorEnviosPage() {
                 className="rounded-lg px-3 py-2 text-steel-900"
               />
             </div>
+            <div>
+              <p className="text-xs text-white/50 mb-1.5">¿Ya se abonó?</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentStatus('abonado')}
+                  className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
+                    paymentStatus === 'abonado' ? 'bg-emerald-600 text-white' : 'bg-steel-800 text-white/60'
+                  }`}
+                >
+                  Abonado
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentStatus('pendiente_pago')}
+                  className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
+                    paymentStatus === 'pendiente_pago' ? 'bg-amber-500 text-white' : 'bg-steel-800 text-white/60'
+                  }`}
+                >
+                  Pendiente de abonar
+                </button>
+              </div>
+            </div>
             {formError && <p className="text-sm text-red-400">{formError}</p>}
             <div className="flex gap-2">
               <button
@@ -244,13 +271,21 @@ export default function VendedorEnviosPage() {
               <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <p className="font-display text-base font-bold">{firstTitle}{extra}</p>
-                  {s.status === 'entregado' ? (
-                    <span className="shrink-0 rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold">Entregado</span>
-                  ) : retrasado ? (
-                    <span className="shrink-0 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold uppercase">Retrasado</span>
-                  ) : (
-                    <span className="shrink-0 rounded-full bg-yellow-600 px-2.5 py-0.5 text-xs font-bold">Pendiente</span>
-                  )}
+                  <div className="flex flex-wrap justify-end gap-1.5">
+                    {retrasado && (
+                      <span className="shrink-0 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold uppercase">Retrasado</span>
+                    )}
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      s.status === 'entregado' ? 'bg-emerald-600' : 'bg-yellow-600'
+                    }`}>
+                      {STATUS_LABELS[s.status]}
+                    </span>
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      s.payment_status === 'abonado' ? 'bg-emerald-700' : 'bg-amber-600'
+                    }`}>
+                      {PAYMENT_STATUS_LABELS[s.payment_status]}
+                    </span>
+                  </div>
                 </div>
                 {s.total != null && <p className="text-sm text-white/50 mb-2">${formatPrice(s.total)}</p>}
 
