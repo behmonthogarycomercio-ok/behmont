@@ -224,6 +224,53 @@ export async function fetchMLOrders(
   return { orders: data.results || [], total: data.paging?.total ?? (data.results || []).length };
 }
 
+export type MLOrderDetail = {
+  id: number;
+  status: string;
+  date_created: string;
+  buyer?: { nickname?: string; first_name?: string; last_name?: string };
+  order_items?: { item: { title: string } ; quantity: number }[];
+  total_amount: number;
+  shipping?: { id: number };
+};
+
+/** Detalle completo de una orden puntual (para procesar un pago nuevo -- ver /api/ml/webhook). */
+export async function fetchMLOrderDetail(orderId: number | string, accessToken: string): Promise<MLOrderDetail> {
+  const res = await fetch(`${ML_API}/orders/${orderId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`ML orders/${orderId} failed: ${await res.text()}`);
+  return res.json();
+}
+
+export type MLShipment = {
+  id: number;
+  status: string;
+  logistic_type: string;
+  tracking_method?: string | null;
+  receiver_address?: {
+    street_name?: string;
+    street_number?: string;
+    city?: { name?: string };
+    receiver_name?: string;
+    receiver_phone?: string;
+    comment?: string;
+  };
+  shipping_option?: {
+    estimated_delivery_time?: { date?: string | null };
+    estimated_delivery_limit?: { date?: string | null };
+  };
+};
+
+/** Detalle de un envío puntual: tipo de logística, destino y fecha estimada (ver /api/ml/webhook). */
+export async function fetchMLShipment(shipmentId: number | string, accessToken: string): Promise<MLShipment> {
+  const res = await fetch(`${ML_API}/shipments/${shipmentId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`ML shipments/${shipmentId} failed: ${await res.text()}`);
+  return res.json();
+}
+
 export type MLReputation = {
   levelId: string | null;
   powerSellerStatus: string | null;

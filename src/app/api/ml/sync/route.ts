@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase, createServerSupabase } from '@/lib/supabase/server';
-import { fetchAllSellerItems, fetchItemDescription, refreshMLToken } from '@/lib/mercadolibre';
+import {
+  fetchAllSellerItems,
+  fetchItemDescription,
+  fetchMLOrders,
+  fetchMLOrderDetail,
+  fetchMLShipment,
+  refreshMLToken,
+} from '@/lib/mercadolibre';
 import { guessCategorySlug } from '@/lib/categorize';
+import { buildShipmentRow } from '@/lib/envios';
+import { notifyDrivers } from '@/lib/push';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // El sync recorre todas las publicaciones activas de forma secuencial
 // (una consulta de descripción por producto) — con catálogos grandes puede
@@ -237,6 +247,16 @@ async function runSync(request: Request, fromCron: boolean) {
       }
     }
 
+    // Red de seguridad para /envios: el webhook de ML (/api/ml/webhook) crea
+    // los pendientes de entrega en tiempo real; esto solo cubre el caso de
+    // que algún evento del webhook se haya perdido. No corre como cron
+    // aparte -- se cuelga del sync diario que ya existe.
+    try {
+      await syncMissingShipments(supabase, settings.ml_seller_id, refreshed.access_token);
+    } catch (err) {
+      console.error('[ml/sync] fallo el chequeo de envíos pendientes:', err);
+    }
+
     const baseDetail = isCron ? 'Sincronización automática (cron)' : 'Sincronización manual';
     const { error: logError } = await supabase.from('ml_sync_log').insert({
       status: 'ok',
@@ -257,6 +277,46 @@ async function runSync(request: Request, fromCron: boolean) {
       .insert({ status: 'error', items_synced: 0, detail });
     if (logError) console.error('[ml/sync] no se pudo escribir ml_sync_log (error path):', logError);
     return NextResponse.json({ error: detail }, { status: 500 });
+  }
+}
+
+async function syncMissingShipments(
+  supabase: SupabaseClient,
+  sellerId: string,
+  accessToken: string
+): Promise<void> {
+  const { orders } = await fetchMLOrders(sellerId, accessToken, 2);
+  if (orders.length === 0) return;
+
+  const { data: existingRows } = await supabase
+    .from('ml_shipments')
+    .select('ml_order_id')
+    .in('ml_order_id', orders.map((o) => o.id));
+  const existingIds = new Set((existingRows || []).map((r: { ml_order_id: number }) => r.ml_order_id));
+
+  for (const order of orders) {
+    if (existingIds.has(order.id)) continue;
+    try {
+      const detail = await fetchMLOrderDetail(order.id, accessToken);
+      if (detail.status !== 'paid' || !detail.shipping?.id) continue;
+      const shipment = await fetchMLShipment(detail.shipping.id, accessToken);
+      const row = buildShipmentRow(detail, shipment);
+      const { error } = await supabase.from('ml_shipments').insert(row);
+      if (error) {
+        console.error(`[ml/sync] no se pudo guardar el envío pendiente ${order.id}:`, error);
+        continue;
+      }
+      const items = row.items as { title: string; quantity: number }[];
+      const firstTitle = items[0]?.title || 'Producto';
+      const extra = items.length > 1 ? ` + ${items.length - 1} más` : '';
+      await notifyDrivers({
+        title: '📦 Nuevo envío pendiente',
+        body: `${firstTitle}${extra}`,
+        url: '/envios',
+      });
+    } catch (err) {
+      console.error(`[ml/sync] no se pudo procesar el pendiente de envío de la orden ${order.id}:`, err);
+    }
   }
 }
 

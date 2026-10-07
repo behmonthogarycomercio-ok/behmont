@@ -19,6 +19,7 @@ import {
   Instagram,
   Printer,
   Users,
+  Truck,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PushSubscribeButton from './PushSubscribeButton';
@@ -26,6 +27,7 @@ import PushSubscribeButton from './PushSubscribeButton';
 const NAV = [
   { href: '/admin/dashboard',   label: 'Inicio',               icon: LayoutDashboard },
   { href: '/admin/pedidos',     label: 'Pedidos',               icon: ShoppingBag },
+  { href: '/admin/envios',      label: 'Envíos',                icon: Truck },
   { href: '/admin/metricas',    label: 'Métricas',              icon: BarChart3 },
   { href: '/admin/turnero',     label: 'Turnero',               icon: Users },
   { href: '/admin/productos',   label: 'Productos',             icon: Package },
@@ -42,6 +44,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const router = useRouter();
   const [pendingOrders, setPendingOrders] = useState(0);
+  const [pendingShipments, setPendingShipments] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +55,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       .eq('status', 'pendiente')
       .then(({ count }) => {
         if (!cancelled) setPendingOrders(count ?? 0);
+      });
+    supabase
+      .from('ml_shipments')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pendiente')
+      .then(({ count }) => {
+        if (!cancelled) setPendingShipments(count ?? 0);
       });
     return () => {
       cancelled = true;
@@ -91,6 +101,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 {href === '/admin/pedidos' && pendingOrders > 0 && (
                   <span className="ml-auto rounded-full bg-danger-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                     {pendingOrders}
+                  </span>
+                )}
+                {href === '/admin/envios' && pendingShipments > 0 && (
+                  <span className="ml-auto rounded-full bg-danger-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                    {pendingShipments}
                   </span>
                 )}
               </Link>

@@ -413,3 +413,51 @@ export async function deleteCoupon(id: string): Promise<ActionResult> {
   revalidatePath('/');
   return {};
 }
+
+// ── ENVÍOS (MercadoLibre → repartidor) ──────────────────
+export async function markShipmentDelivered(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const deliveredBy = (formData.get('deliveredBy') as string) || 'Admin';
+  const { error } = await supabase
+    .from('ml_shipments')
+    .update({ status: 'entregado', delivered_at: new Date().toISOString(), delivered_by: deliveredBy })
+    .eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}
+
+export async function updateShipmentDestino(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const payload = {
+    destino_tipo: formData.get('destino_tipo') as string,
+    destino_detalle: (formData.get('destino_detalle') as string) || null,
+    notes: (formData.get('notes') as string) || null,
+  };
+  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}
+
+/** Válvula de escape si el webhook/cron se perdió una venta, o es un caso fuera de ML. */
+export async function createManualShipment(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const productTitle = (formData.get('productTitle') as string)?.trim();
+  if (!productTitle) return { error: 'Falta el producto' };
+
+  const payload = {
+    ml_order_id: -Date.now(), // negativo para no chocar nunca con un id real de ML
+    status: 'pendiente',
+    destino_tipo: formData.get('destino_tipo') as string,
+    destino_detalle: (formData.get('destino_detalle') as string) || null,
+    buyer_nickname: (formData.get('buyerNickname') as string) || null,
+    items: [{ title: productTitle, quantity: 1 }],
+  };
+  const { error } = await supabase.from('ml_shipments').insert(payload);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}
