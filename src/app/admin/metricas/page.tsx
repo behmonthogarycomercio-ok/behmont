@@ -38,7 +38,11 @@ export default async function MetricasPage() {
           <h1 className="font-display text-2xl font-bold text-steel-950">Métricas</h1>
           <p className="text-sm text-steel-500 capitalize">{monthLabel}</p>
         </div>
-        <ExportButton />
+        <ExportButton
+          endpoint="/api/admin/export-orders"
+          filenamePrefix="behmont-ventas"
+          label="Descargar Excel de ventas"
+        />
       </div>
 
       {/* ── Tarjetas resumen ── */}

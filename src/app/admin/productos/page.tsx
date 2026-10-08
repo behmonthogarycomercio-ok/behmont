@@ -2,6 +2,7 @@ import AdminShell from '@/components/admin/AdminShell';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductsTable from '@/components/admin/ProductsTable';
 import PriceListImport from '@/components/admin/PriceListImport';
+import ExportButton from '@/components/admin/ExportButton';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export default async function ProductosPage({
@@ -49,15 +50,22 @@ export default async function ProductosPage({
 
   return (
     <AdminShell>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="font-display text-2xl font-bold text-steel-950">Productos</h1>
         {!showForm && (
-          <a
-            href="?new=1"
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
-          >
-            + Nuevo producto
-          </a>
+          <div className="flex items-center gap-3">
+            <ExportButton
+              endpoint="/api/admin/export-products"
+              filenamePrefix="behmont-productos"
+              label="Descargar Excel"
+            />
+            <a
+              href="?new=1"
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+            >
+              + Nuevo producto
+            </a>
+          </div>
         )}
       </div>
 
