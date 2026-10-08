@@ -1,6 +1,6 @@
 // Parseo de la lista de precios/stock del distribuidor (mismo formato que
 // scripts/import-lista-csv.py: "Articulo;Nombre;Stock;Precio", separado por
-// ";", codificado en latin-1). Se usa desde /admin/stock para actualizar
+// ";", codificado en latin-1). Se usa desde /admin/productos para actualizar
 // precio y stock por SKU sin tener que correr un script a mano cada vez
 // que llega una lista nueva.
 

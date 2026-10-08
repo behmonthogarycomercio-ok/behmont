@@ -157,7 +157,7 @@ export async function updateStockAndPrice(id: string, stock: number, price: numb
     await pushToMLIfLinked(existing.ml_item_id, { price, stock });
   }
 
-  revalidatePath('/admin/stock');
+  revalidatePath('/admin/productos');
   revalidatePath('/');
   return {};
 }
@@ -594,7 +594,6 @@ export async function upsertProductLocation(formData: FormData): Promise<ActionR
   }
   revalidatePath('/admin/depositos');
   revalidatePath('/admin/productos');
-  revalidatePath('/admin/stock');
   revalidatePath('/');
   return {};
 }
@@ -605,7 +604,6 @@ export async function deleteProductLocation(id: string): Promise<ActionResult> {
   if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/depositos');
   revalidatePath('/admin/productos');
-  revalidatePath('/admin/stock');
   revalidatePath('/');
   return {};
 }
