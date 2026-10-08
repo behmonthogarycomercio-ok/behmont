@@ -5,12 +5,63 @@ import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
 import { getBrandName, getSpecItems, getDescriptionFallback, type LabelProduct } from '@/lib/etiqueta-content';
 import { generateLabelsPdfFromDom } from '@/lib/generateLabelsPdf';
+import { updateProductSpecs } from '@/lib/actions';
 
-export default function EtiquetasClient({ products }: { products: LabelProduct[] }) {
+type Spec = { label: string; value: string };
+
+export default function EtiquetasClient({ products: initialProducts }: { products: LabelProduct[] }) {
+  const [products, setProducts] = useState(initialProducts);
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // Edición rápida de características (specs) directo desde la vista previa,
+  // para no tener que ir a /admin/productos antes de imprimir.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSpecs, setEditSpecs] = useState<Spec[]>([]);
+  const [savingSpecs, setSavingSpecs] = useState(false);
+
+  function startEdit(p: LabelProduct) {
+    setEditingId(p.id);
+    setEditSpecs(p.specs.length > 0 ? p.specs.map((s) => ({ ...s })) : [{ label: '', value: '' }]);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditSpecs([]);
+  }
+
+  function updateSpecRow(index: number, field: keyof Spec, value: string) {
+    setEditSpecs((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
+  }
+
+  function removeSpecRow(index: number) {
+    setEditSpecs((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addSpecRow() {
+    setEditSpecs((prev) => [...prev, { label: '', value: '' }]);
+  }
+
+  async function saveSpecs(id: string) {
+    const cleaned = editSpecs.map((s) => ({ label: s.label.trim(), value: s.value.trim() })).filter((s) => s.value);
+    setSavingSpecs(true);
+    try {
+      const formData = new FormData();
+      formData.set('id', id);
+      formData.set('specs', JSON.stringify(cleaned));
+      const result = await updateProductSpecs(formData);
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, specs: cleaned } : p)));
+      cancelEdit();
+    } finally {
+      setSavingSpecs(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -157,38 +208,105 @@ export default function EtiquetasClient({ products }: { products: LabelProduct[]
               const descriptionFallback = getDescriptionFallback(p);
               const brandName = getBrandName(p);
 
+              const isEditing = editingId === p.id;
+
               return (
-                <div key={p.id} className="etiqueta-card">
-                  <div className="etiqueta-contenido">
-                    <div className="etiqueta-info-col">
-                      {brandName ? (
-                        <>
-                          <p className="etiqueta-marca">{brandName}</p>
-                          <p className="etiqueta-variacion">{p.name}</p>
-                        </>
-                      ) : (
-                        <p className="etiqueta-variacion etiqueta-variacion--sola">{p.name}</p>
-                      )}
-                      <div className="etiqueta-divisor" />
-                      {specItems.length > 0 ? (
-                        <ul className={`etiqueta-specs ${specItems.length >= 3 ? 'etiqueta-specs--compact' : ''}`}>
-                          {specItems.map((s, i) => (
-                            <li key={i} className="etiqueta-spec-item">
-                              <span className="etiqueta-spec-dot" />
-                              {s.label && <span className="etiqueta-spec-label">{s.label}:</span>}
-                              <span className="etiqueta-spec-value">{s.value}</span>
-                            </li>
+                <div key={p.id}>
+                  <div className="etiqueta-card">
+                    <div className="etiqueta-contenido">
+                      <div className="etiqueta-info-col">
+                        {brandName ? (
+                          <>
+                            <p className="etiqueta-marca">{brandName}</p>
+                            <p className="etiqueta-variacion">{p.name}</p>
+                          </>
+                        ) : (
+                          <p className="etiqueta-variacion etiqueta-variacion--sola">{p.name}</p>
+                        )}
+                        <div className="etiqueta-divisor" />
+                        {specItems.length > 0 ? (
+                          <ul className={`etiqueta-specs ${specItems.length >= 3 ? 'etiqueta-specs--compact' : ''}`}>
+                            {specItems.map((s, i) => (
+                              <li key={i} className="etiqueta-spec-item">
+                                <span className="etiqueta-spec-dot" />
+                                {s.label && <span className="etiqueta-spec-label">{s.label}:</span>}
+                                <span className="etiqueta-spec-value">{s.value}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : descriptionFallback ? (
+                          <p className="etiqueta-descripcion">{descriptionFallback}</p>
+                        ) : null}
+                      </div>
+                      <div className="etiqueta-marca-row">
+                        <p className="etiqueta-sku">{code}</p>
+                        {/* eslint-disable-next-line @next/next/no-img-element -- se imprime, no navega por rutas de Next Image */}
+                        <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="print:hidden mt-1.5">
+                    {isEditing ? (
+                      <div className="rounded-lg border border-plate-200 bg-white p-3 shadow-card">
+                        <p className="text-xs font-semibold text-steel-500 mb-2">Características de {p.name}</p>
+                        <div className="flex flex-col gap-1.5">
+                          {editSpecs.map((s, i) => (
+                            <div key={i} className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                value={s.label}
+                                onChange={(e) => updateSpecRow(i, 'label', e.target.value)}
+                                placeholder="Etiqueta (opcional)"
+                                className="w-2/5 rounded border border-plate-200 px-2 py-1 text-xs"
+                              />
+                              <input
+                                type="text"
+                                value={s.value}
+                                onChange={(e) => updateSpecRow(i, 'value', e.target.value)}
+                                placeholder="Valor"
+                                className="flex-1 rounded border border-plate-200 px-2 py-1 text-xs"
+                              />
+                              <button
+                                onClick={() => removeSpecRow(i)}
+                                className="shrink-0 text-steel-400 hover:text-red-600 px-1"
+                                title="Quitar"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           ))}
-                        </ul>
-                      ) : descriptionFallback ? (
-                        <p className="etiqueta-descripcion">{descriptionFallback}</p>
-                      ) : null}
-                    </div>
-                    <div className="etiqueta-marca-row">
-                      <p className="etiqueta-sku">{code}</p>
-                      {/* eslint-disable-next-line @next/next/no-img-element -- se imprime, no navega por rutas de Next Image */}
-                      <img src="/images/logo-behmont-oval.png" alt="BEHMONT" className="etiqueta-logo" />
-                    </div>
+                        </div>
+                        <button
+                          onClick={addSpecRow}
+                          className="mt-2 text-xs font-semibold text-amber-600 hover:underline"
+                        >
+                          + Agregar característica
+                        </button>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => saveSpecs(p.id)}
+                            disabled={savingSpecs}
+                            className="rounded-lg bg-steel-900 text-white hover:bg-steel-800 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold"
+                          >
+                            {savingSpecs ? 'Guardando…' : 'Guardar'}
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="rounded-lg border border-plate-200 px-3 py-1.5 text-xs font-semibold text-steel-600"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => startEdit(p)}
+                        className="text-xs font-semibold text-steel-500 hover:text-amber-700 underline"
+                      >
+                        Editar características
+                      </button>
+                    )}
                   </div>
                 </div>
               );

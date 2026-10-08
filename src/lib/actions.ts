@@ -116,6 +116,28 @@ export async function upsertProduct(formData: FormData): Promise<ActionResult> {
   return {};
 }
 
+/** Edición rápida de specs desde /admin/etiquetas -- a diferencia de
+ * upsertProduct, no toca nombre/precio/stock/slug, solo las características
+ * que se imprimen en la etiqueta. */
+export async function updateProductSpecs(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const specsRaw = formData.get('specs') as string;
+
+  let specs: { label: string; value: string }[] = [];
+  try {
+    specs = specsRaw ? JSON.parse(specsRaw) : [];
+  } catch {
+    return { error: 'No se pudieron leer las características' };
+  }
+
+  const { error } = await supabase.from('products').update({ specs }).eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/etiquetas');
+  revalidatePath('/admin/productos');
+  return {};
+}
+
 export async function deleteProduct(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('products').delete().eq('id', id);
