@@ -4,8 +4,10 @@ import { maybeSyncShipments } from '@/lib/envios-sync';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 // Sin login: lo llama /envios/vendedor para que Lucas/Luz/Lito vean el estado
-// de los envíos (pendiente/retrasado/entregado) de sus ventas -- solo lectura,
-// sin acciones de entrega (eso lo hace el repartidor desde /envios).
+// de los envíos pendientes (pendiente/retrasado/en camino) de sus ventas --
+// solo lectura, sin acciones de entrega (eso lo hace el repartidor desde
+// /envios). Los entregados/cancelados se sacan automáticamente de esta lista
+// apenas cambian de estado, igual que en /envios.
 export async function GET(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`envios-list:${ip}`, 60, 60)) {
@@ -18,6 +20,7 @@ export async function GET(request: Request) {
   const { data, error } = await supabase
     .from('ml_shipments')
     .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at, transportista, numeros_seguimiento')
+    .in('status', ['pendiente', 'retirado', 'en_camino'])
     .order('created_at', { ascending: false })
     .limit(100);
 
