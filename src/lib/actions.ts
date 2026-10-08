@@ -29,6 +29,31 @@ function friendlyDbError(error: { code?: string; message: string }): string {
   return error.message;
 }
 
+const SESSION_EXPIRED_ERROR =
+  'No se guardó: la sesión puede haber vencido. Recargá la página e iniciá sesión de nuevo.';
+
+/**
+ * Hace un update() y lo trata como fallido si RLS lo bloqueó en silencio: sin
+ * esto, un update() a 0 filas (sesión vencida / no admin) no tira error y el
+ * cliente lo toma como guardado con éxito aunque nada haya cambiado en la DB.
+ */
+async function updateChecked(
+  supabase: ReturnType<typeof createServerSupabase>,
+  table: string,
+  payload: Record<string, unknown>,
+  matchColumn: string,
+  matchValue: string | number
+): Promise<ActionResult> {
+  const { data, error } = await supabase
+    .from(table)
+    .update(payload)
+    .eq(matchColumn, matchValue)
+    .select(matchColumn);
+  if (error) return { error: friendlyDbError(error) };
+  if (!data || data.length === 0) return { error: SESSION_EXPIRED_ERROR };
+  return {};
+}
+
 /**
  * Empuja precio/stock hacia MercadoLibre cuando el producto editado en el panel
  * viene de una publicación sincronizada (tiene ml_item_id). "Best effort": si falla,
@@ -100,8 +125,8 @@ export async function upsertProduct(formData: FormData): Promise<ActionResult> {
       .eq('id', id)
       .maybeSingle();
     mlItemId = existing?.ml_item_id || null;
-    const { error } = await supabase.from('products').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'products', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('products').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -131,13 +156,8 @@ export async function updateProductSpecs(formData: FormData): Promise<ActionResu
     return { error: 'No se pudieron leer las características' };
   }
 
-  const { data, error } = await supabase.from('products').update({ specs }).eq('id', id).select('id');
-  if (error) return { error: friendlyDbError(error) };
-  if (!data || data.length === 0) {
-    // RLS bloqueó el update sin tirar error (sesión vencida/no admin) — el
-    // cliente lo tomaría como éxito si no se detecta explícitamente acá.
-    return { error: 'No se guardó: la sesión puede haber vencido. Recargá la página e iniciá sesión de nuevo.' };
-  }
+  const result = await updateChecked(supabase, 'products', { specs }, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/etiquetas');
   revalidatePath('/admin/productos');
   return {};
@@ -160,8 +180,8 @@ export async function updateStockAndPrice(id: string, stock: number, price: numb
     .eq('id', id)
     .maybeSingle();
 
-  const { error } = await supabase.from('products').update({ stock, price }).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'products', { stock, price }, 'id', id);
+  if (result.error) return result;
 
   if (existing?.ml_item_id) {
     await pushToMLIfLinked(existing.ml_item_id, { price, stock });
@@ -190,8 +210,8 @@ export async function upsertCategory(formData: FormData): Promise<ActionResult> 
   if (id) {
     // El slug NO se regenera al editar: cambia el nombre visible sin
     // romper links, subcategorías o fotos ya asociadas a ese slug.
-    const { error } = await supabase.from('categories').update(basePayload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'categories', basePayload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('categories').insert({ ...basePayload, slug: slugify(name) });
     if (error) return { error: friendlyDbError(error) };
@@ -228,8 +248,8 @@ export async function upsertPromotion(formData: FormData): Promise<ActionResult>
   };
 
   if (id) {
-    const { error } = await supabase.from('promotions').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'promotions', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('promotions').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -261,8 +281,8 @@ export async function upsertBrand(formData: FormData): Promise<ActionResult> {
   };
 
   if (id) {
-    const { error } = await supabase.from('brands').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'brands', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('brands').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -285,8 +305,9 @@ export async function deleteBrand(id: string): Promise<ActionResult> {
 // ── CONFIGURACIÓN DEL SITIO ──────────────────────────────
 export async function updateSiteSetting(key: string, value: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
-  const { error } = await supabase.from('site_settings').upsert({ key, value });
+  const { data, error } = await supabase.from('site_settings').upsert({ key, value }).select('key');
   if (error) return { error: friendlyDbError(error) };
+  if (!data || data.length === 0) return { error: SESSION_EXPIRED_ERROR };
   revalidatePath('/admin/marcas');
   revalidatePath('/');
   return {};
@@ -297,8 +318,8 @@ export async function updateOrderStatus(formData: FormData): Promise<ActionResul
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
   const status = formData.get('status') as string;
-  const { error } = await supabase.from('whatsapp_orders').update({ status }).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'whatsapp_orders', { status }, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/pedidos');
   revalidatePath('/admin/dashboard');
   return {};
@@ -326,8 +347,8 @@ export async function upsertContentSource(formData: FormData): Promise<ActionRes
   };
 
   if (id) {
-    const { error } = await supabase.from('content_sources').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'content_sources', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('content_sources').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -368,8 +389,8 @@ export async function upsertContentPiece(formData: FormData): Promise<ActionResu
   };
 
   if (id) {
-    const { error } = await supabase.from('content_pieces').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'content_pieces', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('content_pieces').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -389,11 +410,14 @@ export async function deleteContentPiece(id: string): Promise<ActionResult> {
 
 export async function updateContentPieceStage(id: string, stage: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
-  const { error } = await supabase
-    .from('content_pieces')
-    .update({ stage, updated_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(
+    supabase,
+    'content_pieces',
+    { stage, updated_at: new Date().toISOString() },
+    'id',
+    id
+  );
+  if (result.error) return result;
   revalidatePath('/admin/contenido');
   return {};
 }
@@ -421,8 +445,8 @@ export async function upsertCoupon(formData: FormData): Promise<ActionResult> {
   };
 
   if (id) {
-    const { error } = await supabase.from('coupons').update(payload).eq('id', id);
-    if (error) return { error: friendlyDbError(error) };
+    const result = await updateChecked(supabase, 'coupons', payload, 'id', id);
+    if (result.error) return result;
   } else {
     const { error } = await supabase.from('coupons').insert(payload);
     if (error) return { error: friendlyDbError(error) };
@@ -470,8 +494,8 @@ export async function updateShipmentStatus(formData: FormData): Promise<ActionRe
     payload.delivered_by = by;
   }
 
-  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'ml_shipments', payload, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/envios');
   return {};
 }
@@ -480,8 +504,8 @@ export async function updateShipmentPayment(formData: FormData): Promise<ActionR
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
   const paymentStatus = formData.get('paymentStatus') as string;
-  const { error } = await supabase.from('ml_shipments').update({ payment_status: paymentStatus }).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'ml_shipments', { payment_status: paymentStatus }, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/envios');
   return {};
 }
@@ -494,8 +518,8 @@ export async function updateShipmentDestino(formData: FormData): Promise<ActionR
     destino_detalle: (formData.get('destino_detalle') as string) || null,
     notes: (formData.get('notes') as string) || null,
   };
-  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'ml_shipments', payload, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/envios');
   return {};
 }
@@ -536,8 +560,8 @@ export async function updateShipmentTracking(formData: FormData): Promise<Action
     numeros_seguimiento: parseTrackingNumbers(formData.get('numerosSeguimiento') as string),
     precio_asegurado: precioAseguradoRaw ? Number(precioAseguradoRaw) : null,
   };
-  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
-  if (error) return { error: friendlyDbError(error) };
+  const result = await updateChecked(supabase, 'ml_shipments', payload, 'id', id);
+  if (result.error) return result;
   revalidatePath('/admin/envios');
   return {};
 }
