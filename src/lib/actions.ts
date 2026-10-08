@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
-import { getValidMLAccessToken, updateMLItemPriceStock } from './mercadolibre';
 import { parseTrackingNumbers } from './envios';
+import { pushToMLIfLinked } from './ml-sync';
 
 /**
  * Resultado de una accion. Se devuelve en vez de "throw" porque Next.js oculta
@@ -52,36 +52,6 @@ async function updateChecked(
   if (error) return { error: friendlyDbError(error) };
   if (!data || data.length === 0) return { error: SESSION_EXPIRED_ERROR };
   return {};
-}
-
-/**
- * Empuja precio/stock hacia MercadoLibre cuando el producto editado en el panel
- * viene de una publicación sincronizada (tiene ml_item_id). "Best effort": si falla,
- * lo deja registrado en ml_sync_log pero NO bloquea el guardado local del admin.
- */
-async function pushToMLIfLinked(mlItemId: string | null, changes: { price?: number; stock?: number }) {
-  if (!mlItemId) return;
-  const supabase = createServerSupabase();
-  try {
-    const auth = await getValidMLAccessToken();
-    if (!auth) return;
-    await updateMLItemPriceStock(mlItemId, auth.accessToken, {
-      price: changes.price,
-      availableQuantity: changes.stock,
-    });
-    await supabase.from('ml_sync_log').insert({
-      status: 'ok',
-      items_synced: 1,
-      detail: `Push web → ML (${mlItemId})`,
-    });
-  } catch (err) {
-    const detail = err instanceof Error ? err.message : 'Error desconocido';
-    await supabase.from('ml_sync_log').insert({
-      status: 'error',
-      items_synced: 0,
-      detail: `Push web → ML falló (${mlItemId}): ${detail}`,
-    });
-  }
 }
 
 // ── PRODUCTOS ────────────────────────────────────────────
@@ -563,5 +533,79 @@ export async function updateShipmentTracking(formData: FormData): Promise<Action
   const result = await updateChecked(supabase, 'ml_shipments', payload, 'id', id);
   if (result.error) return result;
   revalidatePath('/admin/envios');
+  return {};
+}
+
+// ── DEPÓSITO (zonas y ubicación de productos) ────────────
+export async function upsertZona(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const parentIdRaw = formData.get('parent_id') as string;
+  const payload = {
+    parent_id: parentIdRaw || null,
+    tipo: formData.get('tipo') as string,
+    codigo: (formData.get('codigo') as string).trim(),
+    nombre: (formData.get('nombre') as string).trim(),
+    sort_order: Number(formData.get('sort_order') || 0),
+    active: formData.get('active') === 'on',
+  };
+
+  if (id) {
+    const result = await updateChecked(supabase, 'zonas', payload, 'id', id);
+    if (result.error) return result;
+  } else {
+    const { error } = await supabase.from('zonas').insert(payload);
+    if (error) return { error: friendlyDbError(error) };
+  }
+  revalidatePath('/admin/depositos');
+  return {};
+}
+
+export async function deleteZona(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { count } = await supabase
+    .from('product_locations')
+    .select('id', { count: 'exact', head: true })
+    .eq('zona_id', id);
+  if (count && count > 0) {
+    return { error: 'No se puede eliminar: hay stock asignado a esta zona. Movelo primero.' };
+  }
+  const { error } = await supabase.from('zonas').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/depositos');
+  return {};
+}
+
+export async function upsertProductLocation(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const quantity = Number(formData.get('quantity'));
+
+  if (id) {
+    const result = await updateChecked(supabase, 'product_locations', { quantity }, 'id', id);
+    if (result.error) return result;
+  } else {
+    const { error } = await supabase.from('product_locations').insert({
+      product_id: formData.get('product_id') as string,
+      zona_id: formData.get('zona_id') as string,
+      quantity,
+    });
+    if (error) return { error: friendlyDbError(error) };
+  }
+  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
+  revalidatePath('/admin/stock');
+  revalidatePath('/');
+  return {};
+}
+
+export async function deleteProductLocation(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('product_locations').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
+  revalidatePath('/admin/stock');
+  revalidatePath('/');
   return {};
 }
