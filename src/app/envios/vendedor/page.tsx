@@ -47,6 +47,9 @@ export default function VendedorEnviosPage() {
   const [email, setEmail] = useState('');
   const [codigoPostal, setCodigoPostal] = useState('');
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('abonado');
+  const [transportista, setTransportista] = useState('');
+  const [numeroSeguimiento, setNumeroSeguimiento] = useState('');
+  const [precioAsegurado, setPrecioAsegurado] = useState('');
 
   async function loadShipments() {
     try {
@@ -86,6 +89,9 @@ export default function VendedorEnviosPage() {
           email: email.trim() || undefined,
           codigoPostal: codigoPostal.trim() || undefined,
           paymentStatus,
+          transportista: transportista.trim() || undefined,
+          numeroSeguimiento: numeroSeguimiento.trim() || undefined,
+          precioAsegurado: precioAsegurado.trim() ? Number(precioAsegurado) : undefined,
         }),
       });
       if (!res.ok) throw new Error();
@@ -97,6 +103,9 @@ export default function VendedorEnviosPage() {
       setEmail('');
       setCodigoPostal('');
       setPaymentStatus('abonado');
+      setTransportista('');
+      setNumeroSeguimiento('');
+      setPrecioAsegurado('');
       setShowForm(false);
       loadShipments();
     } catch {
@@ -204,6 +213,34 @@ export default function VendedorEnviosPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-lg px-3 py-2 text-steel-900"
               />
+            </div>
+            <div>
+              <p className="text-xs text-white/50 mb-1.5">Datos de envío (si ya los tenés — si no, lo completa después el repartidor)</p>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder="Transportista"
+                  value={transportista}
+                  onChange={(e) => setTransportista(e.target.value)}
+                  className="rounded-lg px-3 py-2 text-steel-900"
+                />
+                <input
+                  type="text"
+                  placeholder="Nº de seguimiento"
+                  value={numeroSeguimiento}
+                  onChange={(e) => setNumeroSeguimiento(e.target.value)}
+                  className="rounded-lg px-3 py-2 text-steel-900"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Precio asegurado"
+                  value={precioAsegurado}
+                  onChange={(e) => setPrecioAsegurado(e.target.value)}
+                  className="col-span-2 rounded-lg px-3 py-2 text-steel-900"
+                />
+              </div>
             </div>
             <div>
               <p className="text-xs text-white/50 mb-1.5">¿Ya se abonó?</p>

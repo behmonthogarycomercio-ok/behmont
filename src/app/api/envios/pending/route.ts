@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
+import { maybeSyncShipments } from '@/lib/envios-sync';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 // Sin login: la llama la página privada /envios que abren los repartidores
@@ -12,9 +13,15 @@ export async function GET(request: Request) {
   }
 
   const supabase = createServiceSupabase();
+
+  // Sync oportunista (con su propio throttle interno) para que esta pantalla
+  // muestre lo que ML ya tiene como despachado/en camino sin esperar al cron
+  // diario -- ver contexto en envios-sync.ts.
+  await maybeSyncShipments(supabase);
+
   const { data, error } = await supabase
     .from('ml_shipments')
-    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, created_at')
+    .select('id, ml_order_id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, created_at, transportista, numero_seguimiento, precio_asegurado')
     .in('status', ['pendiente', 'retirado', 'en_camino'])
     .order('created_at', { ascending: true });
 

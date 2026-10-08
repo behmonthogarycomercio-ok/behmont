@@ -1,7 +1,7 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { updateShipmentStatus, updateShipmentPayment, createManualShipment } from '@/lib/actions';
+import { updateShipmentStatus, updateShipmentPayment, createManualShipment, updateShipmentTracking } from '@/lib/actions';
 import { isRetrasado, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus } from 'lucide-react';
@@ -19,6 +19,9 @@ type ShipmentRow = {
   delivered_at: string | null;
   delivered_by: string | null;
   created_at: string;
+  transportista: string | null;
+  numero_seguimiento: string | null;
+  precio_asegurado: number | null;
 };
 
 const DESTINO_ICON = { domicilio: Home, sucursal_andreani: Package, otro: Package } as const;
@@ -34,7 +37,7 @@ export default async function EnviosPage({
 
   const { data: allRows } = await supabase
     .from('ml_shipments')
-    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at')
+    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at, transportista, numero_seguimiento, precio_asegurado')
     .order('created_at', { ascending: false })
     .limit(300);
 
@@ -108,6 +111,9 @@ export default async function EnviosPage({
               <option value="abonado">Abonado</option>
               <option value="pendiente_pago">Pendiente de abonar</option>
             </select>
+            <input name="transportista" placeholder="Transportista (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <input name="numeroSeguimiento" placeholder="Nº de seguimiento (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <input name="precioAsegurado" type="number" min="0" step="0.01" placeholder="Precio asegurado (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
             <button type="submit" className="sm:col-span-2 rounded-lg bg-steel-900 text-white hover:bg-steel-800 py-2 text-sm font-semibold">
               Agregar
             </button>
@@ -127,6 +133,7 @@ export default async function EnviosPage({
                 <th className="px-4 py-3 font-semibold">Producto</th>
                 <th className="px-4 py-3 font-semibold">Destino</th>
                 <th className="px-4 py-3 font-semibold">Comprador</th>
+                <th className="px-4 py-3 font-semibold">Envío</th>
                 <th className="px-4 py-3 font-semibold">Fecha</th>
                 <th className="px-4 py-3 font-semibold">Estado</th>
                 <th className="px-4 py-3 font-semibold">Pago</th>
@@ -154,6 +161,27 @@ export default async function EnviosPage({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-steel-500">{r.buyer_nickname || '—'}</td>
+                    <td className="px-4 py-3 text-steel-600 max-w-[14rem]">
+                      {r.transportista || r.numero_seguimiento || r.precio_asegurado != null ? (
+                        <div className="text-xs leading-relaxed">
+                          {r.transportista && <p className="font-medium text-steel-700">{r.transportista}</p>}
+                          {r.numero_seguimiento && <p className="text-steel-400">Seg: {r.numero_seguimiento}</p>}
+                          {r.precio_asegurado != null && <p className="text-steel-400">Asegurado: ${formatPrice(r.precio_asegurado)}</p>}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-steel-400">Sin datos</span>
+                      )}
+                      <details className="mt-1">
+                        <summary className="cursor-pointer text-xs font-semibold text-steel-500 hover:text-steel-700">Editar</summary>
+                        <AdminActionForm action={updateShipmentTracking} className="mt-2 flex flex-col gap-1.5">
+                          <input type="hidden" name="id" value={r.id} />
+                          <input name="transportista" placeholder="Transportista" defaultValue={r.transportista || ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
+                          <input name="numeroSeguimiento" placeholder="Nº de seguimiento" defaultValue={r.numero_seguimiento || ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
+                          <input name="precioAsegurado" type="number" min="0" step="0.01" placeholder="Precio asegurado" defaultValue={r.precio_asegurado ?? ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
+                          <button type="submit" className="rounded bg-steel-900 text-white hover:bg-steel-800 px-2 py-1 text-xs font-semibold">Guardar</button>
+                        </AdminActionForm>
+                      </details>
+                    </td>
                     <td className="px-4 py-3 text-steel-400 font-mono text-xs">{dateFmt(r.created_at)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">

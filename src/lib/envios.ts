@@ -31,6 +31,35 @@ export const NEXT_DRIVER_STATUS: Partial<Record<ShipmentStatus, ShipmentStatus>>
   en_camino: 'entregado',
 };
 
+// Orden de avance de los pasos -- se usa para nunca retroceder un estado que
+// ya avanzó el repartidor a mano cuando se refresca el status real de ML
+// (ver syncShipmentStatus en envios-sync.ts).
+export const STATUS_RANK: Record<ShipmentStatus, number> = {
+  pendiente: 0,
+  retirado: 1,
+  en_camino: 2,
+  entregado: 3,
+  cancelado: 4,
+};
+
+// Mapeo del status crudo que devuelve la API de Shipments de ML a nuestros
+// pasos internos. Solo cubre los 3 que podemos confiar que reflejan la
+// realidad sin intervención del repartidor (ML nunca sabe que "se retiró
+// del depósito" -- eso es un paso puramente interno). "pending"/"handling"/
+// "ready_to_ship" no mapean a nada: se deja el estado como está.
+export function mapMlShipmentStatus(mlStatus: string | null | undefined): ShipmentStatus | null {
+  switch (mlStatus) {
+    case 'shipped':
+      return 'en_camino';
+    case 'delivered':
+      return 'entregado';
+    case 'cancelled':
+      return 'cancelado';
+    default:
+      return null;
+  }
+}
+
 export const DRIVER_ACTION_LABELS: Record<string, string> = {
   retirado: 'Retiré del depósito',
   en_camino: 'Salió en camino',
@@ -41,6 +70,19 @@ export const shipmentStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(['retirado', 'en_camino', 'entregado']),
   by: z.string().trim().min(1).max(100).optional(),
+});
+
+// Datos del envío de las cargas manuales (transportista + seguimiento +
+// precio asegurado) -- a veces se saben al cargar la venta, pero muchas
+// veces se termina despachando como "encomienda en mostrador" (se decide en
+// la agencia del transportista) y recién ahí se sabe. Por eso este schema se
+// usa tanto al crear el pendiente como para que el repartidor los complete
+// después desde /envios (ver /api/envios/tracking).
+export const trackingSchema = z.object({
+  id: z.string().uuid(),
+  transportista: z.string().trim().max(100).optional(),
+  numeroSeguimiento: z.string().trim().max(100).optional(),
+  precioAsegurado: z.coerce.number().min(0).optional(),
 });
 
 // Las ventas de MercadoLibre siempre llegan ya pagadas (el pendiente se crea
@@ -73,6 +115,9 @@ export const manualShipmentSchema = z.object({
   destinoTipo: z.enum(['domicilio', 'sucursal_andreani', 'otro']),
   destinoDetalle: z.string().trim().max(1000).optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).default('abonado'),
+  transportista: z.string().trim().max(100).optional(),
+  numeroSeguimiento: z.string().trim().max(100).optional(),
+  precioAsegurado: z.coerce.number().min(0).optional(),
 });
 
 /** Carga de un vendedor (Lucas/Luz/Lito) desde /envios/vendedor -- venta hecha
@@ -178,9 +223,16 @@ export function deriveDestino(shipment: MLShipment): DerivedDestino {
 /** Arma la fila lista para upsert en ml_shipments a partir de la orden + el envío de ML. */
 export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
   const destino = deriveDestino(shipment);
+  // Si el sync (webhook o cron) se enteró tarde de la venta -- ej. se perdió el
+  // webhook y recién la trae el cron del día siguiente -- la fila no debe
+  // aparentar que "recién ingresó": se usa la fecha real de la orden en ML,
+  // no el momento en que se inserta la fila. Mismo motivo para el status: si
+  // ML ya la muestra despachada/en camino, arranca ahí en vez de "pendiente".
+  const mappedStatus = mapMlShipmentStatus(shipment.status);
   return {
     ml_order_id: order.id,
     ml_shipment_id: String(shipment.id),
+    ...(mappedStatus ? { status: mappedStatus } : {}),
     destino_tipo: destino.destinoTipo,
     destino_detalle: destino.destinoDetalle,
     buyer_nickname: order.buyer?.nickname ?? null,
@@ -190,6 +242,7 @@ export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
     ml_status: shipment.status,
     estimated_delivery_date: destino.estimatedDeliveryDate,
     payment_status: 'abonado' as const, // ML solo crea el pendiente cuando ya se pagó
+    created_at: order.date_created,
   };
 }
 

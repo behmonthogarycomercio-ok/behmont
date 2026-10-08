@@ -16,6 +16,7 @@ import {
 
 type Shipment = {
   id: string;
+  ml_order_id: number;
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
@@ -25,6 +26,9 @@ type Shipment = {
   created_at: string;
   status: ShipmentStatus;
   payment_status: PaymentStatus;
+  transportista: string | null;
+  numero_seguimiento: string | null;
+  precio_asegurado: number | null;
 };
 
 type PushState = 'unsupported' | 'checking' | 'off' | 'on' | 'busy';
@@ -51,6 +55,15 @@ export default function EnviosPage() {
   const [confirmingStatus, setConfirmingStatus] = useState<ShipmentStatus | null>(null);
   const [driverName, setDriverName] = useState('');
   const [advancingId, setAdvancingId] = useState<string | null>(null);
+
+  // Datos de envío (transportista / seguimiento / precio asegurado) de las
+  // cargas manuales -- se completan después, cuando el paquete se despachó
+  // como "encomienda en mostrador" y no se sabían al cargar la venta.
+  const [trackingFormId, setTrackingFormId] = useState<string | null>(null);
+  const [trackingTransportista, setTrackingTransportista] = useState('');
+  const [trackingNumero, setTrackingNumero] = useState('');
+  const [trackingPrecio, setTrackingPrecio] = useState('');
+  const [savingTracking, setSavingTracking] = useState(false);
 
   useEffect(() => {
     setDriverName(localStorage.getItem(DRIVER_NAME_KEY) || '');
@@ -248,6 +261,49 @@ export default function EnviosPage() {
     }
   }
 
+  function openTrackingForm(s: Shipment) {
+    setTrackingFormId(s.id);
+    setTrackingTransportista(s.transportista || '');
+    setTrackingNumero(s.numero_seguimiento || '');
+    setTrackingPrecio(s.precio_asegurado != null ? String(s.precio_asegurado) : '');
+  }
+
+  async function saveTracking(id: string) {
+    setSavingTracking(true);
+    try {
+      const res = await fetch('/api/envios/tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          transportista: trackingTransportista.trim() || undefined,
+          numeroSeguimiento: trackingNumero.trim() || undefined,
+          precioAsegurado: trackingPrecio.trim() ? Number(trackingPrecio) : undefined,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setShipments((prev) =>
+        prev
+          ? prev.map((s) =>
+              s.id === id
+                ? {
+                    ...s,
+                    transportista: trackingTransportista.trim() || null,
+                    numero_seguimiento: trackingNumero.trim() || null,
+                    precio_asegurado: trackingPrecio.trim() ? Number(trackingPrecio) : null,
+                  }
+                : s
+            )
+          : prev
+      );
+      setTrackingFormId(null);
+    } catch {
+      alert('No se pudo guardar. Probá de nuevo.');
+    } finally {
+      setSavingTracking(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-2xl">
@@ -298,7 +354,7 @@ export default function EnviosPage() {
           </div>
         )}
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {shipments?.map((s) => {
             const retrasado = isRetrasado({
               status: s.status,
@@ -309,32 +365,34 @@ export default function EnviosPage() {
             const extra = s.items.length > 1 ? ` + ${s.items.length - 1} más` : '';
 
             const next = NEXT_DRIVER_STATUS[s.status];
+            const isManual = s.ml_order_id < 0;
+            const hasTracking = Boolean(s.transportista || s.numero_seguimiento || s.precio_asegurado != null);
 
             return (
-              <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="rounded-full bg-steel-800 px-3 py-1 text-xs font-bold uppercase text-white/70">
+              <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-6 shadow-card">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="rounded-full bg-steel-800 px-3.5 py-1.5 text-sm font-bold uppercase text-white/70">
                     {STATUS_LABELS[s.status]}
                   </span>
                   {retrasado && (
-                    <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase">
+                    <span className="rounded-full bg-red-600 px-3.5 py-1.5 text-sm font-bold uppercase">
                       Retrasado
                     </span>
                   )}
-                  <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+                  <span className={`rounded-full px-3.5 py-1.5 text-sm font-bold uppercase ${
                     s.payment_status === 'abonado' ? 'bg-emerald-600' : 'bg-amber-500'
                   }`}>
                     {PAYMENT_STATUS_LABELS[s.payment_status]}
                   </span>
                 </div>
-                <p className="font-display text-lg font-bold">{firstTitle}{extra}</p>
-                {s.total != null && <p className="text-sm text-white/50">${formatPrice(s.total)}</p>}
+                <p className="font-display text-xl font-bold">{firstTitle}{extra}</p>
+                {s.total != null && <p className="text-base text-white/50">${formatPrice(s.total)}</p>}
 
-                <div className="mt-3 flex items-start gap-2 text-sm">
+                <div className="mt-4 flex items-start gap-2 text-base">
                   {s.destino_tipo === 'domicilio' ? (
-                    <Home className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
+                    <Home className="h-5 w-5 mt-0.5 shrink-0 text-amber-400" />
                   ) : (
-                    <Package className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
+                    <Package className="h-5 w-5 mt-0.5 shrink-0 text-amber-400" />
                   )}
                   <span className="text-white/80">
                     {s.destino_tipo === 'domicilio' ? 'Entregar en domicilio' : 'Llevar a sucursal'}
@@ -343,29 +401,91 @@ export default function EnviosPage() {
                 </div>
 
                 {s.buyer_nickname && (
-                  <p className="mt-1 text-xs text-white/40">Comprador: {s.buyer_nickname}</p>
+                  <p className="mt-1.5 text-sm text-white/40">Comprador: {s.buyer_nickname}</p>
+                )}
+
+                {isManual && (
+                  <div className="mt-3 rounded-lg bg-steel-950/60 border border-steel-800 p-3">
+                    {hasTracking && trackingFormId !== s.id ? (
+                      <div className="text-sm text-white/70">
+                        {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
+                        {s.numero_seguimiento && <p>Seguimiento: {s.numero_seguimiento}</p>}
+                        {s.precio_asegurado != null && <p>Asegurado: ${formatPrice(s.precio_asegurado)}</p>}
+                      </div>
+                    ) : null}
+
+                    {trackingFormId === s.id ? (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="text"
+                          placeholder="Transportista"
+                          value={trackingTransportista}
+                          onChange={(e) => setTrackingTransportista(e.target.value)}
+                          className="rounded-lg px-3 py-2 text-steel-900"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Nº de seguimiento"
+                          value={trackingNumero}
+                          onChange={(e) => setTrackingNumero(e.target.value)}
+                          className="rounded-lg px-3 py-2 text-steel-900"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Precio asegurado"
+                          value={trackingPrecio}
+                          onChange={(e) => setTrackingPrecio(e.target.value)}
+                          className="rounded-lg px-3 py-2 text-steel-900"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveTracking(s.id)}
+                            disabled={savingTracking}
+                            className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-2 font-semibold text-white"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => setTrackingFormId(null)}
+                            className="rounded-lg bg-steel-800 hover:bg-steel-700 py-2 px-4 text-white/70"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => openTrackingForm(s)}
+                        className="w-full rounded-lg border border-steel-700 text-white/70 hover:bg-steel-800 py-2 text-sm font-semibold"
+                      >
+                        {hasTracking ? 'Editar datos de envío' : '📮 Agregar datos de envío'}
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 {confirmingId === s.id ? (
-                  <div className="mt-3 flex flex-col gap-2">
+                  <div className="mt-4 flex flex-col gap-2">
                     <input
                       type="text"
                       placeholder="Tu nombre"
                       value={driverName}
                       onChange={(e) => setDriverName(e.target.value)}
-                      className="rounded-lg px-3 py-2 text-steel-900"
+                      className="rounded-lg px-3 py-2.5 text-base text-steel-900"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => confirmAdvance(s.id)}
                         disabled={!driverName.trim() || advancingId === s.id}
-                        className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-2 font-semibold text-white"
+                        className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-3 text-base font-semibold text-white"
                       >
                         Confirmar
                       </button>
                       <button
                         onClick={() => { setConfirmingId(null); setConfirmingStatus(null); }}
-                        className="rounded-lg bg-steel-800 hover:bg-steel-700 py-2 px-4 text-white/70"
+                        className="rounded-lg bg-steel-800 hover:bg-steel-700 py-3 px-4 text-base text-white/70"
                       >
                         Cancelar
                       </button>
@@ -376,7 +496,7 @@ export default function EnviosPage() {
                     <button
                       onClick={() => advance(s)}
                       disabled={advancingId === s.id}
-                      className="mt-3 w-full rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-2 font-semibold text-white"
+                      className="mt-4 w-full rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-3 text-base font-semibold text-white"
                     >
                       {DRIVER_ACTION_LABELS[next]}
                     </button>
@@ -387,7 +507,7 @@ export default function EnviosPage() {
                   <button
                     onClick={() => markPaid(s.id)}
                     disabled={advancingId === s.id}
-                    className="mt-2 w-full rounded-lg border border-amber-500 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 py-2 font-semibold"
+                    className="mt-2.5 w-full rounded-lg border border-amber-500 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 py-3 text-base font-semibold"
                   >
                     💰 Marcar cobrado
                   </button>

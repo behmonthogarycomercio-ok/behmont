@@ -469,6 +469,8 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
   const productTitle = (formData.get('productTitle') as string)?.trim();
   if (!productTitle) return { error: 'Falta el producto' };
 
+  const precioAseguradoRaw = (formData.get('precioAsegurado') as string)?.trim();
+
   const payload = {
     ml_order_id: -Date.now(), // negativo para no chocar nunca con un id real de ML
     status: 'pendiente',
@@ -477,8 +479,27 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
     buyer_nickname: (formData.get('buyerNickname') as string) || null,
     items: [{ title: productTitle, quantity: 1 }],
     payment_status: (formData.get('paymentStatus') as string) || 'abonado',
+    transportista: (formData.get('transportista') as string)?.trim() || null,
+    numero_seguimiento: (formData.get('numeroSeguimiento') as string)?.trim() || null,
+    precio_asegurado: precioAseguradoRaw ? Number(precioAseguradoRaw) : null,
   };
   const { error } = await supabase.from('ml_shipments').insert(payload);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}
+
+export async function updateShipmentTracking(formData: FormData): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const id = formData.get('id') as string;
+  const precioAseguradoRaw = (formData.get('precioAsegurado') as string)?.trim();
+
+  const payload = {
+    transportista: (formData.get('transportista') as string)?.trim() || null,
+    numero_seguimiento: (formData.get('numeroSeguimiento') as string)?.trim() || null,
+    precio_asegurado: precioAseguradoRaw ? Number(precioAseguradoRaw) : null,
+  };
+  const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
   if (error) return { error: friendlyDbError(error) };
   revalidatePath('/admin/envios');
   return {};

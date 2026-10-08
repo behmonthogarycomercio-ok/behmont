@@ -17,7 +17,21 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { productTitle, buyerNickname, destinoTipo, destinoDetalle, addedBy, dni, contacto, email, codigoPostal, paymentStatus } = parsed.data;
+  const {
+    productTitle,
+    buyerNickname,
+    destinoTipo,
+    destinoDetalle,
+    addedBy,
+    dni,
+    contacto,
+    email,
+    codigoPostal,
+    paymentStatus,
+    transportista,
+    numeroSeguimiento,
+    precioAsegurado,
+  } = parsed.data;
 
   const supabase = createServiceSupabase();
   const { error } = await supabase.from('ml_shipments').insert({
@@ -28,6 +42,9 @@ export async function POST(request: Request) {
     buyer_nickname: buyerNickname || null,
     items: [{ title: productTitle, quantity: 1 }],
     payment_status: paymentStatus,
+    transportista: transportista || null,
+    numero_seguimiento: numeroSeguimiento || null,
+    precio_asegurado: precioAsegurado ?? null,
     notes: `Agregado por ${STAFF_LABELS[addedBy]} (venta fuera de MercadoLibre)`,
   });
 
