@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('ml_shipments')
-    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at')
+    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at, transportista, numero_seguimiento')
     .order('created_at', { ascending: false })
     .limit(100);
 

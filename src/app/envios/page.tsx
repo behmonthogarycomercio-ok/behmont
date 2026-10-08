@@ -6,6 +6,7 @@ import { Bell, BellOff, BellRing, Volume2, Home, Package, CheckCircle2 } from 'l
 import { formatPrice } from '@/lib/price';
 import {
   isRetrasado,
+  getTrackingUrl,
   NEXT_DRIVER_STATUS,
   DRIVER_ACTION_LABELS,
   STATUS_LABELS,
@@ -411,6 +412,16 @@ export default function EnviosPage() {
                         {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
                         {s.numero_seguimiento && <p>Seguimiento: {s.numero_seguimiento}</p>}
                         {s.precio_asegurado != null && <p>Asegurado: ${formatPrice(s.precio_asegurado)}</p>}
+                        {getTrackingUrl(s.transportista) && (
+                          <a
+                            href={getTrackingUrl(s.transportista)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-amber-400 underline"
+                          >
+                            Ver estado →
+                          </a>
+                        )}
                       </div>
                     ) : null}
 
@@ -462,6 +473,23 @@ export default function EnviosPage() {
                       >
                         {hasTracking ? 'Editar datos de envío' : '📮 Agregar datos de envío'}
                       </button>
+                    )}
+                  </div>
+                )}
+
+                {!isManual && hasTracking && (
+                  <div className="mt-3 rounded-lg bg-steel-950/60 border border-steel-800 p-3 text-sm text-white/70">
+                    {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
+                    {s.numero_seguimiento && <p>Seguimiento: {s.numero_seguimiento}</p>}
+                    {getTrackingUrl(s.transportista) && (
+                      <a
+                        href={getTrackingUrl(s.transportista)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-amber-400 underline"
+                      >
+                        Ver estado →
+                      </a>
                     )}
                   </div>
                 )}

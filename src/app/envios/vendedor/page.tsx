@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Home, Package, Plus, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '@/lib/price';
-import { isRetrasado, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
+import { isRetrasado, getTrackingUrl, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 
 type StaffName = 'lucas' | 'luz' | 'lito';
 const STAFF_OPTIONS: { value: StaffName; label: string }[] = [
@@ -26,6 +26,8 @@ type Shipment = {
   delivered_at: string | null;
   delivered_by: string | null;
   created_at: string;
+  transportista: string | null;
+  numero_seguimiento: string | null;
 };
 
 const POLL_MS = 60000;
@@ -339,6 +341,25 @@ export default function VendedorEnviosPage() {
                 </div>
 
                 {s.buyer_nickname && <p className="mt-1 text-xs text-white/40">Comprador: {s.buyer_nickname}</p>}
+                {(s.transportista || s.numero_seguimiento) && (
+                  <p className="mt-1 text-xs text-white/40">
+                    {s.transportista}
+                    {s.numero_seguimiento ? ` — Seg: ${s.numero_seguimiento}` : ''}
+                    {getTrackingUrl(s.transportista) && (
+                      <>
+                        {' '}
+                        <a
+                          href={getTrackingUrl(s.transportista)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-400 underline"
+                        >
+                          Ver estado →
+                        </a>
+                      </>
+                    )}
+                  </p>
+                )}
                 {s.status === 'entregado' && s.delivered_by && (
                   <p className="mt-1 text-xs text-emerald-400">Entregado por {s.delivered_by}</p>
                 )}

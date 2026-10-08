@@ -248,6 +248,7 @@ export type MLShipment = {
   status: string;
   logistic_type: string;
   tracking_method?: string | null;
+  tracking_number?: string | null;
   receiver_address?: {
     street_name?: string;
     street_number?: string;

@@ -2,7 +2,7 @@ import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { updateShipmentStatus, updateShipmentPayment, createManualShipment, updateShipmentTracking } from '@/lib/actions';
-import { isRetrasado, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
+import { isRetrasado, getTrackingUrl, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus } from 'lucide-react';
 
@@ -167,6 +167,16 @@ export default async function EnviosPage({
                           {r.transportista && <p className="font-medium text-steel-700">{r.transportista}</p>}
                           {r.numero_seguimiento && <p className="text-steel-400">Seg: {r.numero_seguimiento}</p>}
                           {r.precio_asegurado != null && <p className="text-steel-400">Asegurado: ${formatPrice(r.precio_asegurado)}</p>}
+                          {getTrackingUrl(r.transportista) && (
+                            <a
+                              href={getTrackingUrl(r.transportista)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-amber-600 hover:underline"
+                            >
+                              Ver estado →
+                            </a>
+                          )}
                         </div>
                       ) : (
                         <span className="text-xs text-steel-400">Sin datos</span>

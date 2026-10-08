@@ -60,6 +60,18 @@ export function mapMlShipmentStatus(mlStatus: string | null | undefined): Shipme
   }
 }
 
+// Link público para consultar el estado de un envío por transportista.
+// Solo se incluyen los que se confirmaron a mano (abriendo el sitio real y
+// viendo el buscador) -- mejor no mostrar link que mostrar uno roto. Hoy
+// todos los envíos de ML de la cuenta salen por Andreani, así que cubre el
+// caso real; si aparece otro transportista, se agrega acá cuando se
+// confirme su URL.
+export function getTrackingUrl(transportista: string | null | undefined): string | null {
+  if (!transportista) return null;
+  if (/andreani/i.test(transportista)) return 'https://www.andreani.com/?tab=seguir-envio';
+  return null;
+}
+
 export const DRIVER_ACTION_LABELS: Record<string, string> = {
   retirado: 'Retiré del depósito',
   en_camino: 'Salió en camino',
@@ -240,6 +252,8 @@ export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
     total: order.total_amount,
     logistic_type: shipment.logistic_type,
     ml_status: shipment.status,
+    transportista: shipment.tracking_method || null,
+    numero_seguimiento: shipment.tracking_number || null,
     estimated_delivery_date: destino.estimatedDeliveryDate,
     payment_status: 'abonado' as const, // ML solo crea el pendiente cuando ya se pagó
     created_at: order.date_created,

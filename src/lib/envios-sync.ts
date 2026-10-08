@@ -98,19 +98,42 @@ export async function refreshActiveShipmentStatuses(
 ): Promise<void> {
   const { data: activeRows } = await supabase
     .from('ml_shipments')
-    .select('id, status, ml_shipment_id')
+    .select('id, status, ml_shipment_id, transportista, numero_seguimiento')
     .not('status', 'in', '(entregado,cancelado)')
     .not('ml_shipment_id', 'is', null);
 
-  for (const row of (activeRows || []) as { id: string; status: ShipmentStatus; ml_shipment_id: string }[]) {
+  type ActiveRow = {
+    id: string;
+    status: ShipmentStatus;
+    ml_shipment_id: string;
+    transportista: string | null;
+    numero_seguimiento: string | null;
+  };
+
+  for (const row of (activeRows || []) as ActiveRow[]) {
     try {
       const shipment = await fetchMLShipment(row.ml_shipment_id, accessToken);
-      const mapped = mapMlShipmentStatus(shipment.status);
-      if (!mapped || STATUS_RANK[mapped] <= STATUS_RANK[row.status]) continue;
+      const payload: Record<string, unknown> = {};
 
-      const payload: Record<string, unknown> = { status: mapped, ml_status: shipment.status };
-      if (mapped === 'en_camino') payload.en_camino_at = new Date().toISOString();
-      if (mapped === 'entregado') payload.delivered_at = new Date().toISOString();
+      const mapped = mapMlShipmentStatus(shipment.status);
+      if (mapped && STATUS_RANK[mapped] > STATUS_RANK[row.status]) {
+        payload.status = mapped;
+        payload.ml_status = shipment.status;
+        if (mapped === 'en_camino') payload.en_camino_at = new Date().toISOString();
+        if (mapped === 'entregado') payload.delivered_at = new Date().toISOString();
+      }
+
+      // El tracking number no siempre está desde que se crea el envío -- ML
+      // lo asigna recién cuando el transportista lo recibe. Se actualiza acá
+      // cada vez que aparece o cambia, no solo cuando avanza el status.
+      if (shipment.tracking_method && shipment.tracking_method !== row.transportista) {
+        payload.transportista = shipment.tracking_method;
+      }
+      if (shipment.tracking_number && String(shipment.tracking_number) !== row.numero_seguimiento) {
+        payload.numero_seguimiento = String(shipment.tracking_number);
+      }
+
+      if (Object.keys(payload).length === 0) continue;
 
       const { error } = await supabase.from('ml_shipments').update(payload).eq('id', row.id);
       if (error) console.error(`[envios-sync] no se pudo actualizar el status del envío ${row.id}:`, error);
