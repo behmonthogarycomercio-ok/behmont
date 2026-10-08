@@ -20,7 +20,7 @@ type ShipmentRow = {
   delivered_by: string | null;
   created_at: string;
   transportista: string | null;
-  numero_seguimiento: string | null;
+  numeros_seguimiento: string[];
   precio_asegurado: number | null;
 };
 
@@ -37,7 +37,7 @@ export default async function EnviosPage({
 
   const { data: allRows } = await supabase
     .from('ml_shipments')
-    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at, transportista, numero_seguimiento, precio_asegurado')
+    .select('id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, delivered_at, delivered_by, created_at, transportista, numeros_seguimiento, precio_asegurado')
     .order('created_at', { ascending: false })
     .limit(300);
 
@@ -112,7 +112,7 @@ export default async function EnviosPage({
               <option value="pendiente_pago">Pendiente de abonar</option>
             </select>
             <input name="transportista" placeholder="Transportista (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
-            <input name="numeroSeguimiento" placeholder="Nº de seguimiento (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <input name="numerosSeguimiento" placeholder="Nº de seguimiento (si hay más de uno, separalos con coma)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
             <input name="precioAsegurado" type="number" min="0" step="0.01" placeholder="Precio asegurado (si ya se sabe)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
             <button type="submit" className="sm:col-span-2 rounded-lg bg-steel-900 text-white hover:bg-steel-800 py-2 text-sm font-semibold">
               Agregar
@@ -162,10 +162,12 @@ export default async function EnviosPage({
                     </td>
                     <td className="px-4 py-3 text-steel-500">{r.buyer_nickname || '—'}</td>
                     <td className="px-4 py-3 text-steel-600 max-w-[14rem]">
-                      {r.transportista || r.numero_seguimiento || r.precio_asegurado != null ? (
+                      {r.transportista || r.numeros_seguimiento.length > 0 || r.precio_asegurado != null ? (
                         <div className="text-xs leading-relaxed">
                           {r.transportista && <p className="font-medium text-steel-700">{r.transportista}</p>}
-                          {r.numero_seguimiento && <p className="text-steel-400">Seg: {r.numero_seguimiento}</p>}
+                          {r.numeros_seguimiento.length > 0 && (
+                            <p className="text-steel-400">Seg: {r.numeros_seguimiento.join(', ')}</p>
+                          )}
                           {r.precio_asegurado != null && <p className="text-steel-400">Asegurado: ${formatPrice(r.precio_asegurado)}</p>}
                           {getTrackingUrl(r.transportista) && (
                             <a
@@ -186,7 +188,7 @@ export default async function EnviosPage({
                         <AdminActionForm action={updateShipmentTracking} className="mt-2 flex flex-col gap-1.5">
                           <input type="hidden" name="id" value={r.id} />
                           <input name="transportista" placeholder="Transportista" defaultValue={r.transportista || ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
-                          <input name="numeroSeguimiento" placeholder="Nº de seguimiento" defaultValue={r.numero_seguimiento || ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
+                          <input name="numerosSeguimiento" placeholder="Nº de seguimiento (varios, separados por coma)" defaultValue={r.numeros_seguimiento.join(', ')} className="rounded border border-plate-200 px-2 py-1 text-xs" />
                           <input name="precioAsegurado" type="number" min="0" step="0.01" placeholder="Precio asegurado" defaultValue={r.precio_asegurado ?? ''} className="rounded border border-plate-200 px-2 py-1 text-xs" />
                           <button type="submit" className="rounded bg-steel-900 text-white hover:bg-steel-800 px-2 py-1 text-xs font-semibold">Guardar</button>
                         </AdminActionForm>
@@ -214,15 +216,19 @@ export default async function EnviosPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1.5 items-start">
-                        {NEXT_DRIVER_STATUS[r.status] && (
-                          <AdminActionForm action={updateShipmentStatus}>
-                            <input type="hidden" name="id" value={r.id} />
-                            <input type="hidden" name="status" value={NEXT_DRIVER_STATUS[r.status]} />
-                            <input type="hidden" name="by" value="Admin" />
-                            <button type="submit" className="rounded-lg bg-steel-900 text-white hover:bg-steel-800 px-3 py-1.5 text-xs font-semibold">
-                              {DRIVER_ACTION_LABELS[NEXT_DRIVER_STATUS[r.status]!]}
-                            </button>
-                          </AdminActionForm>
+                        {NEXT_DRIVER_STATUS[r.status] &&
+                          (NEXT_DRIVER_STATUS[r.status] !== 'entregado' || r.payment_status === 'abonado') && (
+                            <AdminActionForm action={updateShipmentStatus}>
+                              <input type="hidden" name="id" value={r.id} />
+                              <input type="hidden" name="status" value={NEXT_DRIVER_STATUS[r.status]} />
+                              <input type="hidden" name="by" value="Admin" />
+                              <button type="submit" className="rounded-lg bg-steel-900 text-white hover:bg-steel-800 px-3 py-1.5 text-xs font-semibold">
+                                {DRIVER_ACTION_LABELS[NEXT_DRIVER_STATUS[r.status]!]}
+                              </button>
+                            </AdminActionForm>
+                          )}
+                        {NEXT_DRIVER_STATUS[r.status] === 'entregado' && r.payment_status !== 'abonado' && (
+                          <p className="text-xs text-amber-600">Falta cobrar para poder entregar</p>
                         )}
                         {r.payment_status === 'pendiente_pago' && (
                           <AdminActionForm action={updateShipmentPayment}>

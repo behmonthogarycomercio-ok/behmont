@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
-import { trackingSchema } from '@/lib/envios';
+import { trackingSchema, parseTrackingNumbers } from '@/lib/envios';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
 // Sin login: lo llama la página privada /envios para que el repartidor
@@ -17,14 +17,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { id, transportista, numeroSeguimiento, precioAsegurado } = parsed.data;
+  const { id, transportista, numerosSeguimiento, precioAsegurado } = parsed.data;
 
   const supabase = createServiceSupabase();
   const { error } = await supabase
     .from('ml_shipments')
     .update({
       transportista: transportista || null,
-      numero_seguimiento: numeroSeguimiento || null,
+      numeros_seguimiento: parseTrackingNumbers(numerosSeguimiento),
       precio_asegurado: precioAsegurado ?? null,
     })
     .eq('id', id);

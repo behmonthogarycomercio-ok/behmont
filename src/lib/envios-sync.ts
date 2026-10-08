@@ -98,7 +98,7 @@ export async function refreshActiveShipmentStatuses(
 ): Promise<void> {
   const { data: activeRows } = await supabase
     .from('ml_shipments')
-    .select('id, status, ml_shipment_id, transportista, numero_seguimiento')
+    .select('id, status, ml_shipment_id, transportista, numeros_seguimiento')
     .not('status', 'in', '(entregado,cancelado)')
     .not('ml_shipment_id', 'is', null);
 
@@ -107,7 +107,7 @@ export async function refreshActiveShipmentStatuses(
     status: ShipmentStatus;
     ml_shipment_id: string;
     transportista: string | null;
-    numero_seguimiento: string | null;
+    numeros_seguimiento: string[];
   };
 
   for (const row of (activeRows || []) as ActiveRow[]) {
@@ -129,8 +129,8 @@ export async function refreshActiveShipmentStatuses(
       if (shipment.tracking_method && shipment.tracking_method !== row.transportista) {
         payload.transportista = shipment.tracking_method;
       }
-      if (shipment.tracking_number && String(shipment.tracking_number) !== row.numero_seguimiento) {
-        payload.numero_seguimiento = String(shipment.tracking_number);
+      if (shipment.tracking_number && !row.numeros_seguimiento.includes(String(shipment.tracking_number))) {
+        payload.numeros_seguimiento = [...row.numeros_seguimiento, String(shipment.tracking_number)];
       }
 
       if (Object.keys(payload).length === 0) continue;

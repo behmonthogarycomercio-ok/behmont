@@ -17,6 +17,19 @@ export async function POST(request: Request) {
   }
   const { id, status, by } = parsed.data;
 
+  const supabase = createServiceSupabase();
+
+  // Regla de negocio: no se puede entregar sin haber cobrado antes -- evita
+  // que el repartidor cierre una entrega contra entrega sin cobrar. El botón
+  // ya queda oculto en el front cuando falta cobrar, esto es la validación
+  // real del lado del servidor.
+  if (status === 'entregado') {
+    const { data: current } = await supabase.from('ml_shipments').select('payment_status').eq('id', id).maybeSingle();
+    if (current?.payment_status !== 'abonado') {
+      return NextResponse.json({ error: 'Primero hay que marcar el pago como cobrado.' }, { status: 400 });
+    }
+  }
+
   const payload: Record<string, unknown> = { status };
   if (status === 'retirado') {
     payload.retirado_at = new Date().toISOString();
@@ -28,7 +41,6 @@ export async function POST(request: Request) {
     payload.delivered_by = by || null;
   }
 
-  const supabase = createServiceSupabase();
   const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);
 
   if (error) {

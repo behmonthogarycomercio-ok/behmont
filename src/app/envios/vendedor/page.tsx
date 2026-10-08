@@ -27,7 +27,7 @@ type Shipment = {
   delivered_by: string | null;
   created_at: string;
   transportista: string | null;
-  numero_seguimiento: string | null;
+  numeros_seguimiento: string[];
 };
 
 const POLL_MS = 60000;
@@ -92,7 +92,7 @@ export default function VendedorEnviosPage() {
           codigoPostal: codigoPostal.trim() || undefined,
           paymentStatus,
           transportista: transportista.trim() || undefined,
-          numeroSeguimiento: numeroSeguimiento.trim() || undefined,
+          numerosSeguimiento: numeroSeguimiento.trim() || undefined,
           precioAsegurado: precioAsegurado.trim() ? Number(precioAsegurado) : undefined,
         }),
       });
@@ -228,7 +228,7 @@ export default function VendedorEnviosPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Nº de seguimiento"
+                  placeholder="Nº de seguimiento (si hay más de uno, separalos con coma)"
                   value={numeroSeguimiento}
                   onChange={(e) => setNumeroSeguimiento(e.target.value)}
                   className="rounded-lg px-3 py-2 text-steel-900"
@@ -341,10 +341,10 @@ export default function VendedorEnviosPage() {
                 </div>
 
                 {s.buyer_nickname && <p className="mt-1 text-xs text-white/40">Comprador: {s.buyer_nickname}</p>}
-                {(s.transportista || s.numero_seguimiento) && (
+                {(s.transportista || s.numeros_seguimiento.length > 0) && (
                   <p className="mt-1 text-xs text-white/40">
                     {s.transportista}
-                    {s.numero_seguimiento ? ` — Seg: ${s.numero_seguimiento}` : ''}
+                    {s.numeros_seguimiento.length > 0 ? ` — Seg: ${s.numeros_seguimiento.join(', ')}` : ''}
                     {getTrackingUrl(s.transportista) && (
                       <>
                         {' '}

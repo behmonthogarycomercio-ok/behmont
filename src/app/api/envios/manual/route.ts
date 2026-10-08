@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
-import { vendorManualShipmentSchema, formatManualDestino, STAFF_LABELS } from '@/lib/envios';
+import { vendorManualShipmentSchema, formatManualDestino, parseTrackingNumbers, STAFF_LABELS } from '@/lib/envios';
 import { notifyDrivers } from '@/lib/push';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     codigoPostal,
     paymentStatus,
     transportista,
-    numeroSeguimiento,
+    numerosSeguimiento,
     precioAsegurado,
   } = parsed.data;
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     items: [{ title: productTitle, quantity: 1 }],
     payment_status: paymentStatus,
     transportista: transportista || null,
-    numero_seguimiento: numeroSeguimiento || null,
+    numeros_seguimiento: parseTrackingNumbers(numerosSeguimiento),
     precio_asegurado: precioAsegurado ?? null,
     notes: `Agregado por ${STAFF_LABELS[addedBy]} (venta fuera de MercadoLibre)`,
   });

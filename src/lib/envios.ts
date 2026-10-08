@@ -72,6 +72,15 @@ export function getTrackingUrl(transportista: string | null | undefined): string
   return null;
 }
 
+/** Convierte lo que se tipeó en el input de "números de seguimiento" (uno o
+ * varios, separados por coma o salto de línea -- las ventas con envío
+ * nacional por Andreani a veces se despachan en más de un paquete) en la
+ * lista que se guarda en la base. */
+export function parseTrackingNumbers(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return [...new Set(raw.split(/[,\n]/).map((s) => s.trim()).filter(Boolean))];
+}
+
 export const DRIVER_ACTION_LABELS: Record<string, string> = {
   retirado: 'Retiré del depósito',
   en_camino: 'Salió en camino',
@@ -93,7 +102,7 @@ export const shipmentStatusSchema = z.object({
 export const trackingSchema = z.object({
   id: z.string().uuid(),
   transportista: z.string().trim().max(100).optional(),
-  numeroSeguimiento: z.string().trim().max(100).optional(),
+  numerosSeguimiento: z.string().trim().max(500).optional(),
   precioAsegurado: z.coerce.number().min(0).optional(),
 });
 
@@ -128,7 +137,7 @@ export const manualShipmentSchema = z.object({
   destinoDetalle: z.string().trim().max(1000).optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).default('abonado'),
   transportista: z.string().trim().max(100).optional(),
-  numeroSeguimiento: z.string().trim().max(100).optional(),
+  numerosSeguimiento: z.string().trim().max(500).optional(),
   precioAsegurado: z.coerce.number().min(0).optional(),
 });
 
@@ -253,7 +262,7 @@ export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
     logistic_type: shipment.logistic_type,
     ml_status: shipment.status,
     transportista: shipment.tracking_method || null,
-    numero_seguimiento: shipment.tracking_number || null,
+    numeros_seguimiento: shipment.tracking_number ? [shipment.tracking_number] : [],
     estimated_delivery_date: destino.estimatedDeliveryDate,
     payment_status: 'abonado' as const, // ML solo crea el pendiente cuando ya se pagó
     created_at: order.date_created,

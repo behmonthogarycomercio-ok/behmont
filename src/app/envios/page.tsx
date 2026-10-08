@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/price';
 import {
   isRetrasado,
   getTrackingUrl,
+  parseTrackingNumbers,
   NEXT_DRIVER_STATUS,
   DRIVER_ACTION_LABELS,
   STATUS_LABELS,
@@ -28,7 +29,7 @@ type Shipment = {
   status: ShipmentStatus;
   payment_status: PaymentStatus;
   transportista: string | null;
-  numero_seguimiento: string | null;
+  numeros_seguimiento: string[];
   precio_asegurado: number | null;
 };
 
@@ -265,7 +266,7 @@ export default function EnviosPage() {
   function openTrackingForm(s: Shipment) {
     setTrackingFormId(s.id);
     setTrackingTransportista(s.transportista || '');
-    setTrackingNumero(s.numero_seguimiento || '');
+    setTrackingNumero(s.numeros_seguimiento.join(', '));
     setTrackingPrecio(s.precio_asegurado != null ? String(s.precio_asegurado) : '');
   }
 
@@ -278,7 +279,7 @@ export default function EnviosPage() {
         body: JSON.stringify({
           id,
           transportista: trackingTransportista.trim() || undefined,
-          numeroSeguimiento: trackingNumero.trim() || undefined,
+          numerosSeguimiento: trackingNumero.trim() || undefined,
           precioAsegurado: trackingPrecio.trim() ? Number(trackingPrecio) : undefined,
         }),
       });
@@ -290,7 +291,7 @@ export default function EnviosPage() {
                 ? {
                     ...s,
                     transportista: trackingTransportista.trim() || null,
-                    numero_seguimiento: trackingNumero.trim() || null,
+                    numeros_seguimiento: parseTrackingNumbers(trackingNumero),
                     precio_asegurado: trackingPrecio.trim() ? Number(trackingPrecio) : null,
                   }
                 : s
@@ -367,7 +368,7 @@ export default function EnviosPage() {
 
             const next = NEXT_DRIVER_STATUS[s.status];
             const isManual = s.ml_order_id < 0;
-            const hasTracking = Boolean(s.transportista || s.numero_seguimiento || s.precio_asegurado != null);
+            const hasTracking = Boolean(s.transportista || s.numeros_seguimiento.length > 0 || s.precio_asegurado != null);
 
             return (
               <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-6 shadow-card">
@@ -410,7 +411,7 @@ export default function EnviosPage() {
                     {hasTracking && trackingFormId !== s.id ? (
                       <div className="text-sm text-white/70">
                         {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
-                        {s.numero_seguimiento && <p>Seguimiento: {s.numero_seguimiento}</p>}
+                        {s.numeros_seguimiento.length > 0 && <p>Seguimiento: {s.numeros_seguimiento.join(', ')}</p>}
                         {s.precio_asegurado != null && <p>Asegurado: ${formatPrice(s.precio_asegurado)}</p>}
                         {getTrackingUrl(s.transportista) && (
                           <a
@@ -436,7 +437,7 @@ export default function EnviosPage() {
                         />
                         <input
                           type="text"
-                          placeholder="Nº de seguimiento"
+                          placeholder="Nº de seguimiento (si hay más de uno, separalos con coma)"
                           value={trackingNumero}
                           onChange={(e) => setTrackingNumero(e.target.value)}
                           className="rounded-lg px-3 py-2 text-steel-900"
@@ -480,7 +481,7 @@ export default function EnviosPage() {
                 {!isManual && hasTracking && (
                   <div className="mt-3 rounded-lg bg-steel-950/60 border border-steel-800 p-3 text-sm text-white/70">
                     {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
-                    {s.numero_seguimiento && <p>Seguimiento: {s.numero_seguimiento}</p>}
+                    {s.numeros_seguimiento.length > 0 && <p>Seguimiento: {s.numeros_seguimiento.join(', ')}</p>}
                     {getTrackingUrl(s.transportista) && (
                       <a
                         href={getTrackingUrl(s.transportista)!}
@@ -519,6 +520,10 @@ export default function EnviosPage() {
                       </button>
                     </div>
                   </div>
+                ) : next === 'entregado' && s.payment_status !== 'abonado' ? (
+                  <p className="mt-4 text-center text-sm text-amber-400">
+                    Marcá el pago como cobrado antes de poder entregar
+                  </p>
                 ) : (
                   next && (
                     <button

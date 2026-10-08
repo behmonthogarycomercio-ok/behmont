@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
 import { getValidMLAccessToken, updateMLItemPriceStock } from './mercadolibre';
+import { parseTrackingNumbers } from './envios';
 
 /**
  * Resultado de una accion. Se devuelve en vez de "throw" porque Next.js oculta
@@ -422,6 +423,15 @@ export async function updateShipmentStatus(formData: FormData): Promise<ActionRe
   const status = formData.get('status') as string;
   const by = (formData.get('by') as string) || 'Admin';
 
+  // Misma regla que /api/envios/status: no se puede entregar sin haber
+  // cobrado antes.
+  if (status === 'entregado') {
+    const { data: current } = await supabase.from('ml_shipments').select('payment_status').eq('id', id).maybeSingle();
+    if (current?.payment_status !== 'abonado') {
+      return { error: 'Primero hay que marcar el pago como cobrado.' };
+    }
+  }
+
   const payload: Record<string, unknown> = { status };
   if (status === 'retirado') {
     payload.retirado_at = new Date().toISOString();
@@ -480,7 +490,7 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
     items: [{ title: productTitle, quantity: 1 }],
     payment_status: (formData.get('paymentStatus') as string) || 'abonado',
     transportista: (formData.get('transportista') as string)?.trim() || null,
-    numero_seguimiento: (formData.get('numeroSeguimiento') as string)?.trim() || null,
+    numeros_seguimiento: parseTrackingNumbers(formData.get('numerosSeguimiento') as string),
     precio_asegurado: precioAseguradoRaw ? Number(precioAseguradoRaw) : null,
   };
   const { error } = await supabase.from('ml_shipments').insert(payload);
@@ -496,7 +506,7 @@ export async function updateShipmentTracking(formData: FormData): Promise<Action
 
   const payload = {
     transportista: (formData.get('transportista') as string)?.trim() || null,
-    numero_seguimiento: (formData.get('numeroSeguimiento') as string)?.trim() || null,
+    numeros_seguimiento: parseTrackingNumbers(formData.get('numerosSeguimiento') as string),
     precio_asegurado: precioAseguradoRaw ? Number(precioAseguradoRaw) : null,
   };
   const { error } = await supabase.from('ml_shipments').update(payload).eq('id', id);

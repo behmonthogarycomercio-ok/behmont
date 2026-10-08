@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('ml_shipments')
-    .select('id, ml_order_id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, created_at, transportista, numero_seguimiento, precio_asegurado')
+    .select('id, ml_order_id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, created_at, transportista, numeros_seguimiento, precio_asegurado')
     .in('status', ['pendiente', 'retirado', 'en_camino'])
     .order('created_at', { ascending: true });
 
