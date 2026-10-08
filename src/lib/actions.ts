@@ -131,8 +131,13 @@ export async function updateProductSpecs(formData: FormData): Promise<ActionResu
     return { error: 'No se pudieron leer las características' };
   }
 
-  const { error } = await supabase.from('products').update({ specs }).eq('id', id);
+  const { data, error } = await supabase.from('products').update({ specs }).eq('id', id).select('id');
   if (error) return { error: friendlyDbError(error) };
+  if (!data || data.length === 0) {
+    // RLS bloqueó el update sin tirar error (sesión vencida/no admin) — el
+    // cliente lo tomaría como éxito si no se detecta explícitamente acá.
+    return { error: 'No se guardó: la sesión puede haber vencido. Recargá la página e iniciá sesión de nuevo.' };
+  }
   revalidatePath('/admin/etiquetas');
   revalidatePath('/admin/productos');
   return {};
