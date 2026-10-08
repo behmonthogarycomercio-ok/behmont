@@ -22,12 +22,28 @@ export function getBrandName(p: LabelProduct): string | null {
 // código que ya se muestra en la esquina inferior de la etiqueta).
 const EXCLUDED_SPEC_LABELS = new Set(['marca', 'modelo']);
 
+// Atributos que trae el sync de MercadoLibre para uso interno (impuestos,
+// motivo de GTIN vacío, código de barras, dimensiones del paquete para el
+// envío) -- no le sirven al cliente en el cartel de precio. Si quedan
+// primeros en el array de specs (orden en que los manda ML) y no se
+// filtran, terminan ocupando las 4 viñetas del cartel con cosas como
+// "El producto no tiene código registrado" en vez de specs reales.
+const NOISE_SPEC_PATTERNS = [/gtin/i, /impuesto interno/i, /^iva$/i, /^sku$/i, /paquete del seller/i];
+
+// Dato valido pero generico (todo el catálogo es "Nuevo") -- se muestra
+// solo si sobra lugar entre las primeras 4, nunca antes que una spec
+// especifica del producto.
+const LOW_PRIORITY_SPEC_LABELS = new Set(['condición del ítem']);
+
 /** Hasta 4 características, mostradas como texto plano en viñetas (sin "Label:" delante). */
 export function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  return p.specs
-    .filter((s) => !EXCLUDED_SPEC_LABELS.has(s.label.trim().toLowerCase()))
-    .map((s) => ({ label: '', value: s.value }))
-    .slice(0, 4);
+  const usable = p.specs.filter((s) => {
+    const label = s.label.trim().toLowerCase();
+    return !EXCLUDED_SPEC_LABELS.has(label) && !NOISE_SPEC_PATTERNS.some((re) => re.test(label));
+  });
+  const primary = usable.filter((s) => !LOW_PRIORITY_SPEC_LABELS.has(s.label.trim().toLowerCase()));
+  const lowPriority = usable.filter((s) => LOW_PRIORITY_SPEC_LABELS.has(s.label.trim().toLowerCase()));
+  return [...primary, ...lowPriority].map((s) => ({ label: '', value: s.value })).slice(0, 4);
 }
 
 export function getDescriptionFallback(p: LabelProduct): string | null {
