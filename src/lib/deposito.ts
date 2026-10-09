@@ -83,6 +83,23 @@ export const zonaDeleteSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const productLocationWriteSchema = z
+  .object({
+    pin: pinSchema,
+    code: secretCodeSchema,
+    id: z.string().uuid().optional(), // presente = edit cantidad, ausente = nueva ubicación
+    productId: z.string().uuid().optional(),
+    zonaId: z.string().uuid().optional(),
+    quantity: z.coerce.number().int().min(0),
+  })
+  .refine((d) => d.id || (d.productId && d.zonaId), { message: 'Faltan datos de producto/zona' });
+
+export const productLocationDeleteSchema = z.object({
+  pin: pinSchema,
+  code: secretCodeSchema,
+  id: z.string().uuid(),
+});
+
 export const fotoDeleteSchema = z.object({
   pin: pinSchema,
   code: secretCodeSchema,
