@@ -4,10 +4,11 @@ import { ingresoSchema, canIngreso, DEPOSITO_STAFF_LABELS } from '@/lib/deposito
 import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 import { pushToMLIfLinked } from '@/lib/ml-sync';
+import { notifyAdmins, notifyDepositoSupervisor } from '@/lib/push';
 
-// Sin login: solo PIN 0 (Javier) y PIN 1 (Gabriel) pueden registrar ingreso
-// de mercadería, y cada uno con su código secreto -- el botón ya está oculto
-// para el resto en el cliente, pero la restricción real es esta, server-side.
+// Sin login: solo Gabriel puede registrar ingreso de mercadería, con su
+// código secreto -- el botón ya está oculto para el resto en el cliente,
+// pero la restricción real es esta, server-side.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-ingreso:${ip}`, 60, 3600)) {
@@ -43,10 +44,18 @@ export async function POST(request: Request) {
   }
 
   const row = data?.[0];
-  const { data: product } = await supabase.from('products').select('ml_item_id').eq('id', productId).maybeSingle();
+  const { data: product } = await supabase.from('products').select('name, ml_item_id').eq('id', productId).maybeSingle();
   if (product?.ml_item_id) {
     await pushToMLIfLinked(product.ml_item_id, { stock: row?.new_stock });
   }
+
+  const staffName = DEPOSITO_STAFF_LABELS[pin];
+  const notifyPayload = {
+    title: '📦 Ingreso a depósito',
+    body: `${staffName} ingresó ${quantity} de "${product?.name || 'un producto'}"`,
+    url: '/admin/depositos',
+  };
+  await Promise.all([notifyAdmins(notifyPayload), notifyDepositoSupervisor(notifyPayload)]);
 
   return NextResponse.json({ ok: true, newQuantity: row?.new_quantity, newStock: row?.new_stock });
 }

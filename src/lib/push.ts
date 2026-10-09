@@ -86,6 +86,40 @@ export async function notifyStaff(staff: StaffName, payload: { title: string; bo
 }
 
 /**
+ * Manda una notificación push a Gabriel (jefe de depósito) por cada retiro/
+ * ingreso registrado en /deposito -- se suma a notifyAdmins() para que el
+ * dueño también quede al tanto por el mismo canal que ya usa.
+ */
+export async function notifyDepositoSupervisor(payload: { title: string; body: string; url?: string }) {
+  if (!process.env.VAPID_PRIVATE_KEY || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return;
+  ensureConfigured();
+
+  const supabase = createServiceSupabase();
+  const { data: subs } = await supabase.from('deposito_push_subscriptions').select('id, endpoint, p256dh, auth');
+  if (!subs || subs.length === 0) return;
+
+  const body = JSON.stringify(payload);
+
+  await Promise.all(
+    subs.map(async (sub: { id: string; endpoint: string; p256dh: string; auth: string }) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          body
+        );
+      } catch (err: unknown) {
+        const statusCode = (err as { statusCode?: number })?.statusCode;
+        if (statusCode === 404 || statusCode === 410) {
+          await supabase.from('deposito_push_subscriptions').delete().eq('id', sub.id);
+        } else {
+          console.error('[push] envío a supervisor de depósito falló:', err);
+        }
+      }
+    })
+  );
+}
+
+/**
  * Manda una notificación push a TODOS los repartidores suscriptos (son 2,
  * cualquiera puede tomar cualquier entrega, no hay filtro por destinatario
  * como en notifyStaff). Activada desde /envios, sin cuenta de admin.

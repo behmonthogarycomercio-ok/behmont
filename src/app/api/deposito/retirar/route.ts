@@ -4,6 +4,7 @@ import { retiroSchema, DEPOSITO_STAFF_LABELS, isLocalOnly, LOCAL_ZONA_CODIGO } f
 import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 import { pushToMLIfLinked } from '@/lib/ml-sync';
+import { notifyAdmins, notifyDepositoSupervisor } from '@/lib/push';
 
 // Sin login: cualquiera de los 6 PINs de la terminal /deposito puede retirar
 // stock, pero cada uno con su código secreto (no alcanza con mandar el PIN)
@@ -50,10 +51,18 @@ export async function POST(request: Request) {
   }
 
   const row = data?.[0];
-  const { data: product } = await supabase.from('products').select('ml_item_id').eq('id', productId).maybeSingle();
+  const { data: product } = await supabase.from('products').select('name, ml_item_id').eq('id', productId).maybeSingle();
   if (product?.ml_item_id) {
     await pushToMLIfLinked(product.ml_item_id, { stock: row?.new_stock });
   }
+
+  const staffName = DEPOSITO_STAFF_LABELS[pin];
+  const notifyPayload = {
+    title: '📦 Retiro de depósito',
+    body: `${staffName} retiró ${quantity} de "${product?.name || 'un producto'}"`,
+    url: '/admin/depositos',
+  };
+  await Promise.all([notifyAdmins(notifyPayload), notifyDepositoSupervisor(notifyPayload)]);
 
   return NextResponse.json({ ok: true, newQuantity: row?.new_quantity, newStock: row?.new_stock });
 }

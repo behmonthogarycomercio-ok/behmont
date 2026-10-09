@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { DEPOSITO_STAFF, canGestionZonas, type DepositoPin } from '@/lib/deposito';
 import ZonasGestionClient from '@/components/deposito/ZonasGestionClient';
 import FotosGestionClient from '@/components/deposito/FotosGestionClient';
+import DepositoPushButton from '@/components/deposito/DepositoPushButton';
 
 type ZonaApi = { id: string; parent_id: string | null; tipo: string; codigo: string; nombre: string; active: boolean };
 type ProductoApi = { id: string; sku: string; name: string; images?: string[] | null };
@@ -158,6 +159,10 @@ export default function DepositoGestionPage() {
             </div>
 
             {loadError && <p className="text-sm text-red-400">No se pudo cargar. Reintentando…</p>}
+
+            <div>
+              <DepositoPushButton pin={pin} code={code} />
+            </div>
 
             <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
               <ZonasGestionClient pin={pin} code={code} zonas={zonas} onChanged={load} />

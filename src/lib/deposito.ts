@@ -89,3 +89,20 @@ export const fotoDeleteSchema = z.object({
   productId: z.string().uuid(),
   imageUrl: z.string().url(),
 });
+
+// Avisos push de movimientos de depósito -- solo Gabriel (PIN de gestión)
+// puede suscribir/desuscribir su propio dispositivo.
+export const depositoSubscribeSchema = z.object({
+  pin: pinSchema,
+  code: secretCodeSchema,
+  subscription: z.object({
+    endpoint: z.string().url(),
+    keys: z.object({ p256dh: z.string(), auth: z.string() }),
+  }),
+});
+
+export const depositoUnsubscribeSchema = z.object({
+  pin: pinSchema,
+  code: secretCodeSchema,
+  endpoint: z.string().url(),
+});
