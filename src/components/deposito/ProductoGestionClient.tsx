@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, Download } from 'lucide-react';
 import type { DepositoPin } from '@/lib/deposito';
 
 type ZonaApi = { id: string; parent_id: string | null; tipo: string; codigo: string; nombre: string; active: boolean };
@@ -51,6 +51,7 @@ export default function ProductoGestionClient({
 
   const [uploading, setUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [confirmDeleteUrl, setConfirmDeleteUrl] = useState<string | null>(null);
 
   const zonasById = useMemo(() => new Map(zonas.map((z) => [z.id, z])), [zonas]);
   // Solo tiene sentido ubicar stock en zonas "hoja" (división), o en un área
@@ -151,6 +152,7 @@ export default function ProductoGestionClient({
       body: JSON.stringify({ pin, code, productId: selected.id, imageUrl }),
     });
     const data = await res.json();
+    setConfirmDeleteUrl(null);
     if (!res.ok) {
       setPhotoError(data.error || 'No se pudo quitar la foto');
       return;
@@ -265,15 +267,36 @@ export default function ProductoGestionClient({
             <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Fotos</p>
             <div className="flex flex-wrap gap-3 mb-3">
               {(selected.images || []).map((url) => (
-                <div key={url} className="relative h-20 w-20 rounded-lg overflow-hidden group border border-white/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-full w-full object-cover" />
-                  <button
-                    onClick={() => removeImage(url)}
-                    className="absolute inset-0 hidden group-hover:grid place-items-center bg-black/60"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
+                <div key={url} className="w-24">
+                  <div className="h-20 w-24 rounded-lg overflow-hidden border border-white/10 bg-steel-900">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-1 text-[11px]">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      className="inline-flex items-center gap-0.5 text-amber-400 underline"
+                    >
+                      <Download className="h-3 w-3" /> Bajar
+                    </a>
+                    {confirmDeleteUrl === url ? (
+                      <span className="flex items-center gap-1">
+                        <button onClick={() => removeImage(url)} className="text-red-400 underline font-semibold">
+                          Sí, borrar
+                        </button>
+                        <button onClick={() => setConfirmDeleteUrl(null)} className="text-white/40 underline">
+                          No
+                        </button>
+                      </span>
+                    ) : (
+                      <button onClick={() => setConfirmDeleteUrl(url)} className="text-red-400 underline">
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
