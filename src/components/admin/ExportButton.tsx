@@ -7,10 +7,12 @@ export default function ExportButton({
   endpoint,
   filenamePrefix,
   label,
+  extension = 'xlsx',
 }: {
   endpoint: string;
   filenamePrefix: string;
   label: string;
+  extension?: string;
 }) {
   const [loading, setLoading] = useState(false);
 
@@ -19,14 +21,14 @@ export default function ExportButton({
     try {
       const res = await fetch(endpoint);
       if (!res.ok) {
-        alert('No se pudo generar el Excel. Probá de nuevo.');
+        alert('No se pudo generar el archivo. Probá de nuevo.');
         return;
       }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${filenamePrefix}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.download = `${filenamePrefix}-${new Date().toISOString().slice(0, 10)}.${extension}`;
       document.body.appendChild(a);
       a.click();
       a.remove();

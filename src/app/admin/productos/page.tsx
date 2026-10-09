@@ -16,7 +16,7 @@ export default async function ProductosPage({
   let productsQuery = supabase
     .from('products')
     .select('*, category:categories(name), brand:brands(name)')
-    .order('created_at', { ascending: false })
+    .order('name')
     .range(0, 4999);
 
   if (q) {
@@ -58,6 +58,12 @@ export default async function ProductosPage({
               endpoint="/api/admin/export-products"
               filenamePrefix="behmont-productos"
               label="Descargar Excel"
+            />
+            <ExportButton
+              endpoint="/api/admin/export-products-pdf"
+              filenamePrefix="behmont-productos"
+              extension="pdf"
+              label="Descargar PDF"
             />
             <a
               href="?new=1"

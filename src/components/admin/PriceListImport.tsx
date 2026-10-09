@@ -79,9 +79,11 @@ export default function PriceListImport() {
       <div>
         <h2 className="font-display font-semibold text-steel-900">Importar lista de precios</h2>
         <p className="text-sm text-steel-500 mt-1">
-          Subí el archivo del distribuidor (.csv o .xlsx) para actualizar precio y stock por SKU.
-          Los SKU nuevos se crean sin categoría (o con la que sugiere la lista/el nombre); los que
-          ya no aparecen en la lista se desactivan automáticamente.
+          Subí el archivo del distribuidor (.csv o .xlsx), o el Excel que bajaste con &quot;Descargar
+          Excel&quot; editado con los precios/stock nuevos, para actualizar por SKU sin tener que pasar
+          por nadie más. Los SKU nuevos se crean sin categoría (o con la que sugiere la lista/el
+          nombre); <strong>los que no aparecen en el archivo se desactivan</strong> — si solo querés
+          cambiar algunos precios, subí el Excel completo con esas filas editadas, no uno recortado.
         </p>
       </div>
 

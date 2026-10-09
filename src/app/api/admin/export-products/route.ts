@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { getProductCode } from '@/lib/product-display';
 
 export async function GET() {
   const supabase = createServerSupabase();
@@ -15,18 +14,23 @@ export async function GET() {
 
   const { data: products, error } = await supabase
     .from('products')
-    .select('sku, name, specs, ml_item_id, price, stock, active, category:categories(name), brand:brands(name)')
+    .select('sku, name, price, stock, active, category:categories(name), brand:brands(name)')
     .order('name');
 
   if (error) {
     return NextResponse.json({ error: 'No se pudo leer los productos' }, { status: 500 });
   }
 
+  // SKU acá es el codigo interno real (no el "Código" amigable que a veces
+  // se arma distinto para productos de MercadoLibre) -- tiene que coincidir
+  // exacto con products.sku para que "Importar lista de precios" lo
+  // reconozca como el mismo producto al volver a subir este archivo, en vez
+  // de crear uno duplicado.
   const rows = (products || []).map((p) => {
     const category = Array.isArray(p.category) ? p.category[0] : p.category;
     const brand = Array.isArray(p.brand) ? p.brand[0] : p.brand;
     return {
-      Código: getProductCode(p) ?? p.sku,
+      SKU: p.sku,
       Nombre: p.name,
       Marca: brand?.name || '',
       Categoría: category?.name || '',
@@ -38,7 +42,7 @@ export async function GET() {
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
   worksheet['!cols'] = [
-    { wch: 16 }, // Código
+    { wch: 16 }, // SKU
     { wch: 45 }, // Nombre
     { wch: 18 }, // Marca
     { wch: 20 }, // Categoría
