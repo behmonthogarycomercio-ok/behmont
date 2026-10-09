@@ -48,6 +48,17 @@ export default async function ProductosPage({
   ]);
   const showForm = searchParams.new === '1' || !!editing;
 
+  // Orden por marca y, dentro de cada marca, por nombre -- los sin marca
+  // quedan al final en vez de mezclados alfabeticamente antes que "A...".
+  const sortedProducts = (products || []).slice().sort((a, b) => {
+    const brandA = (Array.isArray(a.brand) ? a.brand[0]?.name : a.brand?.name) || '';
+    const brandB = (Array.isArray(b.brand) ? b.brand[0]?.name : b.brand?.name) || '';
+    if (!brandA && brandB) return 1;
+    if (brandA && !brandB) return -1;
+    if (brandA !== brandB) return brandA.localeCompare(brandB, 'es');
+    return (a.name || '').localeCompare(b.name || '', 'es');
+  });
+
   return (
     <AdminShell>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -99,7 +110,7 @@ export default async function ProductosPage({
             </p>
           )}
           <PriceListImport />
-          <ProductsTable key={q || 'all'} products={products || []} />
+          <ProductsTable key={q || 'all'} products={sortedProducts} />
         </>
       )}
     </AdminShell>
