@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     .from('ml_shipments')
     .select('id, ml_order_id, status, payment_status, destino_tipo, destino_detalle, buyer_nickname, items, total, estimated_delivery_date, created_at, transportista, numeros_seguimiento, precio_asegurado')
     .in('status', ['pendiente', 'retirado', 'en_camino'])
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: 'No se pudo cargar la lista' }, { status: 500 });
