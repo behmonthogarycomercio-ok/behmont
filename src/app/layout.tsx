@@ -17,6 +17,12 @@ export const metadata: Metadata = {
   title: 'BEHMONT — Comercio y Hogar | Equipamiento comercial, hogar y electrónica',
   description:
     'Equipamientos comerciales, mueblería, hogar, electrónica y barbería en Concordia, Entre Ríos. Financiación diaria y semanal. Consultá stock y precio por WhatsApp.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BEHMONT',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

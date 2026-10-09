@@ -317,12 +317,19 @@ export default function EnviosPage() {
         </div>
 
         {pushState === 'off' && (
-          <button
-            onClick={subscribe}
-            className="w-full mb-4 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-amber-500 hover:bg-amber-400 shadow-card transition-colors"
-          >
-            <BellOff className="h-5 w-5" /> Activar avisos de nuevos envíos
-          </button>
+          <>
+            <button
+              onClick={subscribe}
+              className="w-full mb-2 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-amber-500 hover:bg-amber-400 shadow-card transition-colors"
+            >
+              <BellOff className="h-5 w-5" /> Activar avisos de nuevos envíos
+            </button>
+            <p className="mb-4 text-xs text-white/40">
+              Para que no se corten solos: en el navegador del celular, agregá esta página a la
+              pantalla de inicio (menú ⋮ o compartir → &quot;Agregar a pantalla de inicio&quot;) y
+              abrila desde ahí.
+            </p>
+          </>
         )}
         {pushState === 'on' && !soundReady && (
           <button
