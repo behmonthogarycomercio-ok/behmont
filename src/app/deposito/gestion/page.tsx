@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { DEPOSITO_STAFF, canGestionZonas, type DepositoPin } from '@/lib/deposito';
 import ZonasGestionClient from '@/components/deposito/ZonasGestionClient';
-import FotosGestionClient from '@/components/deposito/FotosGestionClient';
-import UbicacionesGestionClient from '@/components/deposito/UbicacionesGestionClient';
+import ProductoGestionClient from '@/components/deposito/ProductoGestionClient';
 import DepositoPushButton from '@/components/deposito/DepositoPushButton';
 
 type ZonaApi = { id: string; parent_id: string | null; tipo: string; codigo: string; nombre: string; active: boolean };
@@ -178,11 +177,7 @@ export default function DepositoGestionPage() {
             </div>
 
             <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
-              <UbicacionesGestionClient pin={pin} code={code} products={products} zonas={zonas} onChanged={load} />
-            </div>
-
-            <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
-              <FotosGestionClient pin={pin} code={code} products={products} onChanged={load} />
+              <ProductoGestionClient pin={pin} code={code} products={products} zonas={zonas} onChanged={load} />
             </div>
           </div>
         )}
