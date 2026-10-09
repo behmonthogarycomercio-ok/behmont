@@ -17,6 +17,7 @@ type Row = {
   ml_item_id: string | null;
   specs: { label: string; value: string }[];
   category: { name: string } | null;
+  brand: { name: string } | null;
 };
 
 export default function ProductsTable({ products }: { products: Row[] }) {
@@ -47,6 +48,7 @@ export default function ProductsTable({ products }: { products: Row[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-plate-200 text-left text-steel-500">
+            <th className="p-3 font-medium">Marca</th>
             <th className="p-3 font-medium">Producto</th>
             <th className="p-3 font-medium">Código</th>
             <th className="p-3 font-medium">Categoría</th>
@@ -59,6 +61,7 @@ export default function ProductsTable({ products }: { products: Row[] }) {
         <tbody>
           {rows.map((row) => (
             <tr key={row.id} className="border-b border-plate-100 last:border-0">
+              <td className="p-3 text-steel-600">{row.brand?.name || '—'}</td>
               <td className="p-3">
                 <div className="flex items-center gap-3">
                   <div className="relative h-10 w-10 rounded-md bg-white overflow-hidden shrink-0">
