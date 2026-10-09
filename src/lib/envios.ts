@@ -245,10 +245,11 @@ export function deriveDestino(shipment: MLShipment): DerivedDestino {
 
 /** Texto legible con todos los items de un envío y su cantidad cada uno --
  * antes solo se mostraba el título del primero + "+N más" sin aclarar
- * cuántas unidades de cada producto se vendieron. */
+ * cuántas unidades de cada producto se vendieron. La cantidad siempre se
+ * muestra (incluso "1x"), para que no haya que inferirla por ausencia. */
 export function itemsSummary(items: { title: string; quantity: number }[]): string {
   if (items.length === 0) return 'Producto';
-  return items.map((i) => (i.quantity > 1 ? `${i.quantity}x ${i.title}` : i.title)).join(' + ');
+  return items.map((i) => `${i.quantity}x ${i.title}`).join(' + ');
 }
 
 /** Resuelve el SKU propio de cada item de una orden de ML para que el
