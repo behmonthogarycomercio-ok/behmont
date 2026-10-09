@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
 import { parseTrackingNumbers } from './envios';
 import { pushToMLIfLinked } from './ml-sync';
+import { hashSecretCode } from './deposito-auth';
 
 /**
  * Resultado de una accion. Se devuelve en vez de "throw" porque Next.js oculta
@@ -605,5 +606,21 @@ export async function deleteProductLocation(id: string): Promise<ActionResult> {
   revalidatePath('/admin/depositos');
   revalidatePath('/admin/productos');
   revalidatePath('/');
+  return {};
+}
+
+/** Define o resetea el código secreto de una persona de la terminal de
+ * depósito (admin only) -- la persona lo usa después para probar que es
+ * ella, no solo un número público. */
+export async function setDepositoStaffSecret(pin: number, code: string): Promise<ActionResult> {
+  if (!code || code.trim().length < 4) {
+    return { error: 'El código debe tener al menos 4 caracteres.' };
+  }
+  const supabase = createServerSupabase();
+  const { hash, salt } = hashSecretCode(code.trim());
+  const { error } = await supabase
+    .from('deposito_staff_secrets')
+    .upsert({ pin, secret_hash: hash, secret_salt: salt, updated_at: new Date().toISOString() });
+  if (error) return { error: friendlyDbError(error) };
   return {};
 }

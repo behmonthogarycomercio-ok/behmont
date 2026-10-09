@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { zonaDeleteSchema, canGestionZonas } from '@/lib/deposito';
+import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
-// Sin login: solo PIN 1 (Gabriel). Bloquea el borrado si hay stock asignado
-// a la zona, mismo criterio que deleteZona() en actions.ts.
+// Sin login: solo PIN de Gabriel, con su código secreto. Bloquea el borrado
+// si hay stock asignado a la zona, mismo criterio que deleteZona() en
+// actions.ts.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-zonas-delete:${ip}`, 30, 3600)) {
@@ -15,13 +17,17 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { pin, id } = parsed.data;
+  const { pin, code, id } = parsed.data;
 
   if (!canGestionZonas(pin)) {
     return NextResponse.json({ error: 'No autorizado para gestionar zonas.' }, { status: 403 });
   }
 
   const supabase = createServiceSupabase();
+  if (!(await verifyDepositoCode(supabase, pin, code))) {
+    return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
+  }
+
   const { count } = await supabase
     .from('product_locations')
     .select('id', { count: 'exact', head: true })

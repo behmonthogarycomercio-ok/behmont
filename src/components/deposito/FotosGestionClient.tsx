@@ -8,10 +8,12 @@ type ProductoApi = { id: string; sku: string; name: string; images?: string[] | 
 
 export default function FotosGestionClient({
   pin,
+  code,
   products,
   onChanged,
 }: {
   pin: DepositoPin;
+  code: string;
   products: ProductoApi[];
   onChanged: () => void;
 }) {
@@ -35,6 +37,7 @@ export default function FotosGestionClient({
     try {
       const fd = new FormData();
       fd.set('pin', String(pin));
+      fd.set('code', code);
       fd.set('productId', selected.id);
       Array.from(files).forEach((f) => fd.append('files', f));
       const res = await fetch('/api/deposito/fotos', { method: 'POST', body: fd });
@@ -57,7 +60,7 @@ export default function FotosGestionClient({
     const res = await fetch('/api/deposito/fotos/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin, productId: selected.id, imageUrl }),
+      body: JSON.stringify({ pin, code, productId: selected.id, imageUrl }),
     });
     const data = await res.json();
     if (!res.ok) {

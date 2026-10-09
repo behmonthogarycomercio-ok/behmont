@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { fotoDeleteSchema, canGestionZonas } from '@/lib/deposito';
+import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
-// Sin login: solo PIN 1 (Gabriel). Saca la URL del array products.images --
-// no borra el archivo del bucket (mismo comportamiento diferido que
-// ImageUploader.tsx, que tampoco borra de storage al quitar una imagen).
+// Sin login: solo PIN de Gabriel, con su código secreto. Saca la URL del
+// array products.images -- no borra el archivo del bucket (mismo
+// comportamiento diferido que ImageUploader.tsx, que tampoco borra de
+// storage al quitar una imagen).
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-fotos-delete:${ip}`, 30, 3600)) {
@@ -16,13 +18,16 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { pin, productId, imageUrl } = parsed.data;
+  const { pin, code, productId, imageUrl } = parsed.data;
 
   if (!canGestionZonas(pin)) {
     return NextResponse.json({ error: 'No autorizado para editar fotos.' }, { status: 403 });
   }
 
   const supabase = createServiceSupabase();
+  if (!(await verifyDepositoCode(supabase, pin, code))) {
+    return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
+  }
   const { data: product } = await supabase.from('products').select('images').eq('id', productId).maybeSingle();
   if (!product) {
     return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });

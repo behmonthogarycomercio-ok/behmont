@@ -1,6 +1,8 @@
 import AdminShell from '@/components/admin/AdminShell';
 import ZonasTree from '@/components/admin/ZonasTree';
 import ProductLocationsManager from '@/components/admin/ProductLocationsManager';
+import DepositoStaffSecrets from '@/components/admin/DepositoStaffSecrets';
+import StockMovementsHistory from '@/components/admin/StockMovementsHistory';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export type Zona = {
@@ -45,6 +47,12 @@ export default async function DepositosPage() {
     .from('product_locations')
     .select('id, product_id, zona_id, quantity');
 
+  const { data: movements } = await supabase
+    .from('stock_movements')
+    .select('id, tipo, quantity, staff_name, note, created_at, zona_id, product:products(name, sku)')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
   return (
     <AdminShell>
       <h1 className="font-display text-2xl font-bold text-steel-950 mb-2">Depósitos y zonas</h1>
@@ -53,12 +61,16 @@ export default async function DepositosPage() {
         producto dónde está ubicado. Lo mismo lo puede gestionar Gabriel desde la terminal del
         depósito (sin login), en <span className="font-mono">/deposito/gestion</span>.
       </p>
+      <DepositoStaffSecrets />
       <ZonasTree zonas={(zonas as Zona[]) || []} />
       <ProductLocationsManager
         products={(products as ProductoDeposito[]) || []}
         zonas={(zonas as Zona[]) || []}
         locations={(locations as ProductLocationRow[]) || []}
       />
+      <div className="mt-8">
+        <StockMovementsHistory movements={movements || []} zonas={(zonas as Zona[]) || []} />
+      </div>
     </AdminShell>
   );
 }

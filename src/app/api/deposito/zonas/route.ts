@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { zonaWriteSchema, canGestionZonas } from '@/lib/deposito';
+import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
-// Sin login: solo PIN 1 (Gabriel) puede crear/editar zonas desde
-// /deposito/gestion. El admin hace lo mismo vía Server Action (upsertZona
-// en actions.ts) sobre la misma tabla.
+// Sin login: solo PIN 1 (Gabriel), con su código secreto, puede crear/editar
+// zonas desde /deposito/gestion. El admin hace lo mismo vía Server Action
+// (upsertZona en actions.ts) sobre la misma tabla.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-zonas:${ip}`, 60, 3600)) {
@@ -16,13 +17,17 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { pin, id, parentId, tipo, codigo, nombre, sortOrder, active } = parsed.data;
+  const { pin, code, id, parentId, tipo, codigo, nombre, sortOrder, active } = parsed.data;
 
   if (!canGestionZonas(pin)) {
     return NextResponse.json({ error: 'No autorizado para gestionar zonas.' }, { status: 403 });
   }
 
   const supabase = createServiceSupabase();
+  if (!(await verifyDepositoCode(supabase, pin, code))) {
+    return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
+  }
+
   const payload = { parent_id: parentId, tipo, codigo, nombre, sort_order: sortOrder, active };
   const { error } = id
     ? await supabase.from('zonas').update(payload).eq('id', id)

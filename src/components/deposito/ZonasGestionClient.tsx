@@ -12,7 +12,17 @@ const TIPO_LABEL: Record<string, string> = { area: 'Área', gondola: 'Góndola',
 type FormState = { codigo: string; nombre: string; sort_order: string; active: boolean };
 const EMPTY_FORM: FormState = { codigo: '', nombre: '', sort_order: '0', active: true };
 
-export default function ZonasGestionClient({ pin, zonas, onChanged }: { pin: DepositoPin; zonas: ZonaApi[]; onChanged: () => void }) {
+export default function ZonasGestionClient({
+  pin,
+  code,
+  zonas,
+  onChanged,
+}: {
+  pin: DepositoPin;
+  code: string;
+  zonas: ZonaApi[];
+  onChanged: () => void;
+}) {
   const [addingChildOf, setAddingChildOf] = useState<string | 'root' | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -58,6 +68,7 @@ export default function ZonasGestionClient({ pin, zonas, onChanged }: { pin: Dep
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pin,
+          code,
           id,
           parentId,
           tipo,
@@ -87,7 +98,7 @@ export default function ZonasGestionClient({ pin, zonas, onChanged }: { pin: Dep
     const res = await fetch('/api/deposito/zonas/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin, id }),
+      body: JSON.stringify({ pin, code, id }),
     });
     const data = await res.json();
     if (!res.ok) {

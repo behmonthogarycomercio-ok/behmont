@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { ingresoSchema, canIngreso, DEPOSITO_STAFF_LABELS } from '@/lib/deposito';
+import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 import { pushToMLIfLinked } from '@/lib/ml-sync';
 
 // Sin login: solo PIN 0 (Javier) y PIN 1 (Gabriel) pueden registrar ingreso
-// de mercadería -- el botón ya está oculto para el resto en el cliente, pero
-// la restricción real es esta, server-side.
+// de mercadería, y cada uno con su código secreto -- el botón ya está oculto
+// para el resto en el cliente, pero la restricción real es esta, server-side.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-ingreso:${ip}`, 60, 3600)) {
@@ -17,13 +18,17 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
-  const { pin, productId, zonaId, quantity, note } = parsed.data;
+  const { pin, code, productId, zonaId, quantity, note } = parsed.data;
 
   if (!canIngreso(pin)) {
     return NextResponse.json({ error: 'Este PIN no puede registrar ingresos de mercadería.' }, { status: 403 });
   }
 
   const supabase = createServiceSupabase();
+  if (!(await verifyDepositoCode(supabase, pin, code))) {
+    return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
+  }
+
   const { data, error } = await supabase.rpc('registrar_ingreso', {
     p_product_id: productId,
     p_zona_id: zonaId,

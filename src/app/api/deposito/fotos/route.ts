@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { pinSchema, canGestionZonas } from '@/lib/deposito';
+import { verifyDepositoCode } from '@/lib/deposito-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
 
-// Sin login: solo PIN 1 (Gabriel) puede subir fotos de producto desde
-// /deposito/gestion. Usa service role porque no hay sesión del navegador acá
-// (a diferencia de ImageUploader.tsx, que sí sube con la sesión del admin) --
-// el bucket product-images exige is_admin() por RLS, así que un cliente
-// anon/sin cookie no podría subir directo.
+// Sin login: solo PIN de Gabriel, con su código secreto, puede subir fotos
+// de producto desde /deposito/gestion. Usa service role porque no hay
+// sesión del navegador acá (a diferencia de ImageUploader.tsx, que sí sube
+// con la sesión del admin) -- el bucket product-images exige is_admin() por
+// RLS, así que un cliente anon/sin cookie no podría subir directo.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`deposito-fotos:${ip}`, 30, 3600)) {
@@ -16,10 +17,11 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const pinResult = pinSchema.safeParse(formData.get('pin'));
+  const code = formData.get('code');
   const productId = formData.get('productId');
   const files = formData.getAll('files').filter((f): f is File => f instanceof File);
 
-  if (!pinResult.success || typeof productId !== 'string' || files.length === 0) {
+  if (!pinResult.success || typeof code !== 'string' || code.length < 4 || typeof productId !== 'string' || files.length === 0) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
   if (!canGestionZonas(pinResult.data)) {
@@ -27,6 +29,9 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceSupabase();
+  if (!(await verifyDepositoCode(supabase, pinResult.data, code))) {
+    return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
+  }
   const { data: product } = await supabase.from('products').select('images').eq('id', productId).maybeSingle();
   if (!product) {
     return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
