@@ -6,6 +6,7 @@ import {
   getValidMLAccessToken,
 } from './mercadolibre';
 import { buildShipmentRow, mapMlShipmentStatus, STATUS_RANK, type ShipmentStatus } from './envios';
+import type { MLOrderDetail } from './mercadolibre';
 import { notifyDrivers } from './push';
 
 // Antes esto solo corría una vez al día (cron de /api/ml/sync a las 9 UTC) --
@@ -46,6 +47,15 @@ export async function maybeSyncShipments(supabase: SupabaseClient): Promise<void
   }
 }
 
+/** Resuelve el SKU propio de cada item de la orden (vía products.ml_item_id)
+ * para que el repartidor/vendedor puedan buscarlo en la terminal de depósito. */
+async function buildSkuMap(supabase: SupabaseClient, order: MLOrderDetail): Promise<Map<string, string>> {
+  const itemIds = (order.order_items || []).map((oi) => oi.item.id).filter(Boolean);
+  if (itemIds.length === 0) return new Map();
+  const { data } = await supabase.from('products').select('ml_item_id, sku').in('ml_item_id', itemIds);
+  return new Map((data || []).map((p: { ml_item_id: string; sku: string }) => [p.ml_item_id, p.sku]));
+}
+
 /** Busca ventas pagadas recientes que todavía no tengan fila en ml_shipments
  * (se perdió el webhook) y las crea. */
 export async function syncMissingShipments(
@@ -68,7 +78,8 @@ export async function syncMissingShipments(
       const detail = await fetchMLOrderDetail(order.id, accessToken);
       if (detail.status !== 'paid' || !detail.shipping?.id) continue;
       const shipment = await fetchMLShipment(detail.shipping.id, accessToken);
-      const row = buildShipmentRow(detail, shipment);
+      const skuMap = await buildSkuMap(supabase, detail);
+      const row = buildShipmentRow(detail, shipment, skuMap);
       const { error } = await supabase.from('ml_shipments').insert(row);
       if (error) {
         console.error(`[envios-sync] no se pudo guardar el envío pendiente ${order.id}:`, error);

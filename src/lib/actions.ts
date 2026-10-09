@@ -501,6 +501,7 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
   const productTitle = (formData.get('productTitle') as string)?.trim();
   if (!productTitle) return { error: 'Falta el producto' };
 
+  const sku = (formData.get('sku') as string)?.trim();
   const precioAseguradoRaw = (formData.get('precioAsegurado') as string)?.trim();
 
   const payload = {
@@ -509,7 +510,7 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
     destino_tipo: formData.get('destino_tipo') as string,
     destino_detalle: (formData.get('destino_detalle') as string) || null,
     buyer_nickname: (formData.get('buyerNickname') as string) || null,
-    items: [{ title: productTitle, quantity: 1 }],
+    items: [{ title: productTitle, quantity: 1, sku: sku || null }],
     payment_status: (formData.get('paymentStatus') as string) || 'abonado',
     transportista: (formData.get('transportista') as string)?.trim() || null,
     numeros_seguimiento: parseTrackingNumbers(formData.get('numerosSeguimiento') as string),

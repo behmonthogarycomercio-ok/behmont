@@ -13,7 +13,7 @@ type ShipmentRow = {
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
-  items: { title: string; quantity: number }[];
+  items: { title: string; quantity: number; sku?: string | null }[];
   total: number | null;
   estimated_delivery_date: string | null;
   delivered_at: string | null;
@@ -100,6 +100,7 @@ export default async function EnviosPage({
         <div className="border-t border-plate-100 p-4">
           <AdminActionForm action={createManualShipment} className="grid gap-3 sm:grid-cols-2">
             <input name="productTitle" placeholder="Producto" required className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <input name="sku" placeholder="SKU (opcional, para buscarlo en depósito)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
             <input name="buyerNickname" placeholder="Comprador (opcional)" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
             <select name="destino_tipo" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" defaultValue="domicilio">
               <option value="domicilio">Domicilio</option>
@@ -149,6 +150,7 @@ export default async function EnviosPage({
                   <tr key={r.id}>
                     <td className="px-4 py-3 text-steel-900 max-w-xs">
                       <p className="line-clamp-1">{firstTitle}{extra}</p>
+                      {r.items[0]?.sku && <p className="text-xs text-steel-400 font-mono">SKU: {r.items[0].sku}</p>}
                       {r.total != null && <p className="text-xs text-steel-400">${formatPrice(r.total)}</p>}
                     </td>
                     <td className="px-4 py-3 text-steel-600 max-w-xs">

@@ -19,6 +19,7 @@ export async function POST(request: Request) {
   }
   const {
     productTitle,
+    sku,
     buyerNickname,
     destinoTipo,
     destinoDetalle,
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     destino_tipo: destinoTipo,
     destino_detalle: formatManualDestino({ destinoDetalle, dni, contacto, email, codigoPostal }),
     buyer_nickname: buyerNickname || null,
-    items: [{ title: productTitle, quantity: 1 }],
+    items: [{ title: productTitle, quantity: 1, sku: sku || null }],
     payment_status: paymentStatus,
     transportista: transportista || null,
     numeros_seguimiento: parseTrackingNumbers(numerosSeguimiento),

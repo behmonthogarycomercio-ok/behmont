@@ -132,6 +132,7 @@ export const unsubscribeSchema = z.object({ endpoint: z.string().url() });
 
 export const manualShipmentSchema = z.object({
   productTitle: z.string().trim().min(1).max(300),
+  sku: z.string().trim().max(60).optional(),
   buyerNickname: z.string().trim().max(100).optional(),
   destinoTipo: z.enum(['domicilio', 'sucursal_andreani', 'otro']),
   destinoDetalle: z.string().trim().max(1000).optional(),
@@ -241,8 +242,15 @@ export function deriveDestino(shipment: MLShipment): DerivedDestino {
   };
 }
 
-/** Arma la fila lista para upsert en ml_shipments a partir de la orden + el envío de ML. */
-export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
+/** Arma la fila lista para upsert en ml_shipments a partir de la orden + el envío de ML.
+ * `skuByMlItemId` resuelve el SKU propio de cada item (vía products.ml_item_id) para que
+ * el repartidor/vendedor puedan buscarlo en la terminal de depósito -- opcional porque el
+ * caller puede no tener el mapeo a mano (en ese caso queda sin sku, no rompe nada). */
+export function buildShipmentRow(
+  order: MLOrderDetail,
+  shipment: MLShipment,
+  skuByMlItemId?: Map<string, string>
+) {
   const destino = deriveDestino(shipment);
   // Si el sync (webhook o cron) se enteró tarde de la venta -- ej. se perdió el
   // webhook y recién la trae el cron del día siguiente -- la fila no debe
@@ -257,7 +265,11 @@ export function buildShipmentRow(order: MLOrderDetail, shipment: MLShipment) {
     destino_tipo: destino.destinoTipo,
     destino_detalle: destino.destinoDetalle,
     buyer_nickname: order.buyer?.nickname ?? null,
-    items: (order.order_items || []).map((oi) => ({ title: oi.item.title, quantity: oi.quantity })),
+    items: (order.order_items || []).map((oi) => ({
+      title: oi.item.title,
+      quantity: oi.quantity,
+      sku: skuByMlItemId?.get(oi.item.id) ?? null,
+    })),
     total: order.total_amount,
     logistic_type: shipment.logistic_type,
     ml_status: shipment.status,

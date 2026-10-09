@@ -53,7 +53,14 @@ async function handleOrderNotification(resource: string) {
   if (existing) return; // ya está creado -- evita duplicar en reintentos del webhook
 
   const shipment = await fetchMLShipment(order.shipping.id, auth.accessToken);
-  const row = buildShipmentRow(order, shipment);
+
+  const itemIds = (order.order_items || []).map((oi) => oi.item.id).filter(Boolean);
+  const skuMap = new Map<string, string>();
+  if (itemIds.length > 0) {
+    const { data: matchingProducts } = await supabase.from('products').select('ml_item_id, sku').in('ml_item_id', itemIds);
+    for (const p of (matchingProducts || []) as { ml_item_id: string; sku: string }[]) skuMap.set(p.ml_item_id, p.sku);
+  }
+  const row = buildShipmentRow(order, shipment, skuMap);
 
   const { error } = await supabase.from('ml_shipments').insert(row);
   if (error) {

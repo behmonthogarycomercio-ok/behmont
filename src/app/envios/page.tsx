@@ -22,7 +22,7 @@ type Shipment = {
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
-  items: { title: string; quantity: number }[];
+  items: { title: string; quantity: number; sku?: string | null }[];
   total: number | null;
   estimated_delivery_date: string | null;
   created_at: string;
@@ -372,6 +372,7 @@ export default function EnviosPage() {
             });
             const firstTitle = s.items[0]?.title || 'Producto';
             const extra = s.items.length > 1 ? ` + ${s.items.length - 1} más` : '';
+            const skus = s.items.map((i) => i.sku).filter((sku): sku is string => Boolean(sku));
 
             const next = NEXT_DRIVER_STATUS[s.status];
             const isManual = s.ml_order_id < 0;
@@ -395,6 +396,9 @@ export default function EnviosPage() {
                   </span>
                 </div>
                 <p className="font-display text-xl font-bold">{firstTitle}{extra}</p>
+                {skus.length > 0 && (
+                  <p className="text-sm text-amber-300 font-mono">SKU: {skus.join(', ')}</p>
+                )}
                 {s.total != null && <p className="text-base text-white/50">${formatPrice(s.total)}</p>}
 
                 <div className="mt-4 flex items-start gap-2 text-base">

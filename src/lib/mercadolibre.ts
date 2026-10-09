@@ -229,7 +229,7 @@ export type MLOrderDetail = {
   status: string;
   date_created: string;
   buyer?: { nickname?: string; first_name?: string; last_name?: string };
-  order_items?: { item: { title: string } ; quantity: number }[];
+  order_items?: { item: { id: string; title: string } ; quantity: number }[];
   total_amount: number;
   shipping?: { id: number };
 };

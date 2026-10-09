@@ -20,7 +20,7 @@ type Shipment = {
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
   buyer_nickname: string | null;
-  items: { title: string; quantity: number }[];
+  items: { title: string; quantity: number; sku?: string | null }[];
   total: number | null;
   estimated_delivery_date: string | null;
   delivered_at: string | null;
@@ -41,6 +41,7 @@ export default function VendedorEnviosPage() {
 
   const [addedBy, setAddedBy] = useState<StaffName>('lucas');
   const [productTitle, setProductTitle] = useState('');
+  const [sku, setSku] = useState('');
   const [buyerNickname, setBuyerNickname] = useState('');
   const [destinoTipo, setDestinoTipo] = useState<'domicilio' | 'sucursal_andreani' | 'otro'>('domicilio');
   const [destinoDetalle, setDestinoDetalle] = useState('');
@@ -82,6 +83,7 @@ export default function VendedorEnviosPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productTitle: productTitle.trim(),
+          sku: sku.trim() || undefined,
           buyerNickname: buyerNickname.trim() || undefined,
           destinoTipo,
           destinoDetalle: destinoDetalle.trim() || undefined,
@@ -98,6 +100,7 @@ export default function VendedorEnviosPage() {
       });
       if (!res.ok) throw new Error();
       setProductTitle('');
+      setSku('');
       setBuyerNickname('');
       setDestinoDetalle('');
       setDni('');
@@ -161,6 +164,13 @@ export default function VendedorEnviosPage() {
               value={productTitle}
               onChange={(e) => setProductTitle(e.target.value)}
               required
+              className="rounded-lg px-3 py-2 text-steel-900"
+            />
+            <input
+              type="text"
+              placeholder="SKU (opcional, para buscarlo en depósito)"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
               className="rounded-lg px-3 py-2 text-steel-900"
             />
             <input
@@ -305,11 +315,15 @@ export default function VendedorEnviosPage() {
             });
             const firstTitle = s.items[0]?.title || 'Producto';
             const extra = s.items.length > 1 ? ` + ${s.items.length - 1} más` : '';
+            const skus = s.items.map((i) => i.sku).filter((v): v is string => Boolean(v));
 
             return (
               <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="font-display text-base font-bold">{firstTitle}{extra}</p>
+                  <div>
+                    <p className="font-display text-base font-bold">{firstTitle}{extra}</p>
+                    {skus.length > 0 && <p className="text-xs text-amber-300 font-mono">SKU: {skus.join(', ')}</p>}
+                  </div>
                   <div className="flex flex-wrap justify-end gap-1.5">
                     {retrasado && (
                       <span className="shrink-0 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold uppercase">Retrasado</span>
