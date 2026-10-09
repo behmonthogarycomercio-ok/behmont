@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { getValidMLAccessToken, fetchMLOrderDetail, fetchMLShipment } from '@/lib/mercadolibre';
-import { buildShipmentRow } from '@/lib/envios';
+import { buildShipmentRow, buildSkuMap } from '@/lib/envios';
 import { notifyDrivers } from '@/lib/push';
 
 // Configurar en developers.mercadolibre.com.ar > Notificaciones:
@@ -53,13 +53,7 @@ async function handleOrderNotification(resource: string) {
   if (existing) return; // ya está creado -- evita duplicar en reintentos del webhook
 
   const shipment = await fetchMLShipment(order.shipping.id, auth.accessToken);
-
-  const itemIds = (order.order_items || []).map((oi) => oi.item.id).filter(Boolean);
-  const skuMap = new Map<string, string>();
-  if (itemIds.length > 0) {
-    const { data: matchingProducts } = await supabase.from('products').select('ml_item_id, sku').in('ml_item_id', itemIds);
-    for (const p of (matchingProducts || []) as { ml_item_id: string; sku: string }[]) skuMap.set(p.ml_item_id, p.sku);
-  }
+  const skuMap = await buildSkuMap(supabase, order);
   const row = buildShipmentRow(order, shipment, skuMap);
 
   const { error } = await supabase.from('ml_shipments').insert(row);

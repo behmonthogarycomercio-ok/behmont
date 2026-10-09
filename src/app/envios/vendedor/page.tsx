@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Home, Package, Plus, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '@/lib/price';
-import { isRetrasado, getTrackingUrl, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
+import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 
 type StaffName = 'lucas' | 'luz' | 'lito';
 const STAFF_OPTIONS: { value: StaffName; label: string }[] = [
@@ -313,16 +313,14 @@ export default function VendedorEnviosPage() {
               created_at: s.created_at,
               estimated_delivery_date: s.estimated_delivery_date,
             });
-            const firstTitle = s.items[0]?.title || 'Producto';
-            const extra = s.items.length > 1 ? ` + ${s.items.length - 1} más` : '';
+            const productsLine = itemsSummary(s.items);
             const skus = s.items.map((i) => i.sku).filter((v): v is string => Boolean(v));
 
             return (
               <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div>
-                    <p className="font-display text-base font-bold">{firstTitle}{extra}</p>
-                    {skus.length > 0 && <p className="text-xs text-amber-300 font-mono">SKU: {skus.join(', ')}</p>}
+                    <p className="font-display text-base font-bold">{productsLine}</p>
                   </div>
                   <div className="flex flex-wrap justify-end gap-1.5">
                     {retrasado && (
@@ -340,7 +338,10 @@ export default function VendedorEnviosPage() {
                     </span>
                   </div>
                 </div>
-                {s.total != null && <p className="text-sm text-white/50 mb-2">${formatPrice(s.total)}</p>}
+                <div className="mb-2">
+                  {s.total != null && <p className="text-sm text-white/50">${formatPrice(s.total)}</p>}
+                  {skus.length > 0 && <p className="text-xs text-amber-300 font-mono">SKU: {skus.join(', ')}</p>}
+                </div>
 
                 <div className="flex items-start gap-2 text-sm">
                   {s.destino_tipo === 'domicilio' ? (

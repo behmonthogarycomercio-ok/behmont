@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { MLOrderDetail, MLShipment } from './mercadolibre';
 import { STAFF, STAFF_LABELS, staffSchema } from './turnero';
 
@@ -240,6 +241,34 @@ export function deriveDestino(shipment: MLShipment): DerivedDestino {
     destinoDetalle: shipment.receiver_address ? formatAddress(shipment.receiver_address) : null,
     estimatedDeliveryDate,
   };
+}
+
+/** Texto legible con todos los items de un envío y su cantidad cada uno --
+ * antes solo se mostraba el título del primero + "+N más" sin aclarar
+ * cuántas unidades de cada producto se vendieron. */
+export function itemsSummary(items: { title: string; quantity: number }[]): string {
+  if (items.length === 0) return 'Producto';
+  return items.map((i) => (i.quantity > 1 ? `${i.quantity}x ${i.title}` : i.title)).join(' + ');
+}
+
+/** Resuelve el SKU propio de cada item de una orden de ML para que el
+ * repartidor/vendedor puedan buscarlo en la terminal de depósito.
+ * ml_item_id quedó sin poblar en casi todo el catálogo (se perdió en algún
+ * sync viejo), así que no alcanza con matchear solo por ahí -- products.sku
+ * también sirve de match directo cuando el producto no tenía SKU propio
+ * del vendedor y el sync de ML usó el item.id de MercadoLibre como sku
+ * (ver payload.sku en /api/ml/sync). */
+export async function buildSkuMap(supabase: SupabaseClient, order: MLOrderDetail): Promise<Map<string, string>> {
+  const itemIds = (order.order_items || []).map((oi) => oi.item.id).filter(Boolean);
+  if (itemIds.length === 0) return new Map();
+  const map = new Map<string, string>();
+  const [byMlItemId, bySku] = await Promise.all([
+    supabase.from('products').select('ml_item_id, sku').in('ml_item_id', itemIds),
+    supabase.from('products').select('sku').in('sku', itemIds),
+  ]);
+  for (const p of (byMlItemId.data || []) as { ml_item_id: string; sku: string }[]) map.set(p.ml_item_id, p.sku);
+  for (const p of (bySku.data || []) as { sku: string }[]) map.set(p.sku, p.sku);
+  return map;
 }
 
 /** Arma la fila lista para upsert en ml_shipments a partir de la orden + el envío de ML.

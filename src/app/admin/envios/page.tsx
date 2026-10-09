@@ -2,7 +2,7 @@ import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { updateShipmentStatus, updateShipmentPayment, createManualShipment, updateShipmentTracking } from '@/lib/actions';
-import { isRetrasado, getTrackingUrl, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
+import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus } from 'lucide-react';
 
@@ -144,14 +144,13 @@ export default async function EnviosPage({
             <tbody className="divide-y divide-plate-100">
               {filtered.map((r) => {
                 const Icon = DESTINO_ICON[r.destino_tipo];
-                const firstTitle = r.items[0]?.title || 'Producto';
-                const extra = r.items.length > 1 ? ` + ${r.items.length - 1} más` : '';
+                const productsLine = itemsSummary(r.items);
                 return (
                   <tr key={r.id}>
                     <td className="px-4 py-3 text-steel-900 max-w-xs">
-                      <p className="line-clamp-1">{firstTitle}{extra}</p>
-                      {r.items[0]?.sku && <p className="text-xs text-steel-400 font-mono">SKU: {r.items[0].sku}</p>}
+                      <p className="line-clamp-1">{productsLine}</p>
                       {r.total != null && <p className="text-xs text-steel-400">${formatPrice(r.total)}</p>}
+                      {r.items[0]?.sku && <p className="text-xs text-steel-400 font-mono">SKU: {r.items[0].sku}</p>}
                     </td>
                     <td className="px-4 py-3 text-steel-600 max-w-xs">
                       <div className="flex items-start gap-1.5">
