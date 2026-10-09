@@ -24,6 +24,9 @@ export async function POST(request: Request) {
   if (!canIngreso(pin)) {
     return NextResponse.json({ error: 'Este PIN no puede registrar ingresos de mercadería.' }, { status: 403 });
   }
+  if (!zonaId) {
+    return NextResponse.json({ error: 'Elegí una zona para el ingreso.' }, { status: 400 });
+  }
 
   const supabase = createServiceSupabase();
   if (!(await verifyDepositoCode(supabase, pin, code))) {

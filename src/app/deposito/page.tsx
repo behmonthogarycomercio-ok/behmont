@@ -49,6 +49,7 @@ export default function DepositoPage() {
   const [q, setQ] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [retirarQty, setRetirarQty] = useState<Record<string, string>>({});
+  const [retirarSinUbicacionQty, setRetirarSinUbicacionQty] = useState('1');
   const [ingresoZonaId, setIngresoZonaId] = useState('');
   const [ingresoQty, setIngresoQty] = useState('1');
   const [busy, setBusy] = useState(false);
@@ -143,6 +144,33 @@ export default function DepositoPage() {
         return;
       }
       setMessage(`Retirado ${quantity}. Quedan ${data.newQuantity} en esa zona.`);
+      await load();
+    } catch {
+      setMessage('No se pudo retirar. Probá de nuevo.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function retirarSinUbicacion() {
+    if (pin === null || !selected) return;
+    const quantity = Number(retirarSinUbicacionQty || '1');
+    if (!quantity || quantity <= 0) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/deposito/retirar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin, code, productId: selected.id, quantity }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.error || 'No se pudo retirar');
+        return;
+      }
+      setMessage(`Retirado ${quantity}. Stock general: ${data.newStock}.`);
+      setRetirarSinUbicacionQty('1');
       await load();
     } catch {
       setMessage('No se pudo retirar. Probá de nuevo.');
@@ -331,7 +359,31 @@ export default function DepositoPage() {
                         );
                       })}
                       {selected.product_locations.length === 0 && (
-                        <p className="text-sm text-white/40">Sin ubicaciones asignadas todavía.</p>
+                        <div className="rounded-lg bg-steel-800 px-3 py-2">
+                          <p className="text-sm text-white/40 mb-2">Sin ubicaciones asignadas todavía.</p>
+                          {localOnly ? (
+                            <p className="text-xs text-amber-300">
+                              No tiene ubicación en el salón. Pedile a depósito que lo retire.
+                            </p>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min={1}
+                                value={retirarSinUbicacionQty}
+                                onChange={(e) => setRetirarSinUbicacionQty(e.target.value)}
+                                className="w-16 rounded px-2 py-1 text-steel-900 text-sm"
+                              />
+                              <button
+                                onClick={retirarSinUbicacion}
+                                disabled={busy}
+                                className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
+                              >
+                                Retirar del stock general
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
 

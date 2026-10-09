@@ -30,21 +30,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Código incorrecto.' }, { status: 401 });
   }
 
-  if (isLocalOnly(pin)) {
+  // Sin zona (producto todavía no ubicado): Lucas/Luz/Lito no pueden tocarlo
+  // porque no hay forma de confirmar que está en el salón -- lo retira
+  // alguien de depósito.
+  if (!zonaId && isLocalOnly(pin)) {
+    return NextResponse.json(
+      { error: 'Este producto no tiene ubicación cargada en el salón. Pedile a depósito que lo retire.' },
+      { status: 403 }
+    );
+  }
+
+  if (zonaId && isLocalOnly(pin)) {
     const { data: rootCodigo } = await supabase.rpc('zona_root_codigo', { p_zona_id: zonaId });
     if (rootCodigo !== LOCAL_ZONA_CODIGO) {
       return NextResponse.json({ error: 'Solo podés retirar del salón.' }, { status: 403 });
     }
   }
 
-  const { data, error } = await supabase.rpc('registrar_retiro', {
-    p_product_id: productId,
-    p_zona_id: zonaId,
-    p_quantity: quantity,
-    p_staff_pin: pin,
-    p_staff_name: DEPOSITO_STAFF_LABELS[pin],
-    p_note: note ?? null,
-  });
+  const { data, error } = zonaId
+    ? await supabase.rpc('registrar_retiro', {
+        p_product_id: productId,
+        p_zona_id: zonaId,
+        p_quantity: quantity,
+        p_staff_pin: pin,
+        p_staff_name: DEPOSITO_STAFF_LABELS[pin],
+        p_note: note ?? null,
+      })
+    : await supabase.rpc('registrar_retiro_sin_ubicacion', {
+        p_product_id: productId,
+        p_quantity: quantity,
+        p_staff_pin: pin,
+        p_staff_name: DEPOSITO_STAFF_LABELS[pin],
+        p_note: note ?? null,
+      });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

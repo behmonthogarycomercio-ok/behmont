@@ -58,7 +58,9 @@ export const retiroSchema = z.object({
   pin: pinSchema,
   code: secretCodeSchema,
   productId: z.string().uuid(),
-  zonaId: z.string().uuid(),
+  // Ausente = producto sin ubicación cargada todavía -- descuenta el stock
+  // general en vez de una zona puntual (ver registrar_retiro_sin_ubicacion).
+  zonaId: z.string().uuid().optional(),
   quantity: z.coerce.number().int().positive(),
   note: z.string().max(280).optional(),
 });
