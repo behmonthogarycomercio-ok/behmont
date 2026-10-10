@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { DEPOSITO_STAFF, canIngreso, isLocalOnly, LOCAL_ZONA_CODIGO, type DepositoPin } from '@/lib/deposito';
+import { DEPOSITO_STAFF, canIngreso, type DepositoPin } from '@/lib/deposito';
 
 type ZonaApi = { id: string; parent_id: string | null; tipo: string; codigo: string; nombre: string; active: boolean };
 type LocationApi = { id: string; zona_id: string; quantity: number };
@@ -23,15 +23,6 @@ function zonaPath(zonaId: string, zonasById: Map<string, ZonaApi>): string {
     current = current.parent_id ? zonasById.get(current.parent_id) : undefined;
   }
   return parts.join(' › ') || 'Zona eliminada';
-}
-
-function zonaRootCodigo(zonaId: string, zonasById: Map<string, ZonaApi>): string | null {
-  let current = zonasById.get(zonaId);
-  while (current) {
-    if (current.tipo === 'area') return current.codigo;
-    current = current.parent_id ? zonasById.get(current.parent_id) : undefined;
-  }
-  return null;
 }
 
 export default function DepositoPage() {
@@ -207,8 +198,6 @@ export default function DepositoPage() {
     }
   }
 
-  const localOnly = pin !== null && isLocalOnly(pin);
-
   return (
     <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-3xl">
@@ -325,64 +314,46 @@ export default function DepositoPage() {
                     <p className="text-xs text-white/40 font-mono mb-4">{selected.sku} — stock total {selected.stock}</p>
 
                     <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Ubicaciones</p>
-                    {localOnly && (
-                      <p className="text-xs text-amber-300 mb-2">Solo podés retirar del salón.</p>
-                    )}
                     <div className="flex flex-col gap-2 mb-4">
-                      {selected.product_locations.map((loc) => {
-                        const blocked = localOnly && zonaRootCodigo(loc.zona_id, zonasById) !== LOCAL_ZONA_CODIGO;
-                        return (
-                          <div key={loc.id} className="flex items-center gap-2 rounded-lg bg-steel-800 px-3 py-2">
-                            <span className="flex-1 text-sm">{zonaPath(loc.zona_id, zonasById)}</span>
-                            <span className="text-sm text-white/60">{loc.quantity} u.</span>
-                            {blocked ? (
-                              <span className="text-xs text-white/30 px-3 py-1.5">No disponible</span>
-                            ) : (
-                              <>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  value={retirarQty[loc.id] ?? '1'}
-                                  onChange={(e) => setRetirarQty((prev) => ({ ...prev, [loc.id]: e.target.value }))}
-                                  className="w-16 rounded px-2 py-1 text-steel-900 text-sm"
-                                />
-                                <button
-                                  onClick={() => retirar(loc.id, loc.zona_id)}
-                                  disabled={busy}
-                                  className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
-                                >
-                                  Retirar
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {selected.product_locations.map((loc) => (
+                        <div key={loc.id} className="flex items-center gap-2 rounded-lg bg-steel-800 px-3 py-2">
+                          <span className="flex-1 text-sm">{zonaPath(loc.zona_id, zonasById)}</span>
+                          <span className="text-sm text-white/60">{loc.quantity} u.</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={retirarQty[loc.id] ?? '1'}
+                            onChange={(e) => setRetirarQty((prev) => ({ ...prev, [loc.id]: e.target.value }))}
+                            className="w-16 rounded px-2 py-1 text-steel-900 text-sm"
+                          />
+                          <button
+                            onClick={() => retirar(loc.id, loc.zona_id)}
+                            disabled={busy}
+                            className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
+                          >
+                            Retirar
+                          </button>
+                        </div>
+                      ))}
                       {selected.product_locations.length === 0 && (
                         <div className="rounded-lg bg-steel-800 px-3 py-2">
                           <p className="text-sm text-white/40 mb-2">Sin ubicaciones asignadas todavía.</p>
-                          {localOnly ? (
-                            <p className="text-xs text-amber-300">
-                              No tiene ubicación en el salón. Pedile a depósito que lo retire.
-                            </p>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
-                                min={1}
-                                value={retirarSinUbicacionQty}
-                                onChange={(e) => setRetirarSinUbicacionQty(e.target.value)}
-                                className="w-16 rounded px-2 py-1 text-steel-900 text-sm"
-                              />
-                              <button
-                                onClick={retirarSinUbicacion}
-                                disabled={busy}
-                                className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
-                              >
-                                Retirar del stock general
-                              </button>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={1}
+                              value={retirarSinUbicacionQty}
+                              onChange={(e) => setRetirarSinUbicacionQty(e.target.value)}
+                              className="w-16 rounded px-2 py-1 text-steel-900 text-sm"
+                            />
+                            <button
+                              onClick={retirarSinUbicacion}
+                              disabled={busy}
+                              className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
+                            >
+                              Retirar del stock general
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>

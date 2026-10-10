@@ -32,15 +32,9 @@ export const pinSchema = z.coerce
 export const INGRESO_PINS: readonly DepositoPin[] = [0];
 // Unico PIN con acceso a gestion de zonas y carga de fotos de producto.
 export const GESTION_PIN: DepositoPin = 0;
-// Lucas/Luz/Lito son del local (vendedores), no del depósito físico -- solo
-// pueden retirar stock de la zona "salon" (exhibición), nunca de Depósito
-// Chile ni 4to Piso.
-export const LOCAL_ONLY_PINS: readonly DepositoPin[] = [3, 4, 5];
-export const LOCAL_ZONA_CODIGO = 'salon';
 
 export const canIngreso = (pin: DepositoPin) => INGRESO_PINS.includes(pin);
 export const canGestionZonas = (pin: DepositoPin) => pin === GESTION_PIN;
-export const isLocalOnly = (pin: DepositoPin) => LOCAL_ONLY_PINS.includes(pin);
 
 export const zonaTipoSchema = z.enum(['area', 'gondola', 'estante', 'division']);
 
