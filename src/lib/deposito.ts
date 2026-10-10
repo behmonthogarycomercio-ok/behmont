@@ -36,12 +36,17 @@ export const GESTION_PIN: DepositoPin = 0;
 export const canIngreso = (pin: DepositoPin) => INGRESO_PINS.includes(pin);
 export const canGestionZonas = (pin: DepositoPin) => pin === GESTION_PIN;
 
+// PINs habilitados para cargar preventas (ver src/lib/preventas.ts):
+// Gabriel/Lucas/Luz/Lito. NO Alejandro (supervisor de cobradores) ni Facundo.
+export const PREVENTA_VENDEDOR_PINS: readonly DepositoPin[] = [0, 3, 4, 5];
+export const canVenderPreventa = (pin: DepositoPin) => PREVENTA_VENDEDOR_PINS.includes(pin);
+
 export const zonaTipoSchema = z.enum(['area', 'gondola', 'estante', 'division']);
 
 // Código secreto personal (distinto del PIN público 0-3) que prueba que
 // quien hace la acción realmente es esa persona -- se exige y se verifica
 // server-side en cada escritura, no solo al entrar a la terminal.
-const secretCodeSchema = z.string().trim().min(4).max(20);
+export const secretCodeSchema = z.string().trim().min(4).max(20);
 
 export const authSchema = z.object({
   pin: pinSchema,

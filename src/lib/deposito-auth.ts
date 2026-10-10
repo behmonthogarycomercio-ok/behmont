@@ -9,7 +9,7 @@ export function hashSecretCode(code: string): { hash: string; salt: string } {
   return { hash, salt };
 }
 
-function matchesHash(code: string, hash: string, salt: string): boolean {
+export function matchesHash(code: string, hash: string, salt: string): boolean {
   const candidate = scryptSync(code, salt, 64);
   const stored = Buffer.from(hash, 'hex');
   if (candidate.length !== stored.length) return false;

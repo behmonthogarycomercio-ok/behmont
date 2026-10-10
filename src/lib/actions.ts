@@ -5,6 +5,8 @@ import { createServerSupabase } from './supabase/server';
 import { parseTrackingNumbers } from './envios';
 import { pushToMLIfLinked } from './ml-sync';
 import { hashSecretCode } from './deposito-auth';
+import { notifyCobrador } from './push';
+import { COBRADOR_LABELS, type CobradorPin } from './preventas';
 
 /**
  * Resultado de una accion. Se devuelve en vez de "throw" porque Next.js oculta
@@ -623,5 +625,75 @@ export async function setDepositoStaffSecret(pin: number, code: string): Promise
     .from('deposito_staff_secrets')
     .upsert({ pin, secret_hash: hash, secret_salt: salt, updated_at: new Date().toISOString() });
   if (error) return { error: friendlyDbError(error) };
+  return {};
+}
+
+/** Define o resetea el código secreto de un cobrador (admin only) -- mismo
+ * mecanismo que setDepositoStaffSecret, tabla distinta. */
+export async function setCobradorStaffSecret(pin: number, code: string): Promise<ActionResult> {
+  if (!code || code.trim().length < 4) {
+    return { error: 'El código debe tener al menos 4 caracteres.' };
+  }
+  const supabase = createServerSupabase();
+  const { hash, salt } = hashSecretCode(code.trim());
+  const { error } = await supabase
+    .from('cobrador_staff_secrets')
+    .upsert({ pin, secret_hash: hash, secret_salt: salt, updated_at: new Date().toISOString() });
+  if (error) return { error: friendlyDbError(error) };
+  return {};
+}
+
+/** Gabriel (gerente, admin real) confirma que recibió la documentación
+ * física de una preventa (DNI, comprobante de domicilio, proveedor -- todo
+ * en papel, nada se sube acá) o la rechaza con un motivo (ej. "está en el
+ * Veraz"). La fecha de esta confirmación es la que arranca las 48hs del
+ * cobrador -- por eso se graba gabriel_revisado_at acá, no en la carga de
+ * la preventa. */
+export async function reviewPreventaDocumentacion(
+  id: string,
+  decision: 'ok' | 'rechazar',
+  motivo?: string
+): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+
+  if (decision === 'rechazar') {
+    if (!motivo || !motivo.trim()) {
+      return { error: 'El motivo de rechazo es obligatorio.' };
+    }
+    const result = await updateChecked(
+      supabase,
+      'preventas',
+      { status: 'rechazada_gabriel', gabriel_motivo_rechazo: motivo.trim() },
+      'id',
+      id
+    );
+    if (result.error) return result;
+    revalidatePath('/admin/envios');
+    return {};
+  }
+
+  const { data: preventa } = await supabase
+    .from('preventas')
+    .select('cobrador_pin, cobrador_nombre, cliente_nombre')
+    .eq('id', id)
+    .maybeSingle();
+  if (!preventa) return { error: 'No se encontró la preventa.' };
+
+  const result = await updateChecked(
+    supabase,
+    'preventas',
+    { status: 'pendiente_cobrador', gabriel_revisado_at: new Date().toISOString() },
+    'id',
+    id
+  );
+  if (result.error) return result;
+
+  await notifyCobrador(preventa.cobrador_pin, {
+    title: '📋 Nueva preventa para controlar',
+    body: `${preventa.cliente_nombre} te espera -- tenés 48hs para controlar el local`,
+    url: `/ventas/cobrador/${COBRADOR_LABELS[preventa.cobrador_pin as CobradorPin]?.toLowerCase()}`,
+  });
+
+  revalidatePath('/admin/envios');
   return {};
 }
