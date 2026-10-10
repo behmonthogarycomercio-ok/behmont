@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   const { data: current } = await supabase
     .from('ml_shipments')
-    .select('status, payment_status, items')
+    .select('status, payment_status, items, ml_order_id')
     .eq('id', id)
     .maybeSingle();
 
@@ -55,10 +55,15 @@ export async function POST(request: Request) {
   // paso del envío con el stock de verdad, que antes quedaban
   // desincronizados hasta que alguien lo retiraba a mano en /deposito. Solo
   // la primera vez que pasa a "retirado" (evita descontar de nuevo si el
-  // request se repite). Best-effort: si un item no tiene SKU resoluble o no
-  // hay stock suficiente, no bloquea el cambio de estado -- queda para
-  // ajuste manual en /admin/depositos.
-  if (status === 'retirado' && current?.status !== 'retirado') {
+  // request se repite), y SOLO para cargas manuales (ml_order_id < 0): una
+  // venta real de MercadoLibre ya le descontó el stock a la publicación en
+  // ML apenas se aprobó -- no cuando se retira físicamente -- y ese número
+  // ya bajado lo trae el sync diario del catálogo a products.stock. Si acá
+  // también descontáramos al marcar "retirado", quedaría descontado dos
+  // veces para ventas de ML en cuanto el sync ya haya corrido. Para las
+  // cargas manuales (ventas fuera de ML) no existe ningún otro mecanismo
+  // que descuente el stock, así que ahí sí hace falta.
+  if (status === 'retirado' && current?.status !== 'retirado' && (current?.ml_order_id ?? 0) < 0) {
     const items = (current?.items || []) as { title: string; quantity: number; sku?: string | null }[];
     for (const item of items) {
       if (!item.sku) continue;
