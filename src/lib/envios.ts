@@ -253,6 +253,20 @@ export function itemsSummary(items: { title: string; quantity: number }[]): stri
   return items.map((i) => `${i.quantity}x ${i.title}`).join(' + ');
 }
 
+/** Encuentra el producto dueño de un SKU mostrado en un envío -- getProductCode()
+ * pudo haber tomado el código de specs.SKU o de products.sku, así que hay
+ * que buscar en los dos lugares para volver de código a producto. */
+export async function resolveProductIdBySku(supabase: SupabaseClient, sku: string): Promise<string | null> {
+  const { data: bySku } = await supabase.from('products').select('id').eq('sku', sku).maybeSingle();
+  if (bySku) return bySku.id;
+  const { data: bySpec } = await supabase
+    .from('products')
+    .select('id')
+    .contains('specs', [{ label: 'SKU', value: sku }])
+    .maybeSingle();
+  return bySpec?.id ?? null;
+}
+
 /** Resuelve el SKU propio de cada item de una orden de ML para que el
  * repartidor/vendedor puedan buscarlo en la terminal de depósito.
  * ml_item_id quedó sin poblar en casi todo el catálogo (se perdió en algún
