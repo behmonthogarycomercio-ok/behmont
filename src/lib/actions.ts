@@ -190,7 +190,7 @@ export async function upsertCategory(formData: FormData): Promise<ActionResult> 
     if (error) return { error: friendlyDbError(error) };
   }
 
-  revalidatePath('/admin/categorias');
+  revalidatePath('/admin/productos');
   revalidatePath('/');
   return {};
 }
@@ -199,7 +199,7 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('categories').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/categorias');
+  revalidatePath('/admin/productos');
   revalidatePath('/');
   return {};
 }

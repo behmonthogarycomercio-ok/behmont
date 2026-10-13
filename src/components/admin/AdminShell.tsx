@@ -7,7 +7,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
-  FolderTree,
   Megaphone,
   Tag,
   Ticket,
@@ -27,8 +26,7 @@ const NAV = [
   { href: '/admin/dashboard',   label: 'Inicio',               icon: LayoutDashboard },
   { href: '/admin/envios',      label: 'Envíos y pedidos',      icon: Truck },
   { href: '/admin/turnero',     label: 'Turnero',               icon: Users },
-  { href: '/admin/productos',   label: 'Productos',             icon: Package },
-  { href: '/admin/categorias',  label: 'Categorías',            icon: FolderTree },
+  { href: '/admin/productos',   label: 'Productos y categorías', icon: Package },
   { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
   { href: '/admin/cupones',     label: 'Cupones',               icon: Ticket },
   { href: '/admin/depositos',   label: 'Depósitos',             icon: Warehouse },

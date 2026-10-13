@@ -82,7 +82,7 @@ export default async function DashboardPage() {
 
   const stats = [
     { label: 'Productos', value: productCount || 0, icon: Package, href: '/admin/productos' },
-    { label: 'Categorías', value: categoryCount || 0, icon: FolderTree, href: '/admin/categorias' },
+    { label: 'Categorías', value: categoryCount || 0, icon: FolderTree, href: '/admin/productos?tab=categorias' },
     { label: 'Pedidos por WhatsApp', value: orderCount || 0, icon: MessageSquareText, href: '/admin/envios?tab=pedidos' },
     { label: 'Envíos pendientes', value: shipmentCount || 0, icon: Truck, href: '/admin/envios' },
     { label: 'Preventas pendientes', value: preventaCount || 0, icon: FileCheck, href: '/admin/envios' },
