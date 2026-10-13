@@ -295,6 +295,53 @@ export async function buildSkuMap(supabase: SupabaseClient, order: MLOrderDetail
   return map;
 }
 
+type ShipmentRow = {
+  ml_order_id: number;
+  ml_shipment_id: string | null;
+  destino_tipo: DerivedDestino['destinoTipo'];
+  destino_detalle: string | null;
+  buyer_nickname: string | null;
+  items: { title: string; quantity: number; sku: string | null }[];
+  total: number;
+  logistic_type: string | null;
+  ml_status: string | null;
+  transportista: string | null;
+  numeros_seguimiento: string[];
+  estimated_delivery_date: string | null;
+  payment_status: PaymentStatus;
+  created_at: string;
+  status?: ShipmentStatus;
+};
+
+/** Arma la fila para una venta de ML sin envío (tag "no_shipping", `shipping.id`
+ * null) -- el típico "a acordar con el comprador": ML no genera shipment porque
+ * el vendedor coordina la entrega por fuera (mensajería, en el local, etc.). No
+ * hay logistic_type ni dirección que derivar, así que esto no pasa por
+ * deriveDestino() como las demás -- el repartidor/vendedor ve la orden igual,
+ * con el aviso de que hay que contactar al comprador. */
+export function buildNoShippingRow(order: MLOrderDetail, skuByMlItemId?: Map<string, string>): ShipmentRow {
+  return {
+    ml_order_id: order.id,
+    ml_shipment_id: null,
+    destino_tipo: 'otro',
+    destino_detalle: 'A acordar con el comprador (venta sin envío de ML) — coordinar por mensajes',
+    buyer_nickname: order.buyer?.nickname ?? null,
+    items: (order.order_items || []).map((oi) => ({
+      title: oi.item.title,
+      quantity: oi.quantity,
+      sku: skuByMlItemId?.get(oi.item.id) ?? null,
+    })),
+    total: order.total_amount,
+    logistic_type: 'no_shipping',
+    ml_status: null,
+    transportista: null,
+    numeros_seguimiento: [],
+    estimated_delivery_date: null,
+    payment_status: 'abonado',
+    created_at: order.date_created,
+  };
+}
+
 /** Arma la fila lista para upsert en ml_shipments a partir de la orden + el envío de ML.
  * `skuByMlItemId` resuelve el SKU propio de cada item (vía products.ml_item_id) para que
  * el repartidor/vendedor puedan buscarlo en la terminal de depósito -- opcional porque el
@@ -303,7 +350,7 @@ export function buildShipmentRow(
   order: MLOrderDetail,
   shipment: MLShipment,
   skuByMlItemId?: Map<string, string>
-) {
+): ShipmentRow {
   const destino = deriveDestino(shipment);
   // Si el sync (webhook o cron) se enteró tarde de la venta -- ej. se perdió el
   // webhook y recién la trae el cron del día siguiente -- la fila no debe

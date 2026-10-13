@@ -5,7 +5,14 @@ import {
   fetchMLShipment,
   getValidMLAccessToken,
 } from './mercadolibre';
-import { buildShipmentRow, buildSkuMap, mapMlShipmentStatus, STATUS_RANK, type ShipmentStatus } from './envios';
+import {
+  buildShipmentRow,
+  buildNoShippingRow,
+  buildSkuMap,
+  mapMlShipmentStatus,
+  STATUS_RANK,
+  type ShipmentStatus,
+} from './envios';
 import { notifyDrivers } from './push';
 
 // Antes esto solo corría una vez al día (cron de /api/ml/sync a las 9 UTC) --
@@ -66,10 +73,13 @@ export async function syncMissingShipments(
     if (existingIds.has(order.id)) continue;
     try {
       const detail = await fetchMLOrderDetail(order.id, accessToken);
-      if (detail.status !== 'paid' || !detail.shipping?.id) continue;
-      const shipment = await fetchMLShipment(detail.shipping.id, accessToken);
+      if (detail.status !== 'paid') continue;
       const skuMap = await buildSkuMap(supabase, detail);
-      const row = buildShipmentRow(detail, shipment, skuMap);
+      // Ventas "a acordar con el comprador" (ML no genera shipment, shipping.id
+      // queda null) igual deben verse en /envios -- antes se perdían acá.
+      const row = detail.shipping?.id
+        ? buildShipmentRow(detail, await fetchMLShipment(detail.shipping.id, accessToken), skuMap)
+        : buildNoShippingRow(detail, skuMap);
       const { error } = await supabase.from('ml_shipments').insert(row);
       if (error) {
         console.error(`[envios-sync] no se pudo guardar el envío pendiente ${order.id}:`, error);

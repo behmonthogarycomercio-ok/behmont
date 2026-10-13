@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceSupabase } from '@/lib/supabase/server';
 import { getValidMLAccessToken, fetchMLOrderDetail, fetchMLShipment } from '@/lib/mercadolibre';
-import { buildShipmentRow, buildSkuMap } from '@/lib/envios';
+import { buildShipmentRow, buildNoShippingRow, buildSkuMap } from '@/lib/envios';
 import { notifyDrivers } from '@/lib/push';
 
 // Configurar en developers.mercadolibre.com.ar > Notificaciones:
@@ -42,7 +42,7 @@ async function handleOrderNotification(resource: string) {
   if (!auth) return;
 
   const order = await fetchMLOrderDetail(orderId, auth.accessToken);
-  if (order.status !== 'paid' || !order.shipping?.id) return;
+  if (order.status !== 'paid') return;
 
   const supabase = createServiceSupabase();
   const { data: existing } = await supabase
@@ -52,9 +52,12 @@ async function handleOrderNotification(resource: string) {
     .maybeSingle();
   if (existing) return; // ya está creado -- evita duplicar en reintentos del webhook
 
-  const shipment = await fetchMLShipment(order.shipping.id, auth.accessToken);
   const skuMap = await buildSkuMap(supabase, order);
-  const row = buildShipmentRow(order, shipment, skuMap);
+  // Ventas "a acordar con el comprador" (ML no genera shipment, shipping.id
+  // queda null) igual deben verse en /envios -- antes se descartaban acá.
+  const row = order.shipping?.id
+    ? buildShipmentRow(order, await fetchMLShipment(order.shipping.id, auth.accessToken), skuMap)
+    : buildNoShippingRow(order, skuMap);
 
   const { error } = await supabase.from('ml_shipments').insert(row);
   if (error) {
