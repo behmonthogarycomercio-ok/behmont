@@ -110,36 +110,36 @@ export default function ZonasGestionClient({
 
   function renderForm(parentId: string | null, tipo: string, id?: string) {
     return (
-      <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg bg-steel-800 p-3">
+      <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg bg-steel-50 border border-steel-200 p-3">
         <div>
-          <label className="block text-[11px] font-semibold text-white/50">Código</label>
+          <label className="block text-[11px] font-semibold text-steel-500">Código</label>
           <input
             value={form.codigo}
             onChange={(e) => setForm((f) => ({ ...f, codigo: e.target.value }))}
             placeholder="ej. 1, a, A1"
-            className="w-24 rounded px-2 py-1 text-sm text-steel-900"
+            className="w-24 rounded border border-steel-200 px-2 py-1 text-sm text-steel-900"
           />
         </div>
         <div>
-          <label className="block text-[11px] font-semibold text-white/50">Nombre</label>
+          <label className="block text-[11px] font-semibold text-steel-500">Nombre</label>
           <input
             value={form.nombre}
             onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
             placeholder={`ej. ${TIPO_LABEL[tipo]} 1`}
-            className="w-44 rounded px-2 py-1 text-sm text-steel-900"
+            className="w-44 rounded border border-steel-200 px-2 py-1 text-sm text-steel-900"
           />
         </div>
         <button
           onClick={() => submit(parentId, tipo, id)}
           disabled={pending || !form.codigo.trim() || !form.nombre.trim()}
-          className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
+          className="rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 px-3 py-1.5 text-xs font-semibold text-white"
         >
           {pending ? 'Guardando…' : 'Guardar'}
         </button>
-        <button onClick={cancel} className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/70">
+        <button onClick={cancel} className="rounded-lg border border-steel-300 px-3 py-1.5 text-xs font-semibold text-steel-600">
           Cancelar
         </button>
-        {error && <span className="w-full text-xs font-medium text-red-400">{error}</span>}
+        {error && <span className="w-full text-xs font-medium text-red-600">{error}</span>}
       </div>
     );
   }
@@ -150,25 +150,25 @@ export default function ZonasGestionClient({
     return (
       <li key={z.id} className="mt-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-white/40 w-16 shrink-0">{TIPO_LABEL[z.tipo]}</span>
-          <span className={`font-medium ${!z.active ? 'opacity-40 line-through' : ''}`}>{z.nombre}</span>
-          <span className="text-xs text-white/40 font-mono">({z.codigo})</span>
-          <button onClick={() => startEdit(z)} className="text-xs font-semibold text-amber-400 underline">
+          <span className="text-xs text-steel-400 w-16 shrink-0">{TIPO_LABEL[z.tipo]}</span>
+          <span className={`font-medium text-steel-900 ${!z.active ? 'opacity-40 line-through' : ''}`}>{z.nombre}</span>
+          <span className="text-xs text-steel-400 font-mono">({z.codigo})</span>
+          <button onClick={() => startEdit(z)} className="text-xs font-semibold text-steel-600 underline">
             Editar
           </button>
           {childTipo && (
-            <button onClick={() => startAdd(z.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:underline">
+            <button onClick={() => startAdd(z.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-steel-600 hover:underline">
               <Plus className="h-3 w-3" /> {TIPO_LABEL[childTipo]}
             </button>
           )}
-          <button onClick={() => remove(z.id)} className="text-xs font-semibold text-white/40 hover:text-red-400">
+          <button onClick={() => remove(z.id)} className="text-xs font-semibold text-steel-400 hover:text-red-600">
             Eliminar
           </button>
         </div>
         {editingId === z.id && renderForm(z.parent_id, z.tipo, z.id)}
         {addingChildOf === z.id && childTipo && renderForm(z.id, childTipo)}
         {children.length > 0 && (
-          <ul className="ml-6 border-l border-white/10 pl-4 mt-1">{children.map((c) => renderNode(c))}</ul>
+          <ul className="ml-6 border-l border-steel-200 pl-4 mt-1">{children.map((c) => renderNode(c))}</ul>
         )}
       </li>
     );
@@ -179,14 +179,14 @@ export default function ZonasGestionClient({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs uppercase tracking-wide text-white/40">Zonas</p>
-        <button onClick={() => startAdd('root')} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:underline">
+        <p className="text-xs uppercase tracking-wide text-steel-400">Zonas</p>
+        <button onClick={() => startAdd('root')} className="inline-flex items-center gap-1 text-xs font-semibold text-steel-600 hover:underline">
           <Plus className="h-3 w-3" /> Nueva área
         </button>
       </div>
       {addingChildOf === 'root' && renderForm(null, 'area')}
       <ul>{areas.map((z) => renderNode(z))}</ul>
-      {areas.length === 0 && addingChildOf !== 'root' && <p className="text-sm text-white/40">Todavía no hay áreas cargadas.</p>}
+      {areas.length === 0 && addingChildOf !== 'root' && <p className="text-sm text-steel-400">Todavía no hay áreas cargadas.</p>}
     </div>
   );
 }

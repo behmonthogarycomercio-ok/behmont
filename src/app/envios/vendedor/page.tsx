@@ -121,28 +121,28 @@ export default function VendedorEnviosPage() {
   }
 
   return (
-    <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
+    <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-28 shrink-0">
             <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
           </div>
-          <h1 className="font-display text-2xl font-extrabold">Estado de envíos</h1>
+          <h1 className="font-display text-2xl font-extrabold text-steel-900">Estado de envíos</h1>
         </div>
 
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full mb-5 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-amber-500 hover:bg-amber-400 shadow-card transition-colors"
+            className="w-full mb-5 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-steel-800 hover:bg-steel-700 shadow-card transition-colors"
           >
             <Plus className="h-5 w-5" /> Agregar venta por fuera de MercadoLibre
           </button>
         )}
 
         {showForm && (
-          <form onSubmit={submitManual} className="mb-5 flex flex-col gap-3 rounded-xl2 bg-steel-900 border border-steel-800 p-4">
+          <form onSubmit={submitManual} className="mb-5 flex flex-col gap-3 rounded-xl2 bg-white border border-steel-200 p-4 shadow-card">
             <div>
-              <p className="text-xs text-white/50 mb-1.5">¿Quién carga esto?</p>
+              <p className="text-xs text-steel-500 mb-1.5">¿Quién carga esto?</p>
               <div className="flex gap-2">
                 {STAFF_OPTIONS.map((s) => (
                   <button
@@ -150,7 +150,7 @@ export default function VendedorEnviosPage() {
                     type="button"
                     onClick={() => setAddedBy(s.value)}
                     className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
-                      addedBy === s.value ? 'bg-amber-500 text-white' : 'bg-steel-800 text-white/60'
+                      addedBy === s.value ? 'bg-steel-800 text-white' : 'bg-steel-100 text-steel-600'
                     }`}
                   >
                     {s.label}
@@ -164,26 +164,26 @@ export default function VendedorEnviosPage() {
               value={productTitle}
               onChange={(e) => setProductTitle(e.target.value)}
               required
-              className="rounded-lg px-3 py-2 text-steel-900"
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             />
             <input
               type="text"
               placeholder="SKU (opcional, para buscarlo en depósito)"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              className="rounded-lg px-3 py-2 text-steel-900"
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             />
             <input
               type="text"
               placeholder="Comprador (opcional)"
               value={buyerNickname}
               onChange={(e) => setBuyerNickname(e.target.value)}
-              className="rounded-lg px-3 py-2 text-steel-900"
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             />
             <select
               value={destinoTipo}
               onChange={(e) => setDestinoTipo(e.target.value as typeof destinoTipo)}
-              className="rounded-lg px-3 py-2 text-steel-900"
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             >
               <option value="domicilio">Domicilio</option>
               <option value="sucursal_andreani">Sucursal</option>
@@ -194,7 +194,7 @@ export default function VendedorEnviosPage() {
               placeholder="Dirección / detalle"
               value={destinoDetalle}
               onChange={(e) => setDestinoDetalle(e.target.value)}
-              className="rounded-lg px-3 py-2 text-steel-900"
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             />
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -202,46 +202,46 @@ export default function VendedorEnviosPage() {
                 placeholder="DNI"
                 value={dni}
                 onChange={(e) => setDni(e.target.value)}
-                className="rounded-lg px-3 py-2 text-steel-900"
+                className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
               />
               <input
                 type="text"
                 placeholder="Contacto (teléfono)"
                 value={contacto}
                 onChange={(e) => setContacto(e.target.value)}
-                className="rounded-lg px-3 py-2 text-steel-900"
+                className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
               />
               <input
                 type="text"
                 placeholder="Código postal"
                 value={codigoPostal}
                 onChange={(e) => setCodigoPostal(e.target.value)}
-                className="rounded-lg px-3 py-2 text-steel-900"
+                className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
               />
               <input
                 type="email"
                 placeholder="Email (opcional)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-lg px-3 py-2 text-steel-900"
+                className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
               />
             </div>
             <div>
-              <p className="text-xs text-white/50 mb-1.5">Datos de envío (si ya los tenés — si no, lo completa después el repartidor)</p>
+              <p className="text-xs text-steel-500 mb-1.5">Datos de envío (si ya los tenés — si no, lo completa después el repartidor)</p>
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
                   placeholder="Transportista"
                   value={transportista}
                   onChange={(e) => setTransportista(e.target.value)}
-                  className="rounded-lg px-3 py-2 text-steel-900"
+                  className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                 />
                 <input
                   type="text"
                   placeholder="Nº de seguimiento (si hay más de uno, separalos con coma)"
                   value={numeroSeguimiento}
                   onChange={(e) => setNumeroSeguimiento(e.target.value)}
-                  className="rounded-lg px-3 py-2 text-steel-900"
+                  className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                 />
                 <input
                   type="number"
@@ -250,18 +250,18 @@ export default function VendedorEnviosPage() {
                   placeholder="Precio asegurado"
                   value={precioAsegurado}
                   onChange={(e) => setPrecioAsegurado(e.target.value)}
-                  className="col-span-2 rounded-lg px-3 py-2 text-steel-900"
+                  className="col-span-2 rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                 />
               </div>
             </div>
             <div>
-              <p className="text-xs text-white/50 mb-1.5">¿Ya se abonó?</p>
+              <p className="text-xs text-steel-500 mb-1.5">¿Ya se abonó?</p>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setPaymentStatus('abonado')}
                   className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
-                    paymentStatus === 'abonado' ? 'bg-emerald-600 text-white' : 'bg-steel-800 text-white/60'
+                    paymentStatus === 'abonado' ? 'bg-emerald-600 text-white' : 'bg-steel-100 text-steel-600'
                   }`}
                 >
                   Abonado
@@ -270,26 +270,26 @@ export default function VendedorEnviosPage() {
                   type="button"
                   onClick={() => setPaymentStatus('pendiente_pago')}
                   className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
-                    paymentStatus === 'pendiente_pago' ? 'bg-amber-500 text-white' : 'bg-steel-800 text-white/60'
+                    paymentStatus === 'pendiente_pago' ? 'bg-warning-600 text-white' : 'bg-steel-100 text-steel-600'
                   }`}
                 >
                   Pendiente de abonar
                 </button>
               </div>
             </div>
-            {formError && <p className="text-sm text-red-400">{formError}</p>}
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={submitting || !productTitle.trim()}
-                className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-2 font-semibold text-white"
+                className="flex-1 rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-2 font-semibold text-white"
               >
                 {submitting ? 'Guardando…' : 'Agregar'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="rounded-lg bg-steel-800 hover:bg-steel-700 py-2 px-4 text-white/70"
+                className="rounded-lg bg-steel-100 hover:bg-steel-200 py-2 px-4 text-steel-600"
               >
                 Cancelar
               </button>
@@ -297,10 +297,10 @@ export default function VendedorEnviosPage() {
           </form>
         )}
 
-        {loadError && <p className="mb-4 text-sm text-red-400">No se pudo actualizar la lista. Reintentando…</p>}
-        {shipments === null && <p className="text-white/60">Cargando…</p>}
+        {loadError && <p className="mb-4 text-sm text-red-600">No se pudo actualizar la lista. Reintentando…</p>}
+        {shipments === null && <p className="text-steel-500">Cargando…</p>}
         {shipments && shipments.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-16 text-white/50">
+          <div className="flex flex-col items-center gap-3 py-16 text-steel-400">
             <CheckCircle2 className="h-12 w-12" />
             <p>No hay envíos cargados todavía.</p>
           </div>
@@ -317,47 +317,51 @@ export default function VendedorEnviosPage() {
             const skus = s.items.map((i) => i.sku).filter((v): v is string => Boolean(v));
 
             return (
-              <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-4 shadow-card">
+              <div key={s.id} className="rounded-xl2 bg-white border border-steel-200 p-4 shadow-card">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div>
-                    <p className="font-display text-base font-bold">{productsLine}</p>
+                    <p className="font-display text-base font-bold text-steel-900">{productsLine}</p>
                   </div>
                   <div className="flex flex-wrap justify-end gap-1.5">
                     {retrasado && (
-                      <span className="shrink-0 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold uppercase">Retrasado</span>
+                      <span className="shrink-0 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold uppercase text-white">Retrasado</span>
                     )}
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      s.status === 'entregado' ? 'bg-emerald-600' : 'bg-yellow-600'
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${
+                      s.status === 'entregado' ? 'bg-emerald-600' : 'bg-steel-600'
                     }`}>
                       {STATUS_LABELS[s.status]}
                     </span>
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      s.payment_status === 'abonado' ? 'bg-emerald-700' : 'bg-amber-600'
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${
+                      s.payment_status === 'abonado' ? 'bg-emerald-700' : 'bg-warning-600'
                     }`}>
                       {PAYMENT_STATUS_LABELS[s.payment_status]}
                     </span>
                   </div>
                 </div>
                 <div className="mb-2">
-                  {s.total != null && <p className="text-sm text-white/50">${formatPrice(s.total)}</p>}
-                  {skus.length > 0 && <p className="text-xs text-amber-300 font-mono">SKU: {skus.join(', ')}</p>}
+                  {s.total != null && <p className="text-sm text-steel-500">${formatPrice(s.total)}</p>}
+                  {skus.length > 0 && (
+                    <p className="mt-1 inline-block rounded bg-steel-100 px-1.5 py-0.5 text-xs text-steel-700 font-mono">
+                      SKU: {skus.join(', ')}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-start gap-2 text-sm">
                   {s.destino_tipo === 'domicilio' ? (
-                    <Home className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
+                    <Home className="h-4 w-4 mt-0.5 shrink-0 text-steel-600" />
                   ) : (
-                    <Package className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
+                    <Package className="h-4 w-4 mt-0.5 shrink-0 text-steel-600" />
                   )}
-                  <span className="text-white/80">
+                  <span className="text-steel-700">
                     {s.destino_tipo === 'domicilio' ? 'Domicilio' : 'Sucursal'}
                     {s.destino_detalle ? ` — ${s.destino_detalle}` : ''}
                   </span>
                 </div>
 
-                {s.buyer_nickname && <p className="mt-1 text-xs text-white/40">Comprador: {s.buyer_nickname}</p>}
+                {s.buyer_nickname && <p className="mt-1 text-xs text-steel-400">Comprador: {s.buyer_nickname}</p>}
                 {(s.transportista || s.numeros_seguimiento.length > 0) && (
-                  <p className="mt-1 text-xs text-white/40">
+                  <p className="mt-1 text-xs text-steel-400">
                     {s.transportista}
                     {s.numeros_seguimiento.length > 0 ? ` — Seg: ${s.numeros_seguimiento.join(', ')}` : ''}
                     {getTrackingUrl(s.transportista) && (
@@ -367,7 +371,7 @@ export default function VendedorEnviosPage() {
                           href={getTrackingUrl(s.transportista)!}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-amber-400 underline"
+                          className="text-steel-600 underline"
                         >
                           Ver estado →
                         </a>
@@ -376,7 +380,7 @@ export default function VendedorEnviosPage() {
                   </p>
                 )}
                 {s.status === 'entregado' && s.delivered_by && (
-                  <p className="mt-1 text-xs text-emerald-400">Entregado por {s.delivered_by}</p>
+                  <p className="mt-1 text-xs text-emerald-600">Entregado por {s.delivered_by}</p>
                 )}
               </div>
             );

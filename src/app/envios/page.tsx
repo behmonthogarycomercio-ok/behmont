@@ -308,24 +308,24 @@ export default function EnviosPage() {
   }
 
   return (
-    <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
+    <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-28 shrink-0">
             <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
           </div>
-          <h1 className="font-display text-2xl font-extrabold">Envíos pendientes</h1>
+          <h1 className="font-display text-2xl font-extrabold text-steel-900">Envíos pendientes</h1>
         </div>
 
         {pushState === 'off' && (
           <>
             <button
               onClick={subscribe}
-              className="w-full mb-2 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-amber-500 hover:bg-amber-400 shadow-card transition-colors"
+              className="w-full mb-2 flex items-center justify-center gap-2 rounded-xl2 py-4 text-base font-semibold text-white bg-steel-800 hover:bg-steel-700 shadow-card transition-colors"
             >
               <BellOff className="h-5 w-5" /> Activar avisos de nuevos envíos
             </button>
-            <p className="mb-4 text-xs text-white/40">
+            <p className="mb-4 text-xs text-steel-400">
               Para que no se corten solos: en el navegador del celular, agregá esta página a la
               pantalla de inicio (menú ⋮ o compartir → &quot;Agregar a pantalla de inicio&quot;) y
               abrila desde ahí.
@@ -335,30 +335,30 @@ export default function EnviosPage() {
         {pushState === 'on' && !soundReady && (
           <button
             onClick={enableSound}
-            className="w-full mb-4 flex items-center justify-center gap-2 rounded-xl2 py-3 text-sm font-semibold text-steel-900 bg-white hover:bg-steel-100 shadow-card transition-colors"
+            className="w-full mb-4 flex items-center justify-center gap-2 rounded-xl2 py-3 text-sm font-semibold text-steel-900 bg-white border border-steel-200 hover:bg-steel-50 shadow-card transition-colors"
           >
             <Volume2 className="h-5 w-5" /> Activar sonido en este dispositivo
           </button>
         )}
         {pushState === 'on' && soundReady && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-white/60">
+          <div className="mb-4 flex items-center gap-2 text-sm text-steel-500">
             <BellRing className="h-4 w-4" /> Avisos y sonido activados en este dispositivo
           </div>
         )}
         {pushState === 'unsupported' && (
-          <p className="mb-4 text-sm text-amber-400">
+          <p className="mb-4 text-sm text-warning-600">
             Este navegador no soporta avisos push. Usá Chrome para recibirlos.
           </p>
         )}
 
         {loadError && (
-          <p className="mb-4 text-sm text-red-400">No se pudo actualizar la lista. Reintentando…</p>
+          <p className="mb-4 text-sm text-red-600">No se pudo actualizar la lista. Reintentando…</p>
         )}
 
-        {shipments === null && <p className="text-white/60">Cargando…</p>}
+        {shipments === null && <p className="text-steel-500">Cargando…</p>}
 
         {shipments && shipments.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-16 text-white/50">
+          <div className="flex flex-col items-center gap-3 py-16 text-steel-400">
             <CheckCircle2 className="h-12 w-12" />
             <p>No hay envíos pendientes.</p>
           </div>
@@ -379,49 +379,51 @@ export default function EnviosPage() {
             const hasTracking = Boolean(s.transportista || s.numeros_seguimiento.length > 0 || s.precio_asegurado != null);
 
             return (
-              <div key={s.id} className="rounded-xl2 bg-steel-900 border border-steel-800 p-6 shadow-card">
+              <div key={s.id} className="rounded-xl2 bg-white border border-steel-200 p-6 shadow-card">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="rounded-full bg-steel-800 px-3.5 py-1.5 text-sm font-bold uppercase text-white/70">
+                  <span className="rounded-full bg-steel-100 px-3.5 py-1.5 text-sm font-bold uppercase text-steel-700">
                     {STATUS_LABELS[s.status]}
                   </span>
                   {retrasado && (
-                    <span className="rounded-full bg-red-600 px-3.5 py-1.5 text-sm font-bold uppercase">
+                    <span className="rounded-full bg-red-600 px-3.5 py-1.5 text-sm font-bold uppercase text-white">
                       Retrasado
                     </span>
                   )}
-                  <span className={`rounded-full px-3.5 py-1.5 text-sm font-bold uppercase ${
-                    s.payment_status === 'abonado' ? 'bg-emerald-600' : 'bg-amber-500'
+                  <span className={`rounded-full px-3.5 py-1.5 text-sm font-bold uppercase text-white ${
+                    s.payment_status === 'abonado' ? 'bg-emerald-600' : 'bg-warning-600'
                   }`}>
                     {PAYMENT_STATUS_LABELS[s.payment_status]}
                   </span>
                 </div>
-                <p className="font-display text-xl font-bold">{productsLine}</p>
-                {s.total != null && <p className="text-base text-white/50">${formatPrice(s.total)}</p>}
+                <p className="font-display text-xl font-bold text-steel-900">{productsLine}</p>
+                {s.total != null && <p className="text-base text-steel-500">${formatPrice(s.total)}</p>}
                 {skus.length > 0 && (
-                  <p className="text-sm text-amber-300 font-mono">SKU: {skus.join(', ')}</p>
+                  <p className="mt-1 inline-block rounded bg-steel-100 px-2 py-0.5 text-sm text-steel-700 font-mono">
+                    SKU: {skus.join(', ')}
+                  </p>
                 )}
 
                 <div className="mt-4 flex items-start gap-2 text-base">
                   {s.destino_tipo === 'domicilio' ? (
-                    <Home className="h-5 w-5 mt-0.5 shrink-0 text-amber-400" />
+                    <Home className="h-5 w-5 mt-0.5 shrink-0 text-steel-600" />
                   ) : (
-                    <Package className="h-5 w-5 mt-0.5 shrink-0 text-amber-400" />
+                    <Package className="h-5 w-5 mt-0.5 shrink-0 text-steel-600" />
                   )}
-                  <span className="text-white/80">
+                  <span className="text-steel-700">
                     {s.destino_tipo === 'domicilio' ? 'Entregar en domicilio' : 'Llevar a sucursal'}
                     {s.destino_detalle ? ` — ${s.destino_detalle}` : ''}
                   </span>
                 </div>
 
                 {s.buyer_nickname && (
-                  <p className="mt-1.5 text-sm text-white/40">Comprador: {s.buyer_nickname}</p>
+                  <p className="mt-1.5 text-sm text-steel-400">Comprador: {s.buyer_nickname}</p>
                 )}
 
                 {isManual && (
-                  <div className="mt-3 rounded-lg bg-steel-950/60 border border-steel-800 p-3">
+                  <div className="mt-3 rounded-lg bg-steel-50 border border-steel-200 p-3">
                     {hasTracking && trackingFormId !== s.id ? (
-                      <div className="text-sm text-white/70">
-                        {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
+                      <div className="text-sm text-steel-600">
+                        {s.transportista && <p className="font-semibold text-steel-800">{s.transportista}</p>}
                         {s.numeros_seguimiento.length > 0 && <p>Seguimiento: {s.numeros_seguimiento.join(', ')}</p>}
                         {s.precio_asegurado != null && <p>Asegurado: ${formatPrice(s.precio_asegurado)}</p>}
                         {getTrackingUrl(s.transportista) && (
@@ -429,7 +431,7 @@ export default function EnviosPage() {
                             href={getTrackingUrl(s.transportista)!}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-amber-400 underline"
+                            className="text-steel-600 underline"
                           >
                             Ver estado →
                           </a>
@@ -444,14 +446,14 @@ export default function EnviosPage() {
                           placeholder="Transportista"
                           value={trackingTransportista}
                           onChange={(e) => setTrackingTransportista(e.target.value)}
-                          className="rounded-lg px-3 py-2 text-steel-900"
+                          className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                         />
                         <input
                           type="text"
                           placeholder="Nº de seguimiento (si hay más de uno, separalos con coma)"
                           value={trackingNumero}
                           onChange={(e) => setTrackingNumero(e.target.value)}
-                          className="rounded-lg px-3 py-2 text-steel-900"
+                          className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                         />
                         <input
                           type="number"
@@ -460,19 +462,19 @@ export default function EnviosPage() {
                           placeholder="Precio asegurado"
                           value={trackingPrecio}
                           onChange={(e) => setTrackingPrecio(e.target.value)}
-                          className="rounded-lg px-3 py-2 text-steel-900"
+                          className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveTracking(s.id)}
                             disabled={savingTracking}
-                            className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-2 font-semibold text-white"
+                            className="flex-1 rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-2 font-semibold text-white"
                           >
                             Guardar
                           </button>
                           <button
                             onClick={() => setTrackingFormId(null)}
-                            className="rounded-lg bg-steel-800 hover:bg-steel-700 py-2 px-4 text-white/70"
+                            className="rounded-lg bg-steel-100 hover:bg-steel-200 py-2 px-4 text-steel-600"
                           >
                             Cancelar
                           </button>
@@ -481,7 +483,7 @@ export default function EnviosPage() {
                     ) : (
                       <button
                         onClick={() => openTrackingForm(s)}
-                        className="w-full rounded-lg border border-steel-700 text-white/70 hover:bg-steel-800 py-2 text-sm font-semibold"
+                        className="w-full rounded-lg border border-steel-300 text-steel-600 hover:bg-steel-100 py-2 text-sm font-semibold"
                       >
                         {hasTracking ? 'Editar datos de envío' : '📮 Agregar datos de envío'}
                       </button>
@@ -490,15 +492,15 @@ export default function EnviosPage() {
                 )}
 
                 {!isManual && hasTracking && (
-                  <div className="mt-3 rounded-lg bg-steel-950/60 border border-steel-800 p-3 text-sm text-white/70">
-                    {s.transportista && <p className="font-semibold text-white/90">{s.transportista}</p>}
+                  <div className="mt-3 rounded-lg bg-steel-50 border border-steel-200 p-3 text-sm text-steel-600">
+                    {s.transportista && <p className="font-semibold text-steel-800">{s.transportista}</p>}
                     {s.numeros_seguimiento.length > 0 && <p>Seguimiento: {s.numeros_seguimiento.join(', ')}</p>}
                     {getTrackingUrl(s.transportista) && (
                       <a
                         href={getTrackingUrl(s.transportista)!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-amber-400 underline"
+                        className="text-steel-600 underline"
                       >
                         Ver estado →
                       </a>
@@ -513,26 +515,26 @@ export default function EnviosPage() {
                       placeholder="Tu nombre"
                       value={driverName}
                       onChange={(e) => setDriverName(e.target.value)}
-                      className="rounded-lg px-3 py-2.5 text-base text-steel-900"
+                      className="rounded-lg border border-steel-200 px-3 py-2.5 text-base text-steel-900"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => confirmAdvance(s.id)}
                         disabled={!driverName.trim() || advancingId === s.id}
-                        className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-3 text-base font-semibold text-white"
+                        className="flex-1 rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-3 text-base font-semibold text-white"
                       >
                         Confirmar
                       </button>
                       <button
                         onClick={() => { setConfirmingId(null); setConfirmingStatus(null); }}
-                        className="rounded-lg bg-steel-800 hover:bg-steel-700 py-3 px-4 text-base text-white/70"
+                        className="rounded-lg bg-steel-100 hover:bg-steel-200 py-3 px-4 text-base text-steel-600"
                       >
                         Cancelar
                       </button>
                     </div>
                   </div>
                 ) : next === 'entregado' && s.payment_status !== 'abonado' ? (
-                  <p className="mt-4 text-center text-sm text-amber-400">
+                  <p className="mt-4 text-center text-sm text-warning-600">
                     Marcá el pago como cobrado antes de poder entregar
                   </p>
                 ) : (
@@ -551,7 +553,7 @@ export default function EnviosPage() {
                   <button
                     onClick={() => markPaid(s.id)}
                     disabled={advancingId === s.id}
-                    className="mt-2.5 w-full rounded-lg border border-amber-500 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 py-3 text-base font-semibold"
+                    className="mt-2.5 w-full rounded-lg border border-steel-400 text-steel-700 hover:bg-steel-50 disabled:opacity-50 py-3 text-base font-semibold"
                   >
                     💰 Marcar cobrado
                   </button>
