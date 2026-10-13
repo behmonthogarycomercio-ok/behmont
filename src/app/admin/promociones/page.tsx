@@ -2,6 +2,7 @@ import Link from 'next/link';
 import AdminShell from '@/components/admin/AdminShell';
 import DeleteButton from '@/components/admin/DeleteButton';
 import AdminActionForm from '@/components/admin/AdminActionForm';
+import ClearPromotionImagesButton from '@/components/admin/ClearPromotionImagesButton';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { upsertPromotion, deletePromotion, upsertCoupon, deleteCoupon } from '@/lib/actions';
 
@@ -59,20 +60,23 @@ async function PromocionesTab({ searchParams }: { searchParams: { placement?: st
 
   return (
     <>
-      <div className="flex flex-wrap gap-2 mb-6">
-        {PLACEMENTS.map((p) => (
-          <Link
-            key={p.value}
-            href={p.value ? `/admin/promociones?placement=${p.value}` : '/admin/promociones'}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-              activePlacement === p.value
-                ? 'bg-steel-900 text-white'
-                : 'bg-plate-100 text-steel-600 hover:bg-plate-200'
-            }`}
-          >
-            {p.label}
-          </Link>
-        ))}
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-2">
+          {PLACEMENTS.map((p) => (
+            <Link
+              key={p.value}
+              href={p.value ? `/admin/promociones?placement=${p.value}` : '/admin/promociones'}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                activePlacement === p.value
+                  ? 'bg-steel-900 text-white'
+                  : 'bg-plate-100 text-steel-600 hover:bg-plate-200'
+              }`}
+            >
+              {p.label}
+            </Link>
+          ))}
+        </div>
+        <ClearPromotionImagesButton />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">

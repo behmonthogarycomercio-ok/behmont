@@ -242,6 +242,19 @@ export async function deletePromotion(id: string): Promise<ActionResult> {
   return {};
 }
 
+/** Saca la imagen de todas las promociones de una (image_url a null) -- no
+ * borra las promociones en sí, solo limpia el campo. Pensado para cuando
+ * hay que reemplazar todo el set de imágenes y es más rápido arrancar de
+ * cero que editar una por una. */
+export async function clearAllPromotionImages(): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('promotions').update({ image_url: null }).not('id', 'is', null);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/promociones');
+  revalidatePath('/');
+  return {};
+}
+
 // ── MARCAS ───────────────────────────────────────────────
 export async function upsertBrand(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
