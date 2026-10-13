@@ -1,36 +1,101 @@
 import AdminShell from '@/components/admin/AdminShell';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { formatPrice } from '@/lib/price';
-import { Package, FolderTree, MessageSquareText, AlertTriangle } from 'lucide-react';
+import { DEPOSITO_STAFF } from '@/lib/deposito';
+import { COBRADORES } from '@/lib/preventas';
+import { TopProductsChart, SalesTrendChart, DailySalesChart } from '@/components/admin/MetricsCharts';
+import ExportButton from '@/components/admin/ExportButton';
+import {
+  getOrdersForMonth,
+  getOrdersLastNMonths,
+  computeMonthlyMetrics,
+  computeMonthlyTrend,
+} from '@/lib/metrics';
+import { getMLMetricsSummary } from '@/lib/mercadolibre';
+import {
+  Package,
+  FolderTree,
+  MessageSquareText,
+  AlertTriangle,
+  Truck,
+  FileCheck,
+  Megaphone,
+  Ticket,
+  IdCard,
+  TrendingUp,
+  ShoppingBag,
+  Receipt,
+  MapPin,
+  Award,
+  MessageCircleQuestion,
+  Eye,
+  ShieldAlert,
+} from 'lucide-react';
 import Link from 'next/link';
+
+const ML_REPUTATION_LABELS: Record<string, string> = {
+  '5_green': 'Excelente (verde)',
+  '4_light_green': 'Muy buena (verde claro)',
+  '3_yellow': 'Buena (amarilla)',
+  '2_orange': 'Regular (naranja)',
+  '1_red': 'Mala (roja)',
+};
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
 
-  const [{ count: productCount }, { count: categoryCount }, { count: orderCount }, { data: lowStock }, { data: recentOrders }] =
-    await Promise.all([
-      supabase.from('products').select('*', { count: 'exact', head: true }),
-      supabase.from('categories').select('*', { count: 'exact', head: true }),
-      supabase.from('whatsapp_orders').select('*', { count: 'exact', head: true }),
-      supabase.from('products').select('id,name,sku,stock').lte('stock', 3).order('stock'),
-      supabase
-        .from('whatsapp_orders')
-        .select('id,customer_name,total,status,created_at')
-        .order('created_at', { ascending: false })
-        .limit(6),
-    ]);
+  const [
+    { count: productCount },
+    { count: categoryCount },
+    { count: orderCount },
+    { count: shipmentCount },
+    { count: preventaCount },
+    { count: promoCount },
+    { count: couponCount },
+    { data: lowStock },
+    { data: recentOrders },
+    monthOrders,
+    trendOrders,
+    mlMetrics,
+  ] = await Promise.all([
+    supabase.from('products').select('*', { count: 'exact', head: true }),
+    supabase.from('categories').select('*', { count: 'exact', head: true }),
+    supabase.from('whatsapp_orders').select('*', { count: 'exact', head: true }),
+    supabase.from('ml_shipments').select('*', { count: 'exact', head: true }).eq('status', 'pendiente'),
+    supabase.from('preventas').select('*', { count: 'exact', head: true }).in('status', ['pendiente_documentacion', 'pendiente_cobrador']),
+    supabase.from('promotions').select('*', { count: 'exact', head: true }).eq('active', true),
+    supabase.from('coupons').select('*', { count: 'exact', head: true }).eq('active', true),
+    supabase.from('products').select('id,name,sku,stock').lte('stock', 3).order('stock'),
+    supabase
+      .from('whatsapp_orders')
+      .select('id,customer_name,total,status,created_at')
+      .order('created_at', { ascending: false })
+      .limit(6),
+    getOrdersForMonth(),
+    getOrdersLastNMonths(6),
+    getMLMetricsSummary(30),
+  ]);
+
+  const metrics = computeMonthlyMetrics(monthOrders);
+  const trend = computeMonthlyTrend(trendOrders, 6);
+  const monthLabel = new Date().toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
 
   const stats = [
     { label: 'Productos', value: productCount || 0, icon: Package, href: '/admin/productos' },
     { label: 'Categorías', value: categoryCount || 0, icon: FolderTree, href: '/admin/categorias' },
-    { label: 'Pedidos por WhatsApp', value: orderCount || 0, icon: MessageSquareText, href: '/admin/dashboard' },
+    { label: 'Pedidos por WhatsApp', value: orderCount || 0, icon: MessageSquareText, href: '/admin/pedidos' },
+    { label: 'Envíos pendientes', value: shipmentCount || 0, icon: Truck, href: '/admin/envios' },
+    { label: 'Preventas pendientes', value: preventaCount || 0, icon: FileCheck, href: '/admin/envios' },
+    { label: 'Promociones activas', value: promoCount || 0, icon: Megaphone, href: '/admin/promociones' },
+    { label: 'Cupones activos', value: couponCount || 0, icon: Ticket, href: '/admin/cupones' },
+    { label: 'Empleados', value: DEPOSITO_STAFF.length + COBRADORES.length, icon: IdCard, href: '/admin/empleados' },
   ];
 
   return (
     <AdminShell>
       <h1 className="font-display text-2xl font-bold text-steel-950 mb-6">Inicio</h1>
 
-      <div className="grid gap-4 sm:grid-cols-3 mb-8">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {stats.map(({ label, value, icon: Icon, href }) => (
           <Link
             key={label}
@@ -44,24 +109,29 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
-          <h2 className="font-display font-semibold text-steel-900 mb-4 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500" /> Stock bajo
-          </h2>
-          {lowStock && lowStock.length > 0 ? (
-            <ul className="space-y-2 text-sm">
-              {lowStock.map((p) => (
-                <li key={p.id} className="flex justify-between">
-                  <span className="text-steel-800">{p.name}</span>
-                  <span className="font-semibold text-red-600">{p.stock} u.</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-steel-500">Todo el stock está en niveles saludables.</p>
-          )}
-        </div>
+      <div className="grid gap-6 lg:grid-cols-2 mb-10">
+        <details className="rounded-xl2 border border-plate-200 bg-white shadow-card">
+          <summary className="flex cursor-pointer items-center justify-between gap-2 p-5 font-display font-semibold text-steel-900">
+            <span className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" /> Stock bajo
+            </span>
+            <span className="text-sm font-normal text-steel-500">{lowStock?.length || 0}</span>
+          </summary>
+          <div className="border-t border-plate-100 p-5 pt-3">
+            {lowStock && lowStock.length > 0 ? (
+              <ul className="space-y-2 text-sm">
+                {lowStock.map((p) => (
+                  <li key={p.id} className="flex justify-between">
+                    <span className="text-steel-800">{p.name}</span>
+                    <span className="font-semibold text-red-600">{p.stock} u.</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-steel-500">Todo el stock está en niveles saludables.</p>
+            )}
+          </div>
+        </details>
 
         <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
           <h2 className="font-display font-semibold text-steel-900 mb-4">Últimos pedidos</h2>
@@ -81,6 +151,192 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* ── Métricas de ventas ── */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <h2 className="font-display text-xl font-bold text-steel-950">Métricas</h2>
+          <p className="text-sm text-steel-500 capitalize">{monthLabel}</p>
+        </div>
+        <ExportButton
+          endpoint="/api/admin/export-orders"
+          filenamePrefix="behmont-ventas"
+          label="Descargar Excel de ventas"
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <StatCard icon={Receipt} label="Ventas del mes" value={`$${formatPrice(metrics.totalSales)}`} />
+        <StatCard icon={ShoppingBag} label="Pedidos del mes" value={String(metrics.orderCount)} />
+        <StatCard icon={TrendingUp} label="Ticket promedio" value={`$${formatPrice(metrics.avgTicket)}`} />
+        <StatCard
+          icon={MapPin}
+          label="Pedidos con dirección"
+          value={`${metrics.ordersWithAddress} / ${metrics.orderCount}`}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 mb-6">
+        <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+          <h2 className="font-display font-semibold text-steel-900 mb-1">Productos más vendidos</h2>
+          <p className="text-xs text-steel-500 mb-4">Por cantidad, este mes — para saber dónde reforzar promociones</p>
+          <TopProductsChart data={metrics.topProducts} />
+        </div>
+
+        <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+          <h2 className="font-display font-semibold text-steel-900 mb-1">Tendencia (últimos 6 meses)</h2>
+          <p className="text-xs text-steel-500 mb-4">Ventas totales por mes</p>
+          <SalesTrendChart data={trend} />
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 mb-10">
+        <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+          <h2 className="font-display font-semibold text-steel-900 mb-1">Ventas por día (este mes)</h2>
+          <p className="text-xs text-steel-500 mb-4">Detecta picos y días flojos</p>
+          <DailySalesChart data={metrics.dailySales} />
+        </div>
+
+        <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+          <h2 className="font-display font-semibold text-steel-900 mb-1">De dónde son tus clientes</h2>
+          <p className="text-xs text-steel-500 mb-4">
+            Direcciones cargadas en el pedido, este mes
+          </p>
+          {metrics.topLocations.length === 0 ? (
+            <p className="text-sm text-steel-500">
+              Todavía no hay direcciones cargadas — se completan cuando el cliente las escribe
+              en el formulario de pedido.
+            </p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {metrics.topLocations.map((loc) => (
+                <li key={loc.address} className="flex items-start justify-between gap-3">
+                  <span className="text-steel-700 line-clamp-1">{loc.address}</span>
+                  <span className="shrink-0 rounded-full bg-plate-100 px-2 py-0.5 text-xs font-semibold text-steel-600">
+                    {loc.count} pedido{loc.count > 1 ? 's' : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* ── MercadoLibre ── */}
+      <div>
+        <h2 className="font-display text-xl font-bold text-steel-950 mb-1">MercadoLibre</h2>
+        <p className="text-sm text-steel-500 mb-4">Últimos 30 días</p>
+
+        {!mlMetrics.connected ? (
+          <div className="rounded-xl2 border border-dashed border-plate-200 bg-white p-6 text-sm text-steel-500">
+            Todavía no conectaste tu cuenta de MercadoLibre. Hacelo desde{' '}
+            <a href="/admin/marcas" className="font-semibold text-amber-600 hover:underline">
+              Marcas y MercadoLibre
+            </a>{' '}
+            para ver acá las ventas, reputación y preguntas.
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+              <StatCard
+                icon={Receipt}
+                label="Ventas ML (30 días)"
+                value={
+                  mlMetrics.orders
+                    ? `$${mlMetrics.orders.orders
+                        .reduce((sum, o) => sum + Number(o.total_amount || 0), 0)
+                        .toLocaleString('es-AR')}`
+                    : '—'
+                }
+              />
+              <StatCard
+                icon={ShoppingBag}
+                label="Pedidos ML (30 días)"
+                value={mlMetrics.orders ? String(mlMetrics.orders.total) : '—'}
+              />
+              <StatCard
+                icon={Eye}
+                label="Visitas (30 días)"
+                value={mlMetrics.visits !== undefined ? mlMetrics.visits.toLocaleString('es-AR') : '—'}
+              />
+              <StatCard
+                icon={MessageCircleQuestion}
+                label="Preguntas sin responder"
+                value={mlMetrics.unansweredQuestions !== undefined ? String(mlMetrics.unansweredQuestions) : '—'}
+              />
+            </div>
+
+            {mlMetrics.reputation && (
+              <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card mb-6">
+                <h3 className="font-display font-semibold text-steel-900 mb-3 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-amber-500" /> Reputación del vendedor
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-3 text-sm">
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1">Nivel</p>
+                    <p className="font-semibold text-steel-900">
+                      {mlMetrics.reputation.levelId
+                        ? ML_REPUTATION_LABELS[mlMetrics.reputation.levelId] || mlMetrics.reputation.levelId
+                        : 'Sin datos todavía'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1">Ventas completadas / canceladas</p>
+                    <p className="font-semibold text-steel-900">
+                      {mlMetrics.reputation.transactions.completed} / {mlMetrics.reputation.transactions.canceled}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-steel-400 text-xs mb-1 flex items-center gap-1">
+                      <ShieldAlert className="h-3.5 w-3.5" /> Reclamos / cancelaciones
+                    </p>
+                    <p className="font-semibold text-steel-900">
+                      {(mlMetrics.reputation.claimsRate * 100).toFixed(1)}% / {(mlMetrics.reputation.cancellationsRate * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {mlMetrics.orders && mlMetrics.orders.orders.length > 0 && (
+              <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+                <h3 className="font-display font-semibold text-steel-900 mb-3">Últimas ventas de ML</h3>
+                <ul className="space-y-2 text-sm">
+                  {mlMetrics.orders.orders.slice(0, 8).map((o) => (
+                    <li key={o.id} className="flex items-center justify-between gap-3 border-b border-plate-100 pb-2 last:border-0">
+                      <span className="text-steel-700 line-clamp-1">
+                        {o.order_items?.[0]?.item.title || `Pedido #${o.id}`}
+                        {o.buyer?.nickname ? ` — ${o.buyer.nickname}` : ''}
+                      </span>
+                      <span className="shrink-0 font-mono text-xs text-steel-500">
+                        {new Date(o.date_created).toLocaleDateString('es-AR')} · ${Number(o.total_amount).toLocaleString('es-AR')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </AdminShell>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl2 border border-plate-200 bg-white p-5 shadow-card">
+      <Icon className="h-5 w-5 text-amber-500 mb-2" />
+      <p className="text-2xl font-display font-bold text-steel-950">{value}</p>
+      <p className="text-sm text-steel-500">{label}</p>
+    </div>
   );
 }
