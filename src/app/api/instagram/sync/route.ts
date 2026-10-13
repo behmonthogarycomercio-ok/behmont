@@ -38,7 +38,7 @@ async function runSync(request: Request, fromCron: boolean) {
     const conn = await getValidIgConnection();
     if (!conn) {
       return NextResponse.json(
-        { error: 'Instagram no está conectado. Conectá la cuenta desde /admin/contenido.' },
+        { error: 'Instagram no está conectado. Conectá la cuenta desde /admin/marcas (pestaña Contenido).' },
         { status: 400 }
       );
     }

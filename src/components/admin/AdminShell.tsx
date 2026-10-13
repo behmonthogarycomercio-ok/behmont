@@ -11,7 +11,6 @@ import {
   Tag,
   LogOut,
   ExternalLink,
-  Instagram,
   Users,
   Truck,
   IdCard,
@@ -26,8 +25,7 @@ const NAV = [
   { href: '/admin/productos',   label: 'Productos y categorías', icon: Package },
   { href: '/admin/promociones', label: 'Promociones y cupones', icon: Megaphone },
   { href: '/admin/empleados',   label: 'Empleados',             icon: IdCard },
-  { href: '/admin/marcas',      label: 'Marcas y MercadoLibre', icon: Tag },
-  { href: '/admin/contenido',   label: 'Contenido',             icon: Instagram },
+  { href: '/admin/marcas',      label: 'Marcas y contenido',    icon: Tag },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

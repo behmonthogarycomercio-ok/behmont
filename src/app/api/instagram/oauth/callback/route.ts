@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   // Si no hay code, o el state no matchea EXACTAMENTE la cookie que dejó /start,
   // se corta acá (protección anti-CSRF).
   if (!code || !state || !cookieState || state !== cookieState) {
-    return redirectClearingCookie('/admin/contenido?view=conexion&ig_error=estado_invalido');
+    return redirectClearingCookie('/admin/marcas?tab=contenido&view=conexion&ig_error=estado_invalido');
   }
 
   try {
@@ -44,11 +44,11 @@ export async function GET(request: Request) {
       updated_at: new Date().toISOString(),
     });
 
-    return redirectClearingCookie('/admin/contenido?view=conexion&ig_connected=1');
+    return redirectClearingCookie('/admin/marcas?tab=contenido&view=conexion&ig_connected=1');
   } catch (err) {
     const message = err instanceof Error ? err.message : 'error_desconocido';
     return redirectClearingCookie(
-      `/admin/contenido?view=conexion&ig_error=${encodeURIComponent(message)}`
+      `/admin/marcas?tab=contenido&view=conexion&ig_error=${encodeURIComponent(message)}`
     );
   }
 }

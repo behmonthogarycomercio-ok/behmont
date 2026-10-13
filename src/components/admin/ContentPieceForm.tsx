@@ -41,7 +41,7 @@ export default function ContentPieceForm({ piece, sources }: { piece?: Piece; so
       setSaving(false);
       return;
     }
-    router.push('/admin/contenido?view=pipeline');
+    router.push('/admin/marcas?tab=contenido&view=pipeline');
   }
 
   return (
@@ -129,7 +129,7 @@ export default function ContentPieceForm({ piece, sources }: { piece?: Piece; so
         >
           {saving ? 'Guardando...' : 'Guardar pieza'}
         </button>
-        <a href="/admin/contenido?view=pipeline" className="rounded-lg border border-plate-300 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50">
+        <a href="/admin/marcas?tab=contenido&view=pipeline" className="rounded-lg border border-plate-300 px-4 py-2.5 text-sm font-semibold text-steel-700 hover:bg-plate-50">
           Cancelar
         </a>
       </div>

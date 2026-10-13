@@ -327,7 +327,7 @@ export async function upsertContentSource(formData: FormData): Promise<ActionRes
     if (error) return { error: friendlyDbError(error) };
   }
 
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
@@ -335,7 +335,7 @@ export async function deleteContentSource(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('content_sources').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
@@ -369,7 +369,7 @@ export async function upsertContentPiece(formData: FormData): Promise<ActionResu
     if (error) return { error: friendlyDbError(error) };
   }
 
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
@@ -377,7 +377,7 @@ export async function deleteContentPiece(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('content_pieces').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
@@ -391,7 +391,7 @@ export async function updateContentPieceStage(id: string, stage: string): Promis
     id
   );
   if (result.error) return result;
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
@@ -399,7 +399,7 @@ export async function disconnectInstagram(): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('instagram_connection').delete().eq('id', 'main');
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/contenido');
+  revalidatePath('/admin/marcas');
   return {};
 }
 
