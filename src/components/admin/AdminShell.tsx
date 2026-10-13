@@ -20,6 +20,7 @@ import {
   Users,
   Truck,
   Warehouse,
+  IdCard,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PushSubscribeButton from './PushSubscribeButton';
@@ -35,6 +36,7 @@ const NAV = [
   { href: '/admin/promociones', label: 'Promociones',           icon: Megaphone },
   { href: '/admin/cupones',     label: 'Cupones',               icon: Ticket },
   { href: '/admin/depositos',   label: 'Depósitos',             icon: Warehouse },
+  { href: '/admin/empleados',   label: 'Empleados',             icon: IdCard },
   { href: '/admin/etiquetas',   label: 'Etiquetas',             icon: Printer },
   { href: '/admin/marcas',      label: 'Marcas y MercadoLibre', icon: Tag },
   { href: '/admin/contenido',   label: 'Contenido',             icon: Instagram },

@@ -1,7 +1,6 @@
 import AdminShell from '@/components/admin/AdminShell';
 import ZonasTree from '@/components/admin/ZonasTree';
 import ProductLocationsManager from '@/components/admin/ProductLocationsManager';
-import DepositoStaffSecrets from '@/components/admin/DepositoStaffSecrets';
 import StockMovementsHistory from '@/components/admin/StockMovementsHistory';
 import { createServerSupabase } from '@/lib/supabase/server';
 
@@ -61,7 +60,6 @@ export default async function DepositosPage() {
         producto dónde está ubicado. Lo mismo lo puede gestionar Gabriel desde la terminal del
         depósito (sin login), en <span className="font-mono">/deposito/gestion</span>.
       </p>
-      <DepositoStaffSecrets />
       <ZonasTree zonas={(zonas as Zona[]) || []} />
       <ProductLocationsManager
         products={(products as ProductoDeposito[]) || []}

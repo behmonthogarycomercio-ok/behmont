@@ -2,14 +2,13 @@ import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
 import PreventaDocReview from '@/components/admin/PreventaDocReview';
 import PreventaVendedorFilter from '@/components/admin/PreventaVendedorFilter';
-import CobradorStaffSecrets from '@/components/admin/CobradorStaffSecrets';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { updateShipmentStatus, updateShipmentPayment, createManualShipment, updateShipmentTracking } from '@/lib/actions';
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
 import { maybeNotifyOverdueCobradores } from '@/lib/preventas-sync';
 import { formatPrice } from '@/lib/price';
-import { Home, Package, Plus, FileCheck } from 'lucide-react';
+import { Home, Package, Plus } from 'lucide-react';
 
 type PreventaItem = { sku: string; name: string; quantity: number; precioLista: number; precioOfrecido: number };
 type PreventaRow = {
@@ -222,14 +221,6 @@ export default async function EnviosPage({
           </div>
         )}
 
-        <details className="rounded-xl border border-plate-200 bg-white shadow-sm">
-          <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-sm font-semibold text-steel-700">
-            <FileCheck className="h-4 w-4" /> Códigos de cobradores
-          </summary>
-          <div className="border-t border-plate-100 p-4">
-            <CobradorStaffSecrets />
-          </div>
-        </details>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-5">
