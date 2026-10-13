@@ -210,7 +210,12 @@ async function runSync(request: Request, fromCron: boolean) {
       const isNew = !existingMlItemIds.has(item.id);
       let error;
       if (isNew) {
-        payload.sku = item.seller_custom_field?.trim() || item.id;
+        // El SKU del vendedor en publicaciones nuevas de ML ya no viaja por
+        // seller_custom_field (deprecado en varias categorías) -- hoy vive
+        // en el atributo SELLER_SKU (name "SKU", mismo `skuAttr` de arriba).
+        // Sin esto, el producto nuevo se creaba con el ID de ML como sku y
+        // getProductCode() lo escondía -- nunca mostraba el código real.
+        payload.sku = skuAttr?.value_name?.trim() || item.seller_custom_field?.trim() || item.id;
         ({ error } = await supabase.from('products').insert(payload));
       } else {
         ({ error } = await supabase.from('products').update(payload).eq('ml_item_id', item.id));
