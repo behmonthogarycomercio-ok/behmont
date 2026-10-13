@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from './supabase/server';
-import { parseTrackingNumbers } from './envios';
+import { parseTrackingNumbers, resolveProductIdBySku } from './envios';
 import { pushToMLIfLinked } from './ml-sync';
 import { hashSecretCode } from './deposito-auth';
 import { notifyCobrador } from './push';
@@ -449,11 +449,13 @@ export async function updateShipmentStatus(formData: FormData): Promise<ActionRe
 
   // Misma regla que /api/envios/status: no se puede entregar sin haber
   // cobrado antes.
-  if (status === 'entregado') {
-    const { data: current } = await supabase.from('ml_shipments').select('payment_status').eq('id', id).maybeSingle();
-    if (current?.payment_status !== 'abonado') {
-      return { error: 'Primero hay que marcar el pago como cobrado.' };
-    }
+  const { data: current } = await supabase
+    .from('ml_shipments')
+    .select('status, payment_status, items, ml_order_id')
+    .eq('id', id)
+    .maybeSingle();
+  if (status === 'entregado' && current?.payment_status !== 'abonado') {
+    return { error: 'Primero hay que marcar el pago como cobrado.' };
   }
 
   const payload: Record<string, unknown> = { status };
@@ -469,6 +471,38 @@ export async function updateShipmentStatus(formData: FormData): Promise<ActionRe
 
   const result = await updateChecked(supabase, 'ml_shipments', payload, 'id', id);
   if (result.error) return result;
+
+  // Mismo descuento automático de stock que /api/envios/status (ver
+  // comentario ahí) -- el admin también puede marcar "retirado" y el stock
+  // debe quedar sincronizado igual que si lo hiciera el repartidor.
+  if (status === 'retirado' && current?.status !== 'retirado' && (current?.ml_order_id ?? 0) < 0) {
+    const items = (current?.items || []) as { title: string; quantity: number; sku?: string | null }[];
+    for (const item of items) {
+      if (!item.sku) continue;
+      try {
+        const productId = await resolveProductIdBySku(supabase, item.sku);
+        if (!productId) continue;
+        const { data: rpcData, error: rpcError } = await supabase.rpc('registrar_retiro_automatico', {
+          p_product_id: productId,
+          p_quantity: item.quantity,
+          p_staff_name: `${by} (admin)`,
+          p_note: `Auto desde envío ${id}`,
+        });
+        if (rpcError) {
+          console.error(`[updateShipmentStatus] no se pudo descontar stock automático para sku ${item.sku}:`, rpcError.message);
+          continue;
+        }
+        const newStock = rpcData?.[0]?.new_stock;
+        const { data: product } = await supabase.from('products').select('ml_item_id').eq('id', productId).maybeSingle();
+        if (product?.ml_item_id && newStock != null) {
+          await pushToMLIfLinked(product.ml_item_id, { stock: newStock });
+        }
+      } catch (err) {
+        console.error(`[updateShipmentStatus] no se pudo descontar stock automático para sku ${item.sku}:`, err);
+      }
+    }
+  }
+
   revalidatePath('/admin/envios');
   return {};
 }
