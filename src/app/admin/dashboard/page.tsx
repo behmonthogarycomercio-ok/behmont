@@ -87,7 +87,7 @@ export default async function DashboardPage() {
     { label: 'Envíos pendientes', value: shipmentCount || 0, icon: Truck, href: '/admin/envios' },
     { label: 'Preventas pendientes', value: preventaCount || 0, icon: FileCheck, href: '/admin/envios' },
     { label: 'Promociones activas', value: promoCount || 0, icon: Megaphone, href: '/admin/promociones' },
-    { label: 'Cupones activos', value: couponCount || 0, icon: Ticket, href: '/admin/cupones' },
+    { label: 'Cupones activos', value: couponCount || 0, icon: Ticket, href: '/admin/promociones?tab=cupones' },
     { label: 'Empleados', value: DEPOSITO_STAFF.length + COBRADORES.length, icon: IdCard, href: '/admin/empleados' },
   ];
 

@@ -425,7 +425,7 @@ export async function upsertCoupon(formData: FormData): Promise<ActionResult> {
     if (error) return { error: friendlyDbError(error) };
   }
 
-  revalidatePath('/admin/cupones');
+  revalidatePath('/admin/promociones');
   revalidatePath('/');
   return {};
 }
@@ -434,7 +434,7 @@ export async function deleteCoupon(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('coupons').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/cupones');
+  revalidatePath('/admin/promociones');
   revalidatePath('/');
   return {};
 }
