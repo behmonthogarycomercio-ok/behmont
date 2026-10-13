@@ -1,14 +1,22 @@
 import AdminShell from '@/components/admin/AdminShell';
 import AdminActionForm from '@/components/admin/AdminActionForm';
+import DeleteButton from '@/components/admin/DeleteButton';
 import PreventaDocReview from '@/components/admin/PreventaDocReview';
 import PreventaVendedorFilter from '@/components/admin/PreventaVendedorFilter';
-import { createServerSupabase } from '@/lib/supabase/server';
-import { updateShipmentStatus, updateShipmentPayment, createManualShipment, updateShipmentTracking } from '@/lib/actions';
+import { createServerSupabase, createServiceSupabase } from '@/lib/supabase/server';
+import {
+  updateShipmentStatus,
+  updateShipmentPayment,
+  createManualShipment,
+  updateShipmentTracking,
+  updateOrderStatus,
+  deleteOrder,
+} from '@/lib/actions';
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
 import { maybeNotifyOverdueCobradores } from '@/lib/preventas-sync';
 import { formatPrice } from '@/lib/price';
-import { Home, Package, Plus } from 'lucide-react';
+import { Home, Package, Plus, FileText } from 'lucide-react';
 
 type PreventaItem = { sku: string; name: string; quantity: number; precioLista: number; precioOfrecido: number };
 type PreventaRow = {
@@ -67,7 +75,65 @@ type ShipmentRow = {
 const DESTINO_ICON = { domicilio: Home, sucursal_andreani: Package, otro: Package } as const;
 const DESTINO_LABEL = { domicilio: 'Domicilio', sucursal_andreani: 'Sucursal', otro: 'Otro' } as const;
 
-export default async function EnviosPage({
+const ORDER_STATUS_LABELS: Record<string, { label: string; classes: string }> = {
+  pendiente:   { label: 'Pendiente',   classes: 'bg-yellow-100 text-yellow-700' },
+  procesando:  { label: 'Procesando',  classes: 'bg-blue-100 text-blue-700' },
+  completado:  { label: 'Completado',  classes: 'bg-emerald-100 text-emerald-700' },
+  cancelado:   { label: 'Cancelado',   classes: 'bg-red-100 text-red-600' },
+};
+
+const ORDER_STATUS_OPTIONS = Object.entries(ORDER_STATUS_LABELS).map(([value, { label }]) => ({ value, label }));
+
+const SHIPPING_METHOD_LABELS: Record<string, string> = {
+  sucursal: 'Envío a sucursal',
+  domicilio: 'Envío a domicilio',
+  retiro: 'Retiro en local',
+};
+
+const SHIPPING_METHOD_NOTES: Record<string, string> = {
+  sucursal: 'lo abona el cliente al retirar en la sucursal',
+  domicilio: 'lo abona el cliente por transferencia',
+  retiro: 'coordinar retiro y pago por WhatsApp',
+};
+
+export default async function EnviosYPedidosPage({
+  searchParams,
+}: {
+  searchParams: { tab?: string; status?: string; pstatus?: string; vendedor?: string; q?: string };
+}) {
+  const tab = searchParams.tab === 'pedidos' ? 'pedidos' : 'envios';
+
+  return (
+    <AdminShell>
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h1 className="font-display text-2xl font-bold text-steel-950">Envíos y pedidos</h1>
+      </div>
+
+      <div className="flex gap-2 mb-6 border-b border-plate-200">
+        {[
+          { value: 'envios', label: 'Envíos y preventas' },
+          { value: 'pedidos', label: 'Pedidos por WhatsApp' },
+        ].map(({ value, label }) => (
+          <a
+            key={value}
+            href={`?tab=${value}`}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+              tab === value
+                ? 'border-steel-950 text-steel-950'
+                : 'border-transparent text-steel-500 hover:text-steel-700'
+            }`}
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+
+      {tab === 'pedidos' ? <PedidosTab searchParams={searchParams} /> : <EnviosTab searchParams={searchParams} />}
+    </AdminShell>
+  );
+}
+
+async function EnviosTab({
   searchParams,
 }: {
   searchParams: { status?: string; pstatus?: string; vendedor?: string };
@@ -133,6 +199,7 @@ export default async function EnviosPage({
 
   function buildHref(overrides: Partial<{ status: string; pstatus: string; vendedor: string }>) {
     const params = new URLSearchParams({
+      tab: 'envios',
       status: overrides.status ?? filter,
       pstatus: overrides.pstatus ?? pFilter,
       vendedor: overrides.vendedor ?? vendedorFilter,
@@ -141,11 +208,8 @@ export default async function EnviosPage({
   }
 
   return (
-    <AdminShell>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="font-display text-2xl font-bold text-steel-950">Envíos</h1>
-        <p className="text-sm text-steel-500">{rows.length} en total</p>
-      </div>
+    <>
+      <p className="text-sm text-steel-500 mb-5">{rows.length} envíos en total</p>
 
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
@@ -220,7 +284,6 @@ export default async function EnviosPage({
             ))}
           </div>
         )}
-
       </div>
 
       <div className="flex flex-wrap gap-2 mb-5">
@@ -232,7 +295,7 @@ export default async function EnviosPage({
         ].map(({ value, label }) => (
           <a
             key={value}
-            href={`?status=${value}`}
+            href={buildHref({ status: value })}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors ${
               filter === value
                 ? 'bg-steel-950 text-white border-steel-950'
@@ -400,6 +463,253 @@ export default async function EnviosPage({
           </table>
         </div>
       )}
-    </AdminShell>
+    </>
+  );
+}
+
+async function PedidosTab({ searchParams }: { searchParams: { status?: string; q?: string } }) {
+  const supabase = createServerSupabase();
+
+  const filterStatus = searchParams.status || '';
+  const q = searchParams.q?.trim() || '';
+
+  let query = supabase
+    .from('whatsapp_orders')
+    .select('id, customer_name, customer_phone, customer_email, customer_address, customer_city, customer_province, customer_postal_code, shipping_method, customer_note, items, total, status, created_at, financing_documents')
+    .order('created_at', { ascending: false });
+
+  if (filterStatus) query = query.eq('status', filterStatus);
+  if (q)            query = query.ilike('customer_name', `%${q}%`);
+
+  const { data: orders } = await query.limit(100);
+
+  // Los documentos de financiacion viven en un bucket privado -- hace
+  // falta la service role para generar el link firmado de descarga,
+  // sin importar quien este autenticado como admin.
+  const serviceSupabase = createServiceSupabase();
+  const ordersWithDocs = await Promise.all(
+    (orders || []).map(async (order) => {
+      const docs = (order.financing_documents as { label: string; path: string }[] | null) || [];
+      if (docs.length === 0) return { ...order, financingDocsWithUrl: [] as { label: string; url: string }[] };
+      const withUrl = await Promise.all(
+        docs.map(async (doc) => {
+          const { data } = await serviceSupabase.storage
+            .from('financing-documents')
+            .createSignedUrl(doc.path, 60 * 10); // 10 min, se genera al abrir la pagina
+          return { label: doc.label, url: data?.signedUrl || '' };
+        })
+      );
+      return { ...order, financingDocsWithUrl: withUrl.filter((d) => d.url) };
+    })
+  );
+
+  const { data: counts } = await supabase.from('whatsapp_orders').select('status');
+
+  const countByStatus = (counts || []).reduce<Record<string, number>>((acc, o) => {
+    const s = o.status || 'pendiente';
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <p className="text-sm text-steel-500">{(orders || []).length} pedidos cargados</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-5">
+        <a
+          href="?tab=pedidos"
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors ${
+            !filterStatus
+              ? 'bg-steel-950 text-white border-steel-950'
+              : 'bg-white text-steel-600 border-plate-200 hover:border-steel-300'
+          }`}
+        >
+          Todos ({counts?.length || 0})
+        </a>
+        {ORDER_STATUS_OPTIONS.map(({ value, label }) => (
+          <a
+            key={value}
+            href={`?tab=pedidos&status=${value}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors ${
+              filterStatus === value
+                ? 'bg-steel-950 text-white border-steel-950'
+                : 'bg-white text-steel-600 border-plate-200 hover:border-steel-300'
+            }`}
+          >
+            {label} ({countByStatus[value] || 0})
+          </a>
+        ))}
+      </div>
+
+      <form action="" className="mb-5">
+        <input type="hidden" name="tab" value="pedidos" />
+        {filterStatus && <input type="hidden" name="status" value={filterStatus} />}
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por nombre de cliente..."
+          className="w-full max-w-xs rounded-lg border border-plate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+        />
+      </form>
+
+      {ordersWithDocs.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-plate-200 p-12 text-center">
+          <p className="text-steel-500 text-sm">No hay pedidos con este filtro.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {ordersWithDocs.map((order) => {
+            const items = (order.items as { name: string; qty: number; price: number; sku: string }[]) || [];
+            const st = order.status || 'pendiente';
+            const badge = ORDER_STATUS_LABELS[st] || ORDER_STATUS_LABELS.pendiente;
+            const date = new Date(order.created_at).toLocaleString('es-AR', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            });
+
+            const noteLines: string[] = order.customer_note ? order.customer_note.split('\n') : [];
+            const financingLine = noteLines.find((l) => l.startsWith('[FINANCIACION]'));
+            const installments3Line = noteLines.find((l) => l.startsWith('[3CUOTAS]'));
+            const plainNote = noteLines
+              .filter((l) => !l.startsWith('[FINANCIACION]') && !l.startsWith('[MP]') && !l.startsWith('[3CUOTAS]'))
+              .join('\n');
+
+            return (
+              <details key={order.id} className="group rounded-xl border border-plate-200 bg-white shadow-sm overflow-hidden">
+                <summary className="flex items-center gap-4 px-5 py-4 cursor-pointer list-none hover:bg-plate-50 transition-colors">
+                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge.classes}`}>
+                    {badge.label}
+                  </span>
+                  {order.customer_note?.startsWith('[MP]') && (
+                    <span className="shrink-0 rounded-full bg-[#009EE3] px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      MP
+                    </span>
+                  )}
+                  {financingLine && (
+                    <span className="shrink-0 rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      Financia
+                    </span>
+                  )}
+                  {installments3Line && (
+                    <span className="shrink-0 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      3 cuotas
+                    </span>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-steel-900 text-sm">{order.customer_name}</p>
+                    <p className="text-xs text-steel-400 font-mono">{date}</p>
+                  </div>
+                  <span className="font-display font-bold text-steel-950 shrink-0">
+                    ${formatPrice(order.total || 0)}
+                  </span>
+                  <span className="text-steel-300 font-mono text-xs shrink-0 group-open:rotate-90 transition-transform">
+                    ›
+                  </span>
+                </summary>
+
+                <div className="border-t border-plate-100 px-5 py-5 space-y-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5 text-sm">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-steel-400 mb-2">Datos del cliente</p>
+                      <p><span className="text-steel-400">Tel:</span> <span className="font-medium">{order.customer_phone || '—'}</span></p>
+                      {order.customer_email && <p><span className="text-steel-400">Email:</span> <span className="font-medium">{order.customer_email}</span></p>}
+                      {order.customer_address && <p><span className="text-steel-400">Dirección:</span> <span className="font-medium">{order.customer_address}</span></p>}
+                      {order.customer_city && <p><span className="text-steel-400">Ciudad:</span> <span className="font-medium">{order.customer_city}</span></p>}
+                      {order.customer_province && <p><span className="text-steel-400">Provincia:</span> <span className="font-medium">{order.customer_province}</span></p>}
+                      {order.customer_postal_code && <p><span className="text-steel-400">CP:</span> <span className="font-medium">{order.customer_postal_code}</span></p>}
+                      {order.shipping_method && (
+                        <p>
+                          <span className="text-steel-400">Envío:</span>{' '}
+                          <span className="font-medium">{SHIPPING_METHOD_LABELS[order.shipping_method] || order.shipping_method}</span>{' '}
+                          <span className="text-steel-400 italic">
+                            ({SHIPPING_METHOD_NOTES[order.shipping_method] || ''})
+                          </span>
+                        </p>
+                      )}
+                      {plainNote && (
+                        <p><span className="text-steel-400">Nota:</span> <span className="font-medium italic">{plainNote}</span></p>
+                      )}
+                      {order.customer_note?.startsWith('[MP]') && (
+                        <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-[#009EE3]">MercadoPago — {order.customer_note.replace('[MP] ', '').replace('[MP]', '').trim()}</span></p>
+                      )}
+                      {financingLine && (
+                        <p><span className="text-steel-400">Financiación:</span> <span className="font-medium text-amber-600">{financingLine.replace('[FINANCIACION] ', '').replace('[FINANCIACION]', '').trim()}</span></p>
+                      )}
+                      {installments3Line && (
+                        <p><span className="text-steel-400">Pago:</span> <span className="font-medium text-emerald-600">Quiere 3 cuotas sin interés — coordinar link de pago</span></p>
+                      )}
+                      {order.financingDocsWithUrl.length > 0 && (
+                        <div>
+                          <span className="text-steel-400">Documentos:</span>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {order.financingDocsWithUrl.map((doc, i) => (
+                              <a
+                                key={i}
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-plate-200 px-2.5 py-1 text-xs font-medium text-steel-700 hover:border-amber-400 hover:text-amber-700 transition-colors"
+                              >
+                                <FileText className="h-3.5 w-3.5" /> {doc.label}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-steel-400 mb-2">Productos</p>
+                      <ul className="space-y-1 text-sm">
+                        {items.map((item, i) => (
+                          <li key={i} className="flex justify-between gap-3">
+                            <span className="text-steel-700 line-clamp-1">{item.name}</span>
+                            <span className="shrink-0 text-steel-500 font-mono text-xs">
+                              x{item.qty} · ${formatPrice(item.price)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-2 pt-2 border-t border-plate-100 flex justify-between text-sm">
+                        <span className="text-steel-500">Total</span>
+                        <span className="font-bold text-steel-950">${formatPrice(order.total || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-plate-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-steel-500 shrink-0">Cambiar estado:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {ORDER_STATUS_OPTIONS.map(({ value, label }) => (
+                          <AdminActionForm key={value} action={updateOrderStatus}>
+                            <input type="hidden" name="id" value={order.id} />
+                            <input type="hidden" name="status" value={value} />
+                            <button
+                              type="submit"
+                              className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
+                                st === value
+                                  ? `${ORDER_STATUS_LABELS[value].classes} border-transparent`
+                                  : 'bg-white text-steel-500 border-plate-200 hover:border-steel-300'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          </AdminActionForm>
+                        ))}
+                      </div>
+                    </div>
+                    <DeleteButton id={order.id} action={deleteOrder} label="pedido" />
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }

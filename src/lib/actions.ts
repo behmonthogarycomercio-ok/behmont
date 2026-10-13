@@ -293,7 +293,7 @@ export async function updateOrderStatus(formData: FormData): Promise<ActionResul
   const status = formData.get('status') as string;
   const result = await updateChecked(supabase, 'whatsapp_orders', { status }, 'id', id);
   if (result.error) return result;
-  revalidatePath('/admin/pedidos');
+  revalidatePath('/admin/envios');
   revalidatePath('/admin/dashboard');
   return {};
 }
@@ -302,7 +302,7 @@ export async function deleteOrder(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('whatsapp_orders').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/pedidos');
+  revalidatePath('/admin/envios');
   revalidatePath('/admin/dashboard');
   return {};
 }

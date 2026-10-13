@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
       await notifyAdmins({
         title: status === 'completado' ? '✅ Pedido pagado — BEHMONT' : '⏳ Pedido en proceso — BEHMONT',
         body: `${order.customer_name} — $${order.total}`,
-        url: '/admin/pedidos',
+        url: '/admin/envios?tab=pedidos',
       });
     }
 
