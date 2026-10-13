@@ -5,7 +5,9 @@ import { DEPOSITO_STAFF, type DepositoPin } from '@/lib/deposito';
 import { setDepositoStaffSecret } from '@/lib/actions';
 
 export default function DepositoStaffSecrets() {
-  const [values, setValues] = useState<Record<DepositoPin, string>>({ 0: '', 1: '', 2: '', 3: '', 4: '', 5: '' });
+  const [values, setValues] = useState<Record<DepositoPin, string>>(
+    () => Object.fromEntries(DEPOSITO_STAFF.map((s) => [s.pin, ''])) as Record<DepositoPin, string>
+  );
   const [pending, startTransition] = useTransition();
   const [savedPin, setSavedPin] = useState<DepositoPin | null>(null);
   const [errors, setErrors] = useState<Record<number, string>>({});

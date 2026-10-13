@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
 import { COBRADORES } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
+import VendedorPushButton from '@/components/preventas/VendedorPushButton';
 
 type ProductoApi = { id: string; sku: string; name: string; stock: number };
 type CartItem = { sku: string; name: string; quantity: string; precioLista: string; precioOfrecido: string };
@@ -285,6 +286,8 @@ export default function VentasVendedorPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
+            <VendedorPushButton pin={vendedor.pin} code={code} />
+
             <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
               <h2 className="font-display text-lg font-bold mb-3">Nueva preventa</h2>
 

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { secretCodeSchema } from './deposito';
+import { secretCodeSchema, pinSchema } from './deposito';
 
 export const COBRADORES = [
   { pin: 0, name: 'Sergio', ciudad: 'Concordia' },
@@ -99,3 +99,21 @@ export const preventaCobradorUnsubscribeSchema = z.object({
 
 // El supervisor de preventas (Alejandro) ya es PIN 1 del roster de depósito
 // -- reusa pinSchema/secretCodeSchema de deposito.ts, no un schema propio.
+
+// Avisos push para el vendedor -- reusa pinSchema de deposito.ts (mismo
+// roster que canVenderPreventa), a diferencia de cobrador que tiene su
+// propio roster y pinSchema.
+export const preventaVendedorSubscribeSchema = z.object({
+  pin: pinSchema,
+  code: secretCodeSchema,
+  subscription: z.object({
+    endpoint: z.string().url(),
+    keys: z.object({ p256dh: z.string(), auth: z.string() }),
+  }),
+});
+
+export const preventaVendedorUnsubscribeSchema = z.object({
+  pin: pinSchema,
+  code: secretCodeSchema,
+  endpoint: z.string().url(),
+});

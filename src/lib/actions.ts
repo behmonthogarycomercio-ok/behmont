@@ -5,7 +5,7 @@ import { createServerSupabase } from './supabase/server';
 import { parseTrackingNumbers, resolveProductIdBySku } from './envios';
 import { pushToMLIfLinked } from './ml-sync';
 import { hashSecretCode } from './deposito-auth';
-import { notifyCobrador } from './push';
+import { notifyCobrador, notifyVendedor } from './push';
 import { COBRADOR_LABELS, type CobradorPin } from './preventas';
 
 /**
@@ -694,6 +694,11 @@ export async function reviewPreventaDocumentacion(
     if (!motivo || !motivo.trim()) {
       return { error: 'El motivo de rechazo es obligatorio.' };
     }
+    const { data: rejected } = await supabase
+      .from('preventas')
+      .select('vendedor_pin, cliente_nombre')
+      .eq('id', id)
+      .maybeSingle();
     const result = await updateChecked(
       supabase,
       'preventas',
@@ -702,6 +707,12 @@ export async function reviewPreventaDocumentacion(
       id
     );
     if (result.error) return result;
+    if (rejected) {
+      await notifyVendedor(rejected.vendedor_pin, {
+        title: '❌ Preventa rechazada',
+        body: `${rejected.cliente_nombre}: Gabriel rechazó la documentación -- ${motivo.trim()}`,
+      });
+    }
     revalidatePath('/admin/envios');
     return {};
   }

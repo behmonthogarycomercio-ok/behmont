@@ -3,7 +3,7 @@ import { createServiceSupabase } from '@/lib/supabase/server';
 import { cobradorPinSchema } from '@/lib/preventas';
 import { verifyCobradorCode } from '@/lib/cobrador-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
-import { notifyDrivers } from '@/lib/push';
+import { notifyDrivers, notifyVendedor } from '@/lib/push';
 import { formatPrice } from '@/lib/price';
 
 type PreventaItem = { sku: string; name: string; quantity: number; precioLista: number; precioOfrecido: number };
@@ -77,6 +77,10 @@ export async function POST(request: Request) {
       })
       .eq('id', preventaId);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    await notifyVendedor(preventa.vendedor_pin, {
+      title: '❌ Preventa rechazada',
+      body: `${preventa.cliente_nombre}: ${preventa.cobrador_nombre} rechazó tras controlar el local -- ${motivoRechazo.trim()}`,
+    });
     return NextResponse.json({ ok: true, status: 'rechazada_cobrador' });
   }
 
@@ -139,6 +143,10 @@ export async function POST(request: Request) {
     title: '📦 Nuevo envío pendiente',
     body: `${firstTitle}${extra} — preventa aprobada`,
     url: '/envios',
+  });
+  await notifyVendedor(preventa.vendedor_pin, {
+    title: '✅ Preventa aprobada',
+    body: `${preventa.cliente_nombre}: ${preventa.cobrador_nombre} controló el local y aprobó -- pasa a reparto`,
   });
 
   return NextResponse.json({ ok: true, status: 'aprobada' });
