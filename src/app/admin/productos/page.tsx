@@ -5,15 +5,28 @@ import PriceListImport from '@/components/admin/PriceListImport';
 import ExportButton from '@/components/admin/ExportButton';
 import DeleteButton from '@/components/admin/DeleteButton';
 import AdminActionForm from '@/components/admin/AdminActionForm';
+import ZonasTree from '@/components/admin/ZonasTree';
+import ProductLocationsManager from '@/components/admin/ProductLocationsManager';
+import StockMovementsHistory from '@/components/admin/StockMovementsHistory';
+import EtiquetasClient from '@/components/admin/EtiquetasClient';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { upsertCategory, deleteCategory } from '@/lib/actions';
+import type { Zona, ProductoDeposito, ProductLocationRow } from '@/app/admin/depositos/page';
+
+const TABS = [
+  { value: 'productos', label: 'Productos' },
+  { value: 'categorias', label: 'Categorías' },
+  { value: 'depositos', label: 'Depósitos' },
+  { value: 'etiquetas', label: 'Etiquetas' },
+] as const;
+type Tab = (typeof TABS)[number]['value'];
 
 export default async function ProductosYCategoriasPage({
   searchParams,
 }: {
   searchParams: { tab?: string; edit?: string; new?: string; q?: string };
 }) {
-  const tab = searchParams.tab === 'categorias' ? 'categorias' : 'productos';
+  const tab: Tab = (TABS.find((t) => t.value === searchParams.tab)?.value ?? 'productos');
 
   return (
     <AdminShell>
@@ -21,11 +34,8 @@ export default async function ProductosYCategoriasPage({
         <h1 className="font-display text-2xl font-bold text-steel-950">Productos y categorías</h1>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b border-plate-200">
-        {[
-          { value: 'productos', label: 'Productos' },
-          { value: 'categorias', label: 'Categorías' },
-        ].map(({ value, label }) => (
+      <div className="flex gap-2 mb-6 border-b border-plate-200 flex-wrap">
+        {TABS.map(({ value, label }) => (
           <a
             key={value}
             href={`?tab=${value}`}
@@ -40,7 +50,10 @@ export default async function ProductosYCategoriasPage({
         ))}
       </div>
 
-      {tab === 'categorias' ? <CategoriasTab searchParams={searchParams} /> : <ProductosTab searchParams={searchParams} />}
+      {tab === 'categorias' && <CategoriasTab searchParams={searchParams} />}
+      {tab === 'depositos' && <DepositosTab />}
+      {tab === 'etiquetas' && <EtiquetasTab />}
+      {tab === 'productos' && <ProductosTab searchParams={searchParams} />}
     </AdminShell>
   );
 }
@@ -247,4 +260,77 @@ async function CategoriasTab({ searchParams }: { searchParams: { edit?: string }
       <style>{`.input{width:100%;border-radius:0.5rem;border:1px solid #dfe3e8;padding:0.5rem 0.75rem;font-size:0.875rem;outline:none;margin-bottom:0.25rem}`}</style>
     </div>
   );
+}
+
+async function DepositosTab() {
+  const supabase = createServerSupabase();
+
+  const { data: zonas } = await supabase
+    .from('zonas')
+    .select('id, parent_id, tipo, codigo, nombre, sort_order, active')
+    .order('sort_order');
+
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, sku, name, stock')
+    .eq('active', true)
+    .order('name');
+
+  const { data: locations } = await supabase
+    .from('product_locations')
+    .select('id, product_id, zona_id, quantity');
+
+  const { data: movements } = await supabase
+    .from('stock_movements')
+    .select('id, tipo, quantity, staff_name, note, created_at, zona_id, product:products(name, sku)')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  return (
+    <>
+      <p className="text-sm text-steel-500 mb-6">
+        Armá la estructura de góndolas/estantes/divisiones de cada depósito y asignale a cada
+        producto dónde está ubicado. Lo mismo lo puede gestionar Gabriel desde la terminal del
+        depósito (sin login), en <span className="font-mono">/deposito/gestion</span>.
+      </p>
+      <ZonasTree zonas={(zonas as Zona[]) || []} />
+      <ProductLocationsManager
+        products={(products as ProductoDeposito[]) || []}
+        zonas={(zonas as Zona[]) || []}
+        locations={(locations as ProductLocationRow[]) || []}
+      />
+      <div className="mt-8">
+        <StockMovementsHistory movements={movements || []} zonas={(zonas as Zona[]) || []} />
+      </div>
+    </>
+  );
+}
+
+const ETIQUETAS_PAGE_SIZE = 1000; // limite maximo por request que impone Supabase (db-max-rows), no se puede pedir mas de una
+
+async function EtiquetasTab() {
+  const supabase = createServerSupabase();
+
+  const pages = [];
+  for (let from = 0; ; from += ETIQUETAS_PAGE_SIZE) {
+    const { data } = await supabase
+      .from('products')
+      .select('id, sku, name, description, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct), brand:brands(name)')
+      .eq('active', true)
+      .order('name')
+      .range(from, from + ETIQUETAS_PAGE_SIZE - 1);
+    pages.push(...(data || []));
+    if (!data || data.length < ETIQUETAS_PAGE_SIZE) break;
+  }
+
+  // El join a categories viene tipado como array por defecto (aunque la
+  // relacion es de a uno) -- se normaliza aca para que el cliente reciba
+  // siempre un objeto o null.
+  const normalized = pages.map((p) => ({
+    ...p,
+    category: Array.isArray(p.category) ? p.category[0] ?? null : p.category,
+    brand: Array.isArray(p.brand) ? p.brand[0] ?? null : p.brand,
+  }));
+
+  return <EtiquetasClient products={normalized} />;
 }

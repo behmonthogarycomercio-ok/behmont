@@ -131,7 +131,7 @@ export async function updateProductSpecs(formData: FormData): Promise<ActionResu
 
   const result = await updateChecked(supabase, 'products', { specs }, 'id', id);
   if (result.error) return result;
-  revalidatePath('/admin/etiquetas');
+  revalidatePath('/admin/productos');
   revalidatePath('/admin/productos');
   return {};
 }
@@ -595,7 +595,7 @@ export async function upsertZona(formData: FormData): Promise<ActionResult> {
     const { error } = await supabase.from('zonas').insert(payload);
     if (error) return { error: friendlyDbError(error) };
   }
-  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
   return {};
 }
 
@@ -610,7 +610,7 @@ export async function deleteZona(id: string): Promise<ActionResult> {
   }
   const { error } = await supabase.from('zonas').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
   return {};
 }
 
@@ -630,7 +630,7 @@ export async function upsertProductLocation(formData: FormData): Promise<ActionR
     });
     if (error) return { error: friendlyDbError(error) };
   }
-  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
   revalidatePath('/admin/productos');
   revalidatePath('/');
   return {};
@@ -640,7 +640,7 @@ export async function deleteProductLocation(id: string): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const { error } = await supabase.from('product_locations').delete().eq('id', id);
   if (error) return { error: friendlyDbError(error) };
-  revalidatePath('/admin/depositos');
+  revalidatePath('/admin/productos');
   revalidatePath('/admin/productos');
   revalidatePath('/');
   return {};

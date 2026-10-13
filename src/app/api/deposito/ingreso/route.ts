@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   const notifyPayload = {
     title: '📦 Ingreso a depósito',
     body: `${staffName} ingresó ${quantity} de "${product?.name || 'un producto'}"`,
-    url: '/admin/depositos',
+    url: '/admin/productos?tab=depositos',
   };
   await Promise.all([notifyAdmins(notifyPayload), notifyDepositoSupervisor(notifyPayload)]);
 
