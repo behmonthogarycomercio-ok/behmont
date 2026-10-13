@@ -80,12 +80,12 @@ export default function CobradorPushButton({ pin, code }: { pin: CobradorPin; co
   }
 
   if (state === 'unsupported') {
-    return <p className="text-xs text-amber-400">Este navegador no soporta avisos push. Usá Chrome.</p>;
+    return <p className="text-xs text-warning-600">Este navegador no soporta avisos push. Usá Chrome.</p>;
   }
 
   if (state === 'checking' || state === 'busy') {
     return (
-      <button disabled className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white/40">
+      <button disabled className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-steel-400">
         <Bell className="h-4 w-4" /> Un momento…
       </button>
     );
@@ -105,7 +105,7 @@ export default function CobradorPushButton({ pin, code }: { pin: CobradorPin; co
   return (
     <button
       onClick={subscribe}
-      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-400"
+      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white bg-steel-800 hover:bg-steel-700"
     >
       <BellOff className="h-4 w-4" /> Activar avisos de preventas
     </button>

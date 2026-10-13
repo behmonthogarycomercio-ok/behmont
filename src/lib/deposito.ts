@@ -11,6 +11,9 @@ export const DEPOSITO_STAFF = [
   { pin: 7, name: 'Tiago' },
   { pin: 8, name: 'Fernando' },
   { pin: 9, name: 'Juani' },
+  { pin: 10, name: 'Leo' },
+  { pin: 11, name: 'Nacho' },
+  { pin: 12, name: 'Cristian' },
 ] as const;
 
 export type DepositoPin = (typeof DEPOSITO_STAFF)[number]['pin'];
@@ -26,6 +29,9 @@ export const DEPOSITO_STAFF_LABELS: Record<DepositoPin, string> = {
   7: 'Tiago',
   8: 'Fernando',
   9: 'Juani',
+  10: 'Leo',
+  11: 'Nacho',
+  12: 'Cristian',
 };
 
 const PIN_VALUES = DEPOSITO_STAFF.map((s) => s.pin) as [DepositoPin, ...DepositoPin[]];
@@ -46,7 +52,7 @@ export const canGestionZonas = (pin: DepositoPin) => pin === GESTION_PIN;
 
 // PINs habilitados para cargar preventas (ver src/lib/preventas.ts): todos
 // menos Alejandro (supervisor de cobradores) y Facundo (repartidor).
-export const PREVENTA_VENDEDOR_PINS: readonly DepositoPin[] = [0, 3, 4, 5, 6, 7, 8, 9];
+export const PREVENTA_VENDEDOR_PINS: readonly DepositoPin[] = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 export const canVenderPreventa = (pin: DepositoPin) => PREVENTA_VENDEDOR_PINS.includes(pin);
 
 export const zonaTipoSchema = z.enum(['area', 'gondola', 'estante', 'division']);

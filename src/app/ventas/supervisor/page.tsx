@@ -39,19 +39,19 @@ export default function VentasSupervisorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
+    <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
       <div className="mx-auto max-w-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-28 shrink-0">
             <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
           </div>
-          <h1 className="font-display text-2xl font-extrabold">Supervisor</h1>
+          <h1 className="font-display text-2xl font-extrabold text-steel-900">Supervisor</h1>
         </div>
 
         {!authed ? (
-          <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-6">
-            <p className="text-sm text-white/60 mb-1">
-              Hola <span className="font-semibold text-white">Alejandro</span>, ingresá tu código secreto
+          <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-6">
+            <p className="text-sm text-steel-500 mb-1">
+              Hola <span className="font-semibold text-steel-900">Alejandro</span>, ingresá tu código secreto
             </p>
             <input
               type="password"
@@ -59,21 +59,21 @@ export default function VentasSupervisorPage() {
               onChange={(e) => setCodeInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && confirmCode()}
               placeholder="Código"
-              className="w-full rounded-lg px-3 py-3 text-steel-900 mb-3 mt-3"
+              className="w-full rounded-lg border border-steel-200 px-3 py-3 text-steel-900 mb-3 mt-3"
               autoFocus
             />
-            {authError && <p className="text-sm text-red-400 mb-3">{authError}</p>}
+            {authError && <p className="text-sm text-red-600 mb-3">{authError}</p>}
             <button
               onClick={confirmCode}
               disabled={authing || codeInput.trim().length < 4}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
             >
               {authing ? 'Verificando…' : 'Entrar'}
             </button>
           </div>
         ) : (
-          <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-6">
-            <p className="text-sm text-white/60 mb-4">
+          <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-6">
+            <p className="text-sm text-steel-500 mb-4">
               Te vamos a avisar si una preventa queda 24 o 48hs sin que el cobrador la resuelva.
             </p>
             <SupervisorPushButton code={code} />

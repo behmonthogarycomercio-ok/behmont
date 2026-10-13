@@ -150,26 +150,26 @@ export default function CobradorPage() {
 
   if (!cobrador) {
     return (
-      <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
-        <p className="text-white/60">Página no encontrada.</p>
+      <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
+        <p className="text-steel-500">Página no encontrada.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
+    <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-28 shrink-0">
             <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
           </div>
-          <h1 className="font-display text-2xl font-extrabold">Cobrador</h1>
+          <h1 className="font-display text-2xl font-extrabold text-steel-900">Cobrador</h1>
         </div>
 
         {!authed ? (
-          <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-6">
-            <p className="text-sm text-white/60 mb-1">
-              Hola <span className="font-semibold text-white">{cobrador.name}</span>, ingresá tu código secreto
+          <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-6">
+            <p className="text-sm text-steel-500 mb-1">
+              Hola <span className="font-semibold text-steel-900">{cobrador.name}</span>, ingresá tu código secreto
             </p>
             <input
               type="password"
@@ -177,50 +177,50 @@ export default function CobradorPage() {
               onChange={(e) => setCodeInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && confirmCode()}
               placeholder="Código"
-              className="w-full rounded-lg px-3 py-3 text-steel-900 mb-3 mt-3"
+              className="w-full rounded-lg border border-steel-200 px-3 py-3 text-steel-900 mb-3 mt-3"
               autoFocus
             />
-            {authError && <p className="text-sm text-red-400 mb-3">{authError}</p>}
+            {authError && <p className="text-sm text-red-600 mb-3">{authError}</p>}
             <button
               onClick={confirmCode}
               disabled={authing || codeInput.trim().length < 4}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
             >
               {authing ? 'Verificando…' : 'Entrar'}
             </button>
           </div>
         ) : selected ? (
-          <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
-            <button onClick={() => setSelectedId(null)} className="text-xs text-amber-400 underline mb-3">
+          <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-4">
+            <button onClick={() => setSelectedId(null)} className="text-xs text-steel-600 underline mb-3">
               ← Volver a la lista
             </button>
-            <p className="font-display text-xl font-bold">{selected.cliente_nombre}</p>
-            <p className="text-sm text-white/50 mb-1">{selected.cliente_direccion} — {selected.cliente_ciudad}</p>
-            <p className="text-sm text-white/50 mb-1">DNI/CUIT: {selected.cliente_dni_cuit}</p>
-            {selected.cliente_contacto && <p className="text-sm text-white/50 mb-1">Tel: {selected.cliente_contacto}</p>}
-            {selected.cliente_rubro && <p className="text-sm text-white/50 mb-1">Rubro: {selected.cliente_rubro}</p>}
-            <p className="text-sm text-white/50 mb-3">Cargada por {selected.vendedor_nombre}</p>
+            <p className="font-display text-xl font-bold text-steel-900">{selected.cliente_nombre}</p>
+            <p className="text-sm text-steel-500 mb-1">{selected.cliente_direccion} — {selected.cliente_ciudad}</p>
+            <p className="text-sm text-steel-500 mb-1">DNI/CUIT: {selected.cliente_dni_cuit}</p>
+            {selected.cliente_contacto && <p className="text-sm text-steel-500 mb-1">Tel: {selected.cliente_contacto}</p>}
+            {selected.cliente_rubro && <p className="text-sm text-steel-500 mb-1">Rubro: {selected.cliente_rubro}</p>}
+            <p className="text-sm text-steel-500 mb-3">Cargada por {selected.vendedor_nombre}</p>
 
-            <div className="rounded-lg bg-steel-800 p-3 mb-3">
+            <div className="rounded-lg bg-steel-50 border border-steel-200 p-3 mb-3">
               {selected.items.map((i) => (
-                <p key={i.sku} className="text-sm">
+                <p key={i.sku} className="text-sm text-steel-800">
                   {i.quantity}x {i.name} — ${formatPrice(i.precioOfrecido)} c/u (lista ${formatPrice(i.precioLista)})
                 </p>
               ))}
-              <p className="text-sm text-white/60 mt-2">
+              <p className="text-sm text-steel-500 mt-2">
                 {selected.cuotas_cantidad} cuotas {selected.cuotas_tipo} de ${formatPrice(selected.cuota_precio)}
                 {selected.interes_porcentaje ? ` — ${selected.interes_porcentaje}% interés` : ''}
               </p>
             </div>
 
             {selected.observaciones && (
-              <p className="text-sm text-amber-300 mb-3">Obs. del vendedor: {selected.observaciones}</p>
+              <p className="text-sm text-warning-600 mb-3">Obs. del vendedor: {selected.observaciones}</p>
             )}
 
             {selected.status === 'pendiente_cobrador' ? (
               <>
-                <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Foto del papel (obligatoria)</p>
-                <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-white/30 px-4 py-2 text-sm text-white/70 hover:border-amber-500 hover:text-amber-400 mb-3">
+                <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Foto del papel (obligatoria)</p>
+                <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-steel-300 px-4 py-2 text-sm text-steel-600 hover:border-steel-600 hover:text-steel-700 mb-3">
                   {foto ? foto.name : 'Elegir foto'}
                   <input
                     type="file"
@@ -236,7 +236,7 @@ export default function CobradorPage() {
                   value={notas}
                   onChange={(e) => setNotas(e.target.value)}
                   rows={2}
-                  className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm mb-3"
+                  className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm mb-3"
                 />
 
                 {confirmingRechazo && (
@@ -245,11 +245,11 @@ export default function CobradorPage() {
                     value={motivoRechazo}
                     onChange={(e) => setMotivoRechazo(e.target.value)}
                     rows={2}
-                    className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm mb-3"
+                    className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm mb-3"
                   />
                 )}
 
-                {message && <p className="text-sm text-red-400 mb-3">{message}</p>}
+                {message && <p className="text-sm text-red-600 mb-3">{message}</p>}
 
                 <div className="flex gap-2">
                   <button
@@ -270,7 +270,7 @@ export default function CobradorPage() {
                   ) : (
                     <button
                       onClick={() => setConfirmingRechazo(true)}
-                      className="flex-1 rounded-lg border border-red-500 text-red-400 hover:bg-red-500/10 py-3 text-sm font-semibold"
+                      className="flex-1 rounded-lg border border-red-600 text-red-600 hover:bg-red-50 py-3 text-sm font-semibold"
                     >
                       Rechazar
                     </button>
@@ -278,14 +278,14 @@ export default function CobradorPage() {
                 </div>
               </>
             ) : (
-              <div className="text-sm text-white/60">
-                <p className="font-semibold mb-2">{STATUS_LABELS[selected.status]}</p>
+              <div className="text-sm text-steel-500">
+                <p className="font-semibold text-steel-900 mb-2">{STATUS_LABELS[selected.status]}</p>
                 {selected.cobrador_foto_url && (
-                  <a href={selected.cobrador_foto_url} target="_blank" rel="noopener noreferrer" className="text-amber-400 underline">
+                  <a href={selected.cobrador_foto_url} target="_blank" rel="noopener noreferrer" className="text-steel-600 underline">
                     Ver foto subida
                   </a>
                 )}
-                {selected.cobrador_motivo_rechazo && <p className="mt-2 text-red-400">Motivo: {selected.cobrador_motivo_rechazo}</p>}
+                {selected.cobrador_motivo_rechazo && <p className="mt-2 text-red-600">Motivo: {selected.cobrador_motivo_rechazo}</p>}
               </div>
             )}
           </div>
@@ -296,18 +296,18 @@ export default function CobradorPage() {
             </div>
 
             <div>
-              <h2 className="font-display text-lg font-bold mb-3">Pendientes</h2>
-              {preventas === null && <p className="text-white/60 text-sm">Cargando…</p>}
-              {pendientes.length === 0 && preventas !== null && <p className="text-white/40 text-sm">No tenés preventas pendientes.</p>}
+              <h2 className="font-display text-lg font-bold text-steel-900 mb-3">Pendientes</h2>
+              {preventas === null && <p className="text-steel-500 text-sm">Cargando…</p>}
+              {pendientes.length === 0 && preventas !== null && <p className="text-steel-400 text-sm">No tenés preventas pendientes.</p>}
               <div className="flex flex-col gap-2">
                 {pendientes.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => selectPreventa(p.id)}
-                    className="text-left rounded-xl2 bg-steel-900 border border-steel-800 p-4 hover:border-amber-500"
+                    className="text-left rounded-xl2 bg-white border border-steel-200 shadow-card p-4 hover:border-steel-600"
                   >
-                    <p className="font-semibold">{p.cliente_nombre}</p>
-                    <p className="text-xs text-white/40">{p.cliente_direccion} — {p.cliente_ciudad}</p>
+                    <p className="font-semibold text-steel-900">{p.cliente_nombre}</p>
+                    <p className="text-xs text-steel-400">{p.cliente_direccion} — {p.cliente_ciudad}</p>
                   </button>
                 ))}
               </div>
@@ -315,17 +315,17 @@ export default function CobradorPage() {
 
             {revisadas.length > 0 && (
               <div>
-                <h2 className="font-display text-lg font-bold mb-3">Revisadas</h2>
+                <h2 className="font-display text-lg font-bold text-steel-900 mb-3">Revisadas</h2>
                 <div className="flex flex-col gap-2">
                   {revisadas.map((p) => (
                     <button
                       key={p.id}
                       onClick={() => selectPreventa(p.id)}
-                      className="text-left rounded-xl2 bg-steel-900 border border-steel-800 p-4 hover:border-amber-500 flex items-center justify-between gap-2"
+                      className="text-left rounded-xl2 bg-white border border-steel-200 shadow-card p-4 hover:border-steel-600 flex items-center justify-between gap-2"
                     >
                       <div>
-                        <p className="font-semibold">{p.cliente_nombre}</p>
-                        <p className="text-xs text-white/40">{p.cliente_ciudad}</p>
+                        <p className="font-semibold text-steel-900">{p.cliente_nombre}</p>
+                        <p className="text-xs text-steel-400">{p.cliente_ciudad}</p>
                       </div>
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${p.status === 'aprobada' ? 'bg-emerald-600' : 'bg-red-600'}`}>
                         {STATUS_LABELS[p.status]}

@@ -37,9 +37,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pendiente_documentacion: 'bg-amber-500',
+  pendiente_documentacion: 'bg-warning-600',
   rechazada_gabriel: 'bg-red-600',
-  pendiente_cobrador: 'bg-amber-500',
+  pendiente_cobrador: 'bg-warning-600',
   aprobada: 'bg-emerald-600',
   rechazada_cobrador: 'bg-red-600',
 };
@@ -245,26 +245,26 @@ export default function VentasVendedorPage() {
 
   if (!vendedor) {
     return (
-      <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
-        <p className="text-white/60">Página no encontrada.</p>
+      <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
+        <p className="text-steel-500">Página no encontrada.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-steel-950 px-4 py-8 text-white">
+    <main className="min-h-screen bg-white px-4 py-8 text-steel-900">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative h-12 w-28 shrink-0">
             <Image src="/images/logo-behmont-turnero.png" alt="BEHMONT" fill className="object-contain" priority />
           </div>
-          <h1 className="font-display text-2xl font-extrabold">Ventas</h1>
+          <h1 className="font-display text-2xl font-extrabold text-steel-900">Ventas</h1>
         </div>
 
         {!authed ? (
-          <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-6">
-            <p className="text-sm text-white/60 mb-1">
-              Hola <span className="font-semibold text-white">{vendedor.name}</span>, ingresá tu código secreto
+          <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-6">
+            <p className="text-sm text-steel-500 mb-1">
+              Hola <span className="font-semibold text-steel-900">{vendedor.name}</span>, ingresá tu código secreto
             </p>
             <input
               type="password"
@@ -272,14 +272,14 @@ export default function VentasVendedorPage() {
               onChange={(e) => setCodeInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && confirmCode()}
               placeholder="Código"
-              className="w-full rounded-lg px-3 py-3 text-steel-900 mb-3 mt-3"
+              className="w-full rounded-lg border border-steel-200 px-3 py-3 text-steel-900 mb-3 mt-3"
               autoFocus
             />
-            {authError && <p className="text-sm text-red-400 mb-3">{authError}</p>}
+            {authError && <p className="text-sm text-red-600 mb-3">{authError}</p>}
             <button
               onClick={confirmCode}
               disabled={authing || codeInput.trim().length < 4}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white"
             >
               {authing ? 'Verificando…' : 'Entrar'}
             </button>
@@ -288,16 +288,16 @@ export default function VentasVendedorPage() {
           <div className="flex flex-col gap-6">
             <VendedorPushButton pin={vendedor.pin} code={code} />
 
-            <div className="rounded-xl2 bg-steel-900 border border-steel-800 p-4">
-              <h2 className="font-display text-lg font-bold mb-3">Nueva preventa</h2>
+            <div className="rounded-xl2 bg-white border border-steel-200 shadow-card p-4">
+              <h2 className="font-display text-lg font-bold text-steel-900 mb-3">Nueva preventa</h2>
 
-              <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Productos</p>
+              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Productos</p>
               <input
                 type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Buscar producto por código o nombre..."
-                className="w-full rounded-lg px-3 py-2 text-sm text-steel-900 mb-2"
+                className="w-full rounded-lg border border-steel-200 px-3 py-2 text-sm text-steel-900 mb-2"
               />
               {filteredProducts.length > 0 && (
                 <ul className="flex flex-col gap-1 mb-3">
@@ -305,9 +305,9 @@ export default function VentasVendedorPage() {
                     <li key={p.id}>
                       <button
                         onClick={() => addToCart(p)}
-                        className="text-left text-sm text-white/80 hover:text-amber-400"
+                        className="text-left text-sm text-steel-700 hover:text-steel-600"
                       >
-                        + {p.name} <span className="text-white/40 font-mono text-xs">({p.sku})</span>
+                        + {p.name} <span className="text-steel-400 font-mono text-xs">({p.sku})</span>
                       </button>
                     </li>
                   ))}
@@ -317,42 +317,42 @@ export default function VentasVendedorPage() {
               {cart.length > 0 && (
                 <div className="flex flex-col gap-2 mb-4">
                   {cart.map((item) => (
-                    <div key={item.sku} className="rounded-lg bg-steel-800 p-3">
+                    <div key={item.sku} className="rounded-lg bg-steel-50 border border-steel-200 p-3">
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-sm font-semibold">{item.name}</span>
-                        <button onClick={() => removeFromCart(item.sku)} className="text-xs text-red-400 underline shrink-0">
+                        <span className="text-sm font-semibold text-steel-900">{item.name}</span>
+                        <button onClick={() => removeFromCart(item.sku)} className="text-xs text-red-600 underline shrink-0">
                           Quitar
                         </button>
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="block text-[10px] text-white/50">Cantidad</label>
+                          <label className="block text-[10px] text-steel-500">Cantidad</label>
                           <input
                             type="number"
                             min={1}
                             value={item.quantity}
                             onChange={(e) => updateCartItem(item.sku, 'quantity', e.target.value)}
-                            className="w-full rounded px-2 py-1 text-steel-900 text-sm"
+                            className="w-full rounded border border-steel-200 px-2 py-1 text-steel-900 text-sm"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-white/50">Precio lista</label>
+                          <label className="block text-[10px] text-steel-500">Precio lista</label>
                           <input
                             type="number"
                             min={0}
                             value={item.precioLista}
                             onChange={(e) => updateCartItem(item.sku, 'precioLista', e.target.value)}
-                            className="w-full rounded px-2 py-1 text-steel-900 text-sm"
+                            className="w-full rounded border border-steel-200 px-2 py-1 text-steel-900 text-sm"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-white/50">Precio ofrecido</label>
+                          <label className="block text-[10px] text-steel-500">Precio ofrecido</label>
                           <input
                             type="number"
                             min={0}
                             value={item.precioOfrecido}
                             onChange={(e) => updateCartItem(item.sku, 'precioOfrecido', e.target.value)}
-                            className="w-full rounded px-2 py-1 text-steel-900 text-sm"
+                            className="w-full rounded border border-steel-200 px-2 py-1 text-steel-900 text-sm"
                           />
                         </div>
                       </div>
@@ -361,31 +361,31 @@ export default function VentasVendedorPage() {
                 </div>
               )}
 
-              <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Cliente</p>
+              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Cliente</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <input placeholder="Nombre" value={clienteNombre} onChange={(e) => setClienteNombre(e.target.value)} className="col-span-2 rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="Dirección" value={clienteDireccion} onChange={(e) => setClienteDireccion(e.target.value)} className="col-span-2 rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="Teléfono / contacto" value={clienteContacto} onChange={(e) => setClienteContacto(e.target.value)} className="rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="DNI o CUIT" value={clienteDniCuit} onChange={(e) => setClienteDniCuit(e.target.value)} className="rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="Ciudad" value={clienteCiudad} onChange={(e) => setClienteCiudad(e.target.value)} className="rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="Código postal (opcional)" value={clienteCodigoPostal} onChange={(e) => setClienteCodigoPostal(e.target.value)} className="rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <input placeholder="Rubro (opcional)" value={clienteRubro} onChange={(e) => setClienteRubro(e.target.value)} className="rounded-lg px-3 py-2 text-steel-900 text-sm" />
-                <select value={clienteEstado} onChange={(e) => setClienteEstado(e.target.value as ClienteEstado)} className="rounded-lg px-3 py-2 text-steel-900 text-sm">
+                <input placeholder="Nombre" value={clienteNombre} onChange={(e) => setClienteNombre(e.target.value)} className="col-span-2 rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="Dirección" value={clienteDireccion} onChange={(e) => setClienteDireccion(e.target.value)} className="col-span-2 rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="Teléfono / contacto" value={clienteContacto} onChange={(e) => setClienteContacto(e.target.value)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="DNI o CUIT" value={clienteDniCuit} onChange={(e) => setClienteDniCuit(e.target.value)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="Ciudad" value={clienteCiudad} onChange={(e) => setClienteCiudad(e.target.value)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="Código postal (opcional)" value={clienteCodigoPostal} onChange={(e) => setClienteCodigoPostal(e.target.value)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <input placeholder="Rubro (opcional)" value={clienteRubro} onChange={(e) => setClienteRubro(e.target.value)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                <select value={clienteEstado} onChange={(e) => setClienteEstado(e.target.value as ClienteEstado)} className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm">
                   <option value="nuevo">Cliente nuevo</option>
                   <option value="activo">Cliente activo</option>
                   <option value="pasivo">Cliente pasivo</option>
                 </select>
               </div>
 
-              <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Financiación</p>
+              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Financiación</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <div>
-                  <label className="block text-[10px] text-white/50">Cantidad de cuotas</label>
-                  <input type="number" min={1} value={cuotasCantidad} onChange={(e) => setCuotasCantidad(e.target.value)} className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm" />
+                  <label className="block text-[10px] text-steel-500">Cantidad de cuotas</label>
+                  <input type="number" min={1} value={cuotasCantidad} onChange={(e) => setCuotasCantidad(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-white/50">Tipo</label>
-                  <select value={cuotasTipo} onChange={(e) => setCuotasTipo(e.target.value as CuotasTipo)} className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm">
+                  <label className="block text-[10px] text-steel-500">Tipo</label>
+                  <select value={cuotasTipo} onChange={(e) => setCuotasTipo(e.target.value as CuotasTipo)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm">
                     <option value="diaria">Diaria</option>
                     <option value="semanal">Semanal</option>
                     <option value="mensual">Mensual</option>
@@ -393,12 +393,12 @@ export default function VentasVendedorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-white/50">Precio de la cuota</label>
-                  <input type="number" min={0} value={cuotaPrecio} onChange={(e) => setCuotaPrecio(e.target.value)} className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm" />
+                  <label className="block text-[10px] text-steel-500">Precio de la cuota</label>
+                  <input type="number" min={0} value={cuotaPrecio} onChange={(e) => setCuotaPrecio(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-white/50">Interés % (opcional)</label>
-                  <input type="number" min={0} value={interesPorcentaje} onChange={(e) => setInteresPorcentaje(e.target.value)} className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm" />
+                  <label className="block text-[10px] text-steel-500">Interés % (opcional)</label>
+                  <input type="number" min={0} value={interesPorcentaje} onChange={(e) => setInteresPorcentaje(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
                 </div>
               </div>
 
@@ -407,21 +407,21 @@ export default function VentasVendedorPage() {
                 value={observaciones}
                 onChange={(e) => setObservaciones(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg px-3 py-2 text-steel-900 text-sm mb-4"
+                className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm mb-4"
               />
 
-              <p className="text-xs uppercase tracking-wide text-white/40 mb-2">Cobrador</p>
+              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Cobrador</p>
               <div className="flex flex-col gap-3 mb-4">
                 {Array.from(cobradoresPorCiudad.entries()).map(([ciudad, personas]) => (
                   <div key={ciudad}>
-                    <p className="text-xs text-white/50 mb-1">{ciudad}</p>
+                    <p className="text-xs text-steel-500 mb-1">{ciudad}</p>
                     <div className="flex flex-wrap gap-2">
                       {personas.map((c) => (
                         <button
                           key={c.pin}
                           onClick={() => setCobradorPin(String(c.pin))}
                           className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                            cobradorPin === String(c.pin) ? 'bg-amber-500 text-white' : 'bg-steel-800 text-white/60'
+                            cobradorPin === String(c.pin) ? 'bg-steel-800 text-white' : 'bg-steel-100 text-steel-600'
                           }`}
                         >
                           {c.name}
@@ -432,54 +432,54 @@ export default function VentasVendedorPage() {
                 ))}
               </div>
 
-              {formError && <p className="text-sm text-red-400 mb-3">{formError}</p>}
-              {successId && <p className="text-sm text-emerald-400 mb-3">Preventa cargada. Queda esperando que Gabriel confirme la documentación.</p>}
+              {formError && <p className="text-sm text-red-600 mb-3">{formError}</p>}
+              {successId && <p className="text-sm text-emerald-600 mb-3">Preventa cargada. Queda esperando que Gabriel confirme la documentación.</p>}
 
               <button
                 onClick={submit}
                 disabled={submitting}
-                className="w-full rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 py-3 text-sm font-semibold text-white"
+                className="w-full rounded-lg bg-steel-800 hover:bg-steel-700 disabled:opacity-50 py-3 text-sm font-semibold text-white"
               >
                 {submitting ? 'Cargando…' : 'Cargar preventa'}
               </button>
             </div>
 
             <div>
-              <h2 className="font-display text-lg font-bold mb-3">Mis ventas</h2>
-              {misVentas === null && <p className="text-white/60 text-sm">Cargando…</p>}
-              {misVentas && misVentas.length === 0 && <p className="text-white/40 text-sm">Todavía no cargaste ninguna.</p>}
+              <h2 className="font-display text-lg font-bold text-steel-900 mb-3">Mis ventas</h2>
+              {misVentas === null && <p className="text-steel-500 text-sm">Cargando…</p>}
+              {misVentas && misVentas.length === 0 && <p className="text-steel-400 text-sm">Todavía no cargaste ninguna.</p>}
               <div className="flex flex-col gap-2">
                 {misVentas?.map((p) => {
                   const expanded = expandedId === p.id;
                   return (
-                    <div key={p.id} className="rounded-xl2 bg-steel-900 border border-steel-800 overflow-hidden">
+                    <div key={p.id} className="rounded-xl2 bg-white border border-steel-200 shadow-card overflow-hidden">
                       <button
                         onClick={() => setExpandedId(expanded ? null : p.id)}
                         className="w-full flex items-center justify-between gap-2 p-4 text-left"
                       >
                         <div>
-                          <p className="font-semibold">{p.cliente_nombre}</p>
-                          <p className="text-xs text-white/40">{p.cliente_ciudad} — {p.cobrador_nombre}</p>
+                          <p className="font-semibold text-steel-900">{p.cliente_nombre}</p>
+                          <p className="text-xs text-steel-400">{p.cliente_ciudad} — {p.cobrador_nombre}</p>
                         </div>
                         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${STATUS_COLORS[p.status]}`}>
                           {STATUS_LABELS[p.status] || p.status}
                         </span>
                       </button>
                       {expanded && (
-                        <div className="border-t border-steel-800 p-4 text-sm text-white/70 space-y-1">
+                        <div className="border-t border-steel-200 p-4 text-sm text-steel-600 space-y-1">
                           {p.items.map((i) => (
                             <p key={i.sku}>
                               {i.quantity}x {i.name} — ${formatPrice(i.precioOfrecido)} c/u
                             </p>
                           ))}
-                          <p className="text-white/50">
+                          <p className="text-steel-500">
                             {p.cuotas_cantidad} cuotas {p.cuotas_tipo} de ${formatPrice(p.cuota_precio)}
                           </p>
                           {p.gabriel_motivo_rechazo && (
-                            <p className="text-red-400">Motivo (documentación): {p.gabriel_motivo_rechazo}</p>
+                            <p className="text-red-600">Motivo (documentación): {p.gabriel_motivo_rechazo}</p>
                           )}
                           {p.cobrador_motivo_rechazo && (
-                            <p className="text-red-400">Motivo (cobrador): {p.cobrador_motivo_rechazo}</p>
+                            <p className="text-red-600">Motivo (cobrador): {p.cobrador_motivo_rechazo}</p>
                           )}
                         </div>
                       )}
