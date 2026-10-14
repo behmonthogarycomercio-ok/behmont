@@ -558,6 +558,7 @@ export async function createManualShipment(formData: FormData): Promise<ActionRe
     status: 'pendiente',
     destino_tipo: formData.get('destino_tipo') as string,
     destino_detalle: (formData.get('destino_detalle') as string) || null,
+    ciudad: (formData.get('ciudad') as string) || null,
     buyer_nickname: (formData.get('buyerNickname') as string) || null,
     items: [{ title: productTitle, quantity: 1, sku: sku || null }],
     payment_status: (formData.get('paymentStatus') as string) || 'abonado',

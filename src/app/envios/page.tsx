@@ -16,12 +16,14 @@ import {
   type ShipmentStatus,
   type PaymentStatus,
 } from '@/lib/envios';
+import { CIUDADES_ENVIO } from '@/lib/preventas';
 
 type Shipment = {
   id: string;
   ml_order_id: number;
   destino_tipo: 'domicilio' | 'sucursal_andreani' | 'otro';
   destino_detalle: string | null;
+  ciudad: string | null;
   buyer_nickname: string | null;
   items: { title: string; quantity: number; sku?: string | null }[];
   total: number | null;
@@ -53,6 +55,10 @@ export default function EnviosPage() {
 
   const [shipments, setShipments] = useState<Shipment[] | null>(null);
   const [loadError, setLoadError] = useState(false);
+  // "ml" = ventas reales de MercadoLibre (ml_order_id positivo); el resto de
+  // las opciones son ciudades -- preventas aprobadas y cargas manuales que
+  // se clasificaron con esa ciudad al cargarlas.
+  const [origenFiltro, setOrigenFiltro] = useState('ml');
   // Tarjeta donde se está por confirmar un paso que requiere nombre (retirado/entregado)
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [confirmingStatus, setConfirmingStatus] = useState<ShipmentStatus | null>(null);
@@ -357,15 +363,39 @@ export default function EnviosPage() {
 
         {shipments === null && <p className="text-steel-500">Cargando…</p>}
 
-        {shipments && shipments.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-16 text-steel-400">
-            <CheckCircle2 className="h-12 w-12" />
-            <p>No hay envíos pendientes.</p>
-          </div>
+        {shipments && (
+          <select
+            value={origenFiltro}
+            onChange={(e) => setOrigenFiltro(e.target.value)}
+            className="w-full mb-4 rounded-lg border border-steel-200 bg-white px-3 py-2.5 text-sm font-semibold text-steel-900"
+          >
+            <option value="ml">
+              Mercado Libre ({shipments.filter((s) => s.ml_order_id > 0).length})
+            </option>
+            {CIUDADES_ENVIO.map((c) => (
+              <option key={c} value={c}>
+                {c} ({shipments.filter((s) => s.ciudad === c).length})
+              </option>
+            ))}
+          </select>
         )}
 
+        {(() => {
+          const filtered = (shipments ?? []).filter((s) =>
+            origenFiltro === 'ml' ? s.ml_order_id > 0 : s.ciudad === origenFiltro
+          );
+          return shipments && filtered.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16 text-steel-400">
+              <CheckCircle2 className="h-12 w-12" />
+              <p>No hay envíos pendientes acá.</p>
+            </div>
+          ) : null;
+        })()}
+
         <div className="flex flex-col gap-5">
-          {shipments?.map((s) => {
+          {shipments
+            ?.filter((s) => (origenFiltro === 'ml' ? s.ml_order_id > 0 : s.ciudad === origenFiltro))
+            .map((s) => {
             const retrasado = isRetrasado({
               status: s.status,
               created_at: s.created_at,

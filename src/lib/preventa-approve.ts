@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { notifyDrivers, notifyVendedor } from './push';
 import { formatPrice } from './price';
+import { matchCiudadEnvio } from './preventas';
 
 type PreventaItem = { sku: string; name: string; quantity: number; precioLista: number; precioOfrecido: number };
 type PreventaRow = {
@@ -64,6 +65,7 @@ export async function approvePreventaAndCreateShipment(
       total,
       payment_status: 'pendiente_pago',
       notes,
+      ciudad: matchCiudadEnvio(preventa.cliente_ciudad),
     })
     .select('id')
     .single();

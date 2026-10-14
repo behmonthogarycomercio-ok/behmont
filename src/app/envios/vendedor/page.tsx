@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Home, Package, Plus, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '@/lib/price';
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
+import { CIUDADES_ENVIO } from '@/lib/preventas';
 
 type StaffName = 'lucas' | 'luz' | 'lito';
 const STAFF_OPTIONS: { value: StaffName; label: string }[] = [
@@ -45,6 +46,7 @@ export default function VendedorEnviosPage() {
   const [buyerNickname, setBuyerNickname] = useState('');
   const [destinoTipo, setDestinoTipo] = useState<'domicilio' | 'sucursal_andreani' | 'otro'>('domicilio');
   const [destinoDetalle, setDestinoDetalle] = useState('');
+  const [ciudad, setCiudad] = useState('');
   const [dni, setDni] = useState('');
   const [contacto, setContacto] = useState('');
   const [email, setEmail] = useState('');
@@ -87,6 +89,7 @@ export default function VendedorEnviosPage() {
           buyerNickname: buyerNickname.trim() || undefined,
           destinoTipo,
           destinoDetalle: destinoDetalle.trim() || undefined,
+          ciudad: ciudad || undefined,
           addedBy,
           dni: dni.trim() || undefined,
           contacto: contacto.trim() || undefined,
@@ -103,6 +106,7 @@ export default function VendedorEnviosPage() {
       setSku('');
       setBuyerNickname('');
       setDestinoDetalle('');
+      setCiudad('');
       setDni('');
       setContacto('');
       setEmail('');
@@ -196,6 +200,16 @@ export default function VendedorEnviosPage() {
               onChange={(e) => setDestinoDetalle(e.target.value)}
               className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
             />
+            <select
+              value={ciudad}
+              onChange={(e) => setCiudad(e.target.value)}
+              className="rounded-lg border border-steel-200 px-3 py-2 text-steel-900"
+            >
+              <option value="">Ciudad (opcional, para el filtro de /envios)</option>
+              {CIUDADES_ENVIO.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"

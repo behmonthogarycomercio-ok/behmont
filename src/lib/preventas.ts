@@ -14,6 +14,29 @@ export const COBRADORES = [
   { pin: 9, name: 'Valentín', ciudad: 'Villaguay' },
 ] as const;
 
+// Ciudades únicas de COBRADORES, en orden -- Concordia primero porque es
+// donde más se vende. Mismo orden que se usa para el filtro de /envios.
+export const CIUDADES_ENVIO: string[] = [...new Set(COBRADORES.map((c) => c.ciudad))];
+
+function normalizeCiudad(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, ''); // saca acentos para comparar
+}
+
+/** Matchea una ciudad tipeada libremente (ej. "concordia", "CONCORDIA ",
+ * "conCORdia") contra la lista canónica de CIUDADES_ENVIO -- usado al
+ * aprobar una preventa, donde cliente_ciudad lo tipeó el vendedor a mano
+ * y puede no coincidir en mayúsculas/acentos. Si no matchea ninguna,
+ * devuelve null (el envío no cae en ningún filtro de ciudad). */
+export function matchCiudadEnvio(ciudadLibre: string | null | undefined): string | null {
+  if (!ciudadLibre) return null;
+  const normalized = normalizeCiudad(ciudadLibre);
+  return CIUDADES_ENVIO.find((c) => normalizeCiudad(c) === normalized) ?? null;
+}
+
 export type CobradorPin = (typeof COBRADORES)[number]['pin'];
 
 export const COBRADOR_LABELS: Record<CobradorPin, string> = Object.fromEntries(

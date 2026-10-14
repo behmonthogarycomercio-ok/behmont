@@ -138,6 +138,7 @@ export const manualShipmentSchema = z.object({
   buyerNickname: z.string().trim().max(100).optional(),
   destinoTipo: z.enum(['domicilio', 'sucursal_andreani', 'otro']),
   destinoDetalle: z.string().trim().max(1000).optional(),
+  ciudad: z.string().trim().max(60).optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).default('abonado'),
   transportista: z.string().trim().max(100).optional(),
   numerosSeguimiento: z.string().trim().max(500).optional(),

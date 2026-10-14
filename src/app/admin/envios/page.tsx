@@ -16,7 +16,7 @@ import {
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
 import { maybeNotifyOverdueCobradores } from '@/lib/preventas-sync';
-import { formatCuotasLine } from '@/lib/preventas';
+import { formatCuotasLine, CIUDADES_ENVIO } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus, FileText } from 'lucide-react';
 
@@ -340,6 +340,12 @@ async function EnviosTab({
               <option value="otro">Otro</option>
             </select>
             <input name="destino_detalle" placeholder="Dirección / detalle" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" />
+            <select name="ciudad" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" defaultValue="">
+              <option value="">Ciudad (opcional, para el filtro de /envios)</option>
+              {CIUDADES_ENVIO.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
             <select name="paymentStatus" className="rounded-lg border border-plate-200 px-3 py-2 text-sm" defaultValue="abonado">
               <option value="abonado">Abonado</option>
               <option value="pendiente_pago">Pendiente de abonar</option>
