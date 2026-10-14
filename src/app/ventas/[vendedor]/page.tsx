@@ -8,7 +8,7 @@ import { COBRADORES } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 import VendedorPushButton from '@/components/preventas/VendedorPushButton';
 
-type ProductoApi = { id: string; sku: string; name: string; stock: number };
+type ProductoApi = { id: string; sku: string; name: string; stock: number; price: number };
 type CartItem = { sku: string; name: string; quantity: string; precioLista: string; precioOfrecido: string };
 type ClienteEstado = 'activo' | 'nuevo' | 'pasivo';
 type CuotasTipo = 'diaria' | 'semanal' | 'mensual' | 'tarjeta';
@@ -93,7 +93,7 @@ export default function VentasVendedorPage() {
 
   async function loadProducts() {
     try {
-      const res = await fetch('/api/deposito/productos');
+      const res = await fetch('/api/ventas/productos');
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data.products);
@@ -158,7 +158,9 @@ export default function VentasVendedorPage() {
 
   function addToCart(p: ProductoApi) {
     if (cart.some((i) => i.sku === p.sku)) return;
-    setCart((prev) => [...prev, { sku: p.sku, name: p.name, quantity: '1', precioLista: '', precioOfrecido: '' }]);
+    // precioLista sale siempre del precio real de la web -- nunca se tipea a
+    // mano, así no queda desactualizado ni mal cargado por error.
+    setCart((prev) => [...prev, { sku: p.sku, name: p.name, quantity: '1', precioLista: String(p.price), precioOfrecido: '' }]);
     setQ('');
   }
 
@@ -343,13 +345,12 @@ export default function VentasVendedorPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-steel-500">Precio lista</label>
+                          <label className="block text-[10px] text-steel-500">Precio lista (de la web)</label>
                           <input
-                            type="number"
-                            min={0}
-                            value={item.precioLista}
-                            onChange={(e) => updateCartItem(item.sku, 'precioLista', e.target.value)}
-                            className="w-full rounded border border-steel-200 px-2 py-1 text-steel-900 text-sm"
+                            type="text"
+                            readOnly
+                            value={`$${formatPrice(Number(item.precioLista) || 0)}`}
+                            className="w-full rounded border border-steel-200 bg-steel-50 px-2 py-1 text-steel-600 text-sm cursor-not-allowed"
                           />
                         </div>
                         <div>
