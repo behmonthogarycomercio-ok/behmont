@@ -11,6 +11,7 @@ import {
   updateShipmentTracking,
   updateOrderStatus,
   deleteOrder,
+  deletePreventa,
 } from '@/lib/actions';
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
@@ -34,6 +35,8 @@ type PreventaRow = {
   gabriel_motivo_rechazo: string | null;
   cobrador_motivo_rechazo: string | null;
   cobrador_foto_url: string | null;
+  cobrador_segunda_opinion_motivo: string | null;
+  supervisor_motivo_rechazo: string | null;
   ml_shipment_id: string | null;
   created_at: string;
 };
@@ -42,16 +45,20 @@ const PREVENTA_STATUS_LABELS: Record<string, string> = {
   pendiente_documentacion: 'Pendiente documentación',
   rechazada_gabriel: 'Rechazada (documentación)',
   pendiente_cobrador: 'Esperando cobrador',
+  pendiente_supervisor: 'Esperando a Alejandro',
   aprobada: 'Aprobada',
   rechazada_cobrador: 'Rechazada (cobrador)',
+  rechazada_supervisor: 'Rechazada (Alejandro)',
 };
 
 const PREVENTA_STATUS_COLORS: Record<string, string> = {
   pendiente_documentacion: 'bg-amber-100 text-amber-700',
   rechazada_gabriel: 'bg-red-100 text-red-600',
   pendiente_cobrador: 'bg-amber-100 text-amber-700',
+  pendiente_supervisor: 'bg-amber-100 text-amber-700',
   aprobada: 'bg-emerald-100 text-emerald-700',
   rechazada_cobrador: 'bg-red-100 text-red-600',
+  rechazada_supervisor: 'bg-red-100 text-red-600',
 };
 
 type ShipmentRow = {
@@ -153,7 +160,7 @@ async function EnviosTab({
       .limit(300),
     supabase
       .from('preventas')
-      .select('id, vendedor_nombre, cliente_nombre, cliente_ciudad, cliente_estado, items, cuotas_cantidad, cuotas_tipo, cuota_precio, cobrador_nombre, status, gabriel_motivo_rechazo, cobrador_motivo_rechazo, cobrador_foto_url, ml_shipment_id, created_at')
+      .select('id, vendedor_nombre, cliente_nombre, cliente_ciudad, cliente_estado, items, cuotas_cantidad, cuotas_tipo, cuota_precio, cobrador_nombre, status, gabriel_motivo_rechazo, cobrador_motivo_rechazo, cobrador_foto_url, cobrador_segunda_opinion_motivo, supervisor_motivo_rechazo, ml_shipment_id, created_at')
       .order('created_at', { ascending: false })
       .limit(300),
   ]);
@@ -161,16 +168,18 @@ async function EnviosTab({
   const rows = (allRows || []) as ShipmentRow[];
   const preventas = (preventaRows || []) as PreventaRow[];
   const vendedoresConPreventa = DEPOSITO_STAFF.filter((s) => canVenderPreventa(s.pin as DepositoPin));
+  const RECHAZADA_STATUSES = ['rechazada_gabriel', 'rechazada_cobrador', 'rechazada_supervisor'];
   const preventaCounts = {
     pendiente_documentacion: preventas.filter((p) => p.status === 'pendiente_documentacion').length,
     pendiente_cobrador: preventas.filter((p) => p.status === 'pendiente_cobrador').length,
+    pendiente_supervisor: preventas.filter((p) => p.status === 'pendiente_supervisor').length,
     aprobada: preventas.filter((p) => p.status === 'aprobada').length,
-    rechazada: preventas.filter((p) => p.status === 'rechazada_gabriel' || p.status === 'rechazada_cobrador').length,
+    rechazada: preventas.filter((p) => RECHAZADA_STATUSES.includes(p.status)).length,
     todas: preventas.length,
   };
   const filteredPreventas = preventas.filter((p) => {
     if (vendedorFilter !== 'todos' && p.vendedor_nombre.toLowerCase() !== vendedorFilter) return false;
-    if (pFilter === 'rechazada') return p.status === 'rechazada_gabriel' || p.status === 'rechazada_cobrador';
+    if (pFilter === 'rechazada') return RECHAZADA_STATUSES.includes(p.status);
     if (pFilter === 'todas') return true;
     return p.status === pFilter;
   });
@@ -221,6 +230,7 @@ async function EnviosTab({
           {[
             { value: 'pendiente_documentacion', label: `Pendientes documentación (${preventaCounts.pendiente_documentacion})` },
             { value: 'pendiente_cobrador', label: `Esperando cobrador (${preventaCounts.pendiente_cobrador})` },
+            { value: 'pendiente_supervisor', label: `Esperando a Alejandro (${preventaCounts.pendiente_supervisor})` },
             { value: 'aprobada', label: `Aprobadas (${preventaCounts.aprobada})` },
             { value: 'rechazada', label: `Rechazadas (${preventaCounts.rechazada})` },
             { value: 'todas', label: `Todas (${preventaCounts.todas})` },
@@ -270,6 +280,10 @@ async function EnviosTab({
                 </p>
                 {p.gabriel_motivo_rechazo && <p className="mt-1 text-xs text-red-600">Motivo (documentación): {p.gabriel_motivo_rechazo}</p>}
                 {p.cobrador_motivo_rechazo && <p className="mt-1 text-xs text-red-600">Motivo (cobrador): {p.cobrador_motivo_rechazo}</p>}
+                {p.cobrador_segunda_opinion_motivo && (
+                  <p className="mt-1 text-xs text-amber-700">Pidió segunda opinión: {p.cobrador_segunda_opinion_motivo}</p>
+                )}
+                {p.supervisor_motivo_rechazo && <p className="mt-1 text-xs text-red-600">Motivo (Alejandro): {p.supervisor_motivo_rechazo}</p>}
                 {p.cobrador_foto_url && (
                   <a href={p.cobrador_foto_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-amber-600 underline">
                     Ver foto del cobrador
@@ -280,6 +294,9 @@ async function EnviosTab({
                     <PreventaDocReview id={p.id} />
                   </div>
                 )}
+                <div className="mt-2 flex justify-end">
+                  <DeleteButton id={p.id} action={deletePreventa} label="preventa" />
+                </div>
               </div>
             ))}
           </div>

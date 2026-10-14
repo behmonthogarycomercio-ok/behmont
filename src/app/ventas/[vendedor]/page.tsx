@@ -25,6 +25,9 @@ type Preventa = {
   cuota_precio: number;
   gabriel_motivo_rechazo: string | null;
   cobrador_motivo_rechazo: string | null;
+  cobrador_foto_url: string | null;
+  cobrador_segunda_opinion_motivo: string | null;
+  supervisor_motivo_rechazo: string | null;
   created_at: string;
 };
 
@@ -32,16 +35,20 @@ const STATUS_LABELS: Record<string, string> = {
   pendiente_documentacion: 'Esperando documentación',
   rechazada_gabriel: 'Rechazada (documentación)',
   pendiente_cobrador: 'Esperando al cobrador',
+  pendiente_supervisor: 'Esperando a Alejandro',
   aprobada: 'Aprobada',
   rechazada_cobrador: 'Rechazada (cobrador)',
+  rechazada_supervisor: 'Rechazada (Alejandro)',
 };
 
 const STATUS_COLORS: Record<string, string> = {
   pendiente_documentacion: 'bg-warning-600',
   rechazada_gabriel: 'bg-red-600',
   pendiente_cobrador: 'bg-warning-600',
+  pendiente_supervisor: 'bg-warning-600',
   aprobada: 'bg-emerald-600',
   rechazada_cobrador: 'bg-red-600',
+  rechazada_supervisor: 'bg-red-600',
 };
 
 export default function VentasVendedorPage() {
@@ -480,6 +487,24 @@ export default function VentasVendedorPage() {
                           )}
                           {p.cobrador_motivo_rechazo && (
                             <p className="text-red-600">Motivo (cobrador): {p.cobrador_motivo_rechazo}</p>
+                          )}
+                          {p.cobrador_segunda_opinion_motivo && (
+                            <p className="text-warning-600">
+                              {p.cobrador_nombre} le pidió una segunda opinión a Alejandro: {p.cobrador_segunda_opinion_motivo}
+                            </p>
+                          )}
+                          {p.supervisor_motivo_rechazo && (
+                            <p className="text-red-600">Motivo (Alejandro): {p.supervisor_motivo_rechazo}</p>
+                          )}
+                          {p.cobrador_foto_url && (
+                            <a
+                              href={p.cobrador_foto_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block text-steel-600 underline"
+                            >
+                              Ver foto del local →
+                            </a>
                           )}
                         </div>
                       )}

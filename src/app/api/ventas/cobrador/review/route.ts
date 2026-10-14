@@ -3,16 +3,16 @@ import { createServiceSupabase } from '@/lib/supabase/server';
 import { cobradorPinSchema } from '@/lib/preventas';
 import { verifyCobradorCode } from '@/lib/cobrador-auth';
 import { isRateLimited, getClientIp } from '@/lib/rate-limit';
-import { notifyDrivers, notifyVendedor } from '@/lib/push';
-import { formatPrice } from '@/lib/price';
+import { notifyVendedor, notifyPreventaSupervisor } from '@/lib/push';
+import { approvePreventaAndCreateShipment } from '@/lib/preventa-approve';
 
-type PreventaItem = { sku: string; name: string; quantity: number; precioLista: number; precioOfrecido: number };
-
-// Sin login: el cobrador aprueba o rechaza tras controlar el local, subiendo
-// SIEMPRE una foto del papel (no completa un formulario de verificación a
-// mano, por tiempo). Al aprobar, genera el envío real en ml_shipments --
-// "pasa a producción" -- y notifica a los repartidores, igual que una carga
-// manual de /envios.
+// Sin login: el cobrador aprueba, rechaza, o pide una segunda opinión a
+// Alejandro (cuando algo del cliente le genera dudas) tras controlar el
+// local. La foto del papel es obligatoria SOLO para clientes nuevos --
+// a un cliente activo o pasivo ya se le conoce el local de antes, no hace
+// falta volver a verificarlo cada vez. Al aprobar, genera el envío real en
+// ml_shipments -- "pasa a producción" -- y notifica a los repartidores,
+// igual que una carga manual de /envios.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (await isRateLimited(`ventas-cobrador-review:${ip}`, 30, 3600)) {
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
   const decision = formData.get('decision');
   const notas = (formData.get('notas') as string) || '';
   const motivoRechazo = (formData.get('motivoRechazo') as string) || '';
+  const motivoSegundaOpinion = (formData.get('motivoSegundaOpinion') as string) || '';
   const foto = formData.get('foto');
 
   if (
@@ -33,13 +34,16 @@ export async function POST(request: Request) {
     typeof code !== 'string' ||
     code.length < 4 ||
     typeof preventaId !== 'string' ||
-    (decision !== 'aprobar' && decision !== 'rechazar') ||
-    !(foto instanceof File)
+    (decision !== 'aprobar' && decision !== 'rechazar' && decision !== 'segunda_opinion') ||
+    (foto !== null && !(foto instanceof File))
   ) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
   if (decision === 'rechazar' && !motivoRechazo.trim()) {
     return NextResponse.json({ error: 'El motivo de rechazo es obligatorio.' }, { status: 400 });
+  }
+  if (decision === 'segunda_opinion' && !motivoSegundaOpinion.trim()) {
+    return NextResponse.json({ error: 'Contanos qué te genera dudas para avisarle a Alejandro.' }, { status: 400 });
   }
 
   const supabase = createServiceSupabase();
@@ -58,19 +62,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Esta preventa ya fue revisada.' }, { status: 409 });
   }
 
-  const path = `preventas/${preventaId}-${Date.now()}.jpg`;
-  const { error: uploadError } = await supabase.storage.from('product-images').upload(path, foto);
-  if (uploadError) {
-    return NextResponse.json({ error: 'No se pudo subir la foto' }, { status: 500 });
+  const fotoRequerida = preventa.cliente_estado === 'nuevo';
+  if (fotoRequerida && !(foto instanceof File)) {
+    return NextResponse.json({ error: 'Subí una foto del papel -- es obligatoria para clientes nuevos.' }, { status: 400 });
   }
-  const { data: publicUrl } = supabase.storage.from('product-images').getPublicUrl(path);
+
+  let fotoUrl: string | null = null;
+  if (foto instanceof File) {
+    const path = `preventas/${preventaId}-${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage.from('product-images').upload(path, foto);
+    if (uploadError) {
+      return NextResponse.json({ error: 'No se pudo subir la foto' }, { status: 500 });
+    }
+    fotoUrl = supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+  }
 
   if (decision === 'rechazar') {
     const { error } = await supabase
       .from('preventas')
       .update({
         status: 'rechazada_cobrador',
-        cobrador_foto_url: publicUrl.publicUrl,
+        cobrador_foto_url: fotoUrl,
         cobrador_notas: notas || null,
         cobrador_motivo_rechazo: motivoRechazo.trim(),
         reviewed_at: new Date().toISOString(),
@@ -84,70 +96,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, status: 'rechazada_cobrador' });
   }
 
-  // aprobar -> crea el envío real, "pasa a producción".
-  const items = (preventa.items || []) as PreventaItem[];
-  const destinoDetalle = [
-    preventa.cliente_direccion,
-    preventa.cliente_ciudad,
-    preventa.cliente_codigo_postal ? `CP: ${preventa.cliente_codigo_postal}` : null,
-    preventa.cliente_contacto ? `Tel: ${preventa.cliente_contacto}` : null,
-    `DNI/CUIT: ${preventa.cliente_dni_cuit}`,
-  ]
-    .filter(Boolean)
-    .join(' — ');
-  const total = items.reduce((sum, i) => sum + i.precioOfrecido * i.quantity, 0);
-  const notes = [
-    `Preventa aprobada por ${preventa.cobrador_nombre}`,
-    `${preventa.cuotas_cantidad} cuotas ${preventa.cuotas_tipo} de $${formatPrice(preventa.cuota_precio)}`,
-    preventa.interes_porcentaje ? `${preventa.interes_porcentaje}% interés` : null,
-    preventa.observaciones ? `Obs: ${preventa.observaciones}` : null,
-  ]
-    .filter(Boolean)
-    .join(' — ');
-
-  const { data: shipment, error: shipmentError } = await supabase
-    .from('ml_shipments')
-    .insert({
-      ml_order_id: -Date.now(),
-      status: 'pendiente',
-      destino_tipo: 'domicilio',
-      destino_detalle: destinoDetalle,
-      buyer_nickname: preventa.cliente_nombre,
-      items: items.map((i) => ({ title: i.name, quantity: i.quantity, sku: i.sku })),
-      total,
-      payment_status: 'pendiente_pago',
-      notes,
-    })
-    .select('id')
-    .single();
-
-  if (shipmentError) {
-    return NextResponse.json({ error: 'No se pudo generar el envío' }, { status: 500 });
+  if (decision === 'segunda_opinion') {
+    const { error } = await supabase
+      .from('preventas')
+      .update({
+        status: 'pendiente_supervisor',
+        cobrador_foto_url: fotoUrl,
+        cobrador_notas: notas || null,
+        cobrador_segunda_opinion_motivo: motivoSegundaOpinion.trim(),
+      })
+      .eq('id', preventaId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    await notifyPreventaSupervisor({
+      title: '🤔 Segunda opinión pedida',
+      body: `${preventa.cliente_nombre}: ${preventa.cobrador_nombre} necesita tu opinión -- ${motivoSegundaOpinion.trim()}`,
+      url: '/ventas/supervisor',
+    });
+    return NextResponse.json({ ok: true, status: 'pendiente_supervisor' });
   }
 
-  const { error } = await supabase
-    .from('preventas')
-    .update({
-      status: 'aprobada',
-      cobrador_foto_url: publicUrl.publicUrl,
-      cobrador_notas: notas || null,
-      reviewed_at: new Date().toISOString(),
-      ml_shipment_id: shipment.id,
-    })
-    .eq('id', preventaId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  // aprobar -> crea el envío real, "pasa a producción".
+  const result = await approvePreventaAndCreateShipment(supabase, preventa, fotoUrl);
+  if ('error' in result) return NextResponse.json({ error: result.error }, { status: 500 });
 
-  const firstTitle = items[0]?.name || 'Producto';
-  const extra = items.length > 1 ? ` + ${items.length - 1} más` : '';
-  await notifyDrivers({
-    title: '📦 Nuevo envío pendiente',
-    body: `${firstTitle}${extra} — preventa aprobada`,
-    url: '/envios',
-  });
-  await notifyVendedor(preventa.vendedor_pin, {
-    title: '✅ Preventa aprobada',
-    body: `${preventa.cliente_nombre}: ${preventa.cobrador_nombre} controló el local y aprobó -- pasa a reparto`,
-  });
+  await supabase.from('preventas').update({ cobrador_notas: notas || null }).eq('id', preventaId);
 
   return NextResponse.json({ ok: true, status: 'aprobada' });
 }

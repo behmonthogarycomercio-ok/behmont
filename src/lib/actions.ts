@@ -755,3 +755,14 @@ export async function reviewPreventaDocumentacion(
   revalidatePath('/admin/envios');
   return {};
 }
+
+/** Borra una preventa directamente (admin only, vía login real) -- pensado
+ * para limpiar cargas de prueba del flujo, no para uso normal (el circuito
+ * real termina en aprobada/rechazada, nunca se borra una preventa real). */
+export async function deletePreventa(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabase();
+  const { error } = await supabase.from('preventas').delete().eq('id', id);
+  if (error) return { error: friendlyDbError(error) };
+  revalidatePath('/admin/envios');
+  return {};
+}

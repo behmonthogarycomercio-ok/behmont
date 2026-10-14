@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     .from('preventas')
     .select('*')
     .eq('cobrador_pin', pin)
-    .in('status', ['pendiente_cobrador', 'aprobada', 'rechazada_cobrador'])
+    .in('status', ['pendiente_cobrador', 'pendiente_supervisor', 'aprobada', 'rechazada_cobrador', 'rechazada_supervisor'])
     .order('created_at', { ascending: false });
 
   if (error) {

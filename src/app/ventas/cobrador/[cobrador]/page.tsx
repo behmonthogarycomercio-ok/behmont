@@ -26,13 +26,24 @@ type Preventa = {
   status: string;
   cobrador_foto_url: string | null;
   cobrador_motivo_rechazo: string | null;
+  cobrador_segunda_opinion_motivo: string | null;
+  supervisor_motivo_rechazo: string | null;
   created_at: string;
 };
 
 const STATUS_LABELS: Record<string, string> = {
   pendiente_cobrador: 'Pendiente',
+  pendiente_supervisor: 'Esperando a Alejandro',
   aprobada: 'Aprobada',
   rechazada_cobrador: 'Rechazada',
+  rechazada_supervisor: 'Rechazada (Alejandro)',
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  aprobada: 'bg-emerald-600',
+  pendiente_supervisor: 'bg-warning-600',
+  rechazada_cobrador: 'bg-red-600',
+  rechazada_supervisor: 'bg-red-600',
 };
 
 export default function CobradorPage() {
@@ -51,7 +62,9 @@ export default function CobradorPage() {
   const [foto, setFoto] = useState<File | null>(null);
   const [notas, setNotas] = useState('');
   const [motivoRechazo, setMotivoRechazo] = useState('');
+  const [motivoSegundaOpinion, setMotivoSegundaOpinion] = useState('');
   const [confirmingRechazo, setConfirmingRechazo] = useState(false);
+  const [confirmingSegundaOpinion, setConfirmingSegundaOpinion] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -109,17 +122,25 @@ export default function CobradorPage() {
     setFoto(null);
     setNotas('');
     setMotivoRechazo('');
+    setMotivoSegundaOpinion('');
     setConfirmingRechazo(false);
+    setConfirmingSegundaOpinion(false);
     setMessage(null);
   }
 
-  async function review(decision: 'aprobar' | 'rechazar') {
-    if (!cobrador || !selected || !foto) {
-      setMessage('Subí una foto del papel antes de continuar.');
+  async function review(decision: 'aprobar' | 'rechazar' | 'segunda_opinion') {
+    if (!cobrador || !selected) return;
+    const fotoRequerida = selected.cliente_estado === 'nuevo';
+    if (fotoRequerida && !foto) {
+      setMessage('Subí una foto del papel -- es obligatoria para clientes nuevos.');
       return;
     }
     if (decision === 'rechazar' && !motivoRechazo.trim()) {
       setMessage('El motivo de rechazo es obligatorio.');
+      return;
+    }
+    if (decision === 'segunda_opinion' && !motivoSegundaOpinion.trim()) {
+      setMessage('Contanos qué te genera dudas para avisarle a Alejandro.');
       return;
     }
     setBusy(true);
@@ -132,7 +153,8 @@ export default function CobradorPage() {
       fd.set('decision', decision);
       fd.set('notas', notas);
       fd.set('motivoRechazo', motivoRechazo);
-      fd.set('foto', foto);
+      fd.set('motivoSegundaOpinion', motivoSegundaOpinion);
+      if (foto) fd.set('foto', foto);
       const res = await fetch('/api/ventas/cobrador/review', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) {
@@ -219,17 +241,37 @@ export default function CobradorPage() {
 
             {selected.status === 'pendiente_cobrador' ? (
               <>
-                <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Foto del papel (obligatoria)</p>
-                <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-steel-300 px-4 py-2 text-sm text-steel-600 hover:border-steel-600 hover:text-steel-700 mb-3">
-                  {foto ? foto.name : 'Elegir foto'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={(e) => setFoto(e.target.files?.[0] || null)}
-                  />
-                </label>
+                {selected.cliente_estado === 'nuevo' ? (
+                  <>
+                    <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Foto del papel (obligatoria -- cliente nuevo)</p>
+                    <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-steel-300 px-4 py-2 text-sm text-steel-600 hover:border-steel-600 hover:text-steel-700 mb-3">
+                      {foto ? foto.name : 'Elegir foto'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => setFoto(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">
+                      Foto del papel (opcional -- cliente {selected.cliente_estado})
+                    </p>
+                    <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-steel-300 px-4 py-2 text-sm text-steel-600 hover:border-steel-600 hover:text-steel-700 mb-3">
+                      {foto ? foto.name : 'Elegir foto (opcional)'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => setFoto(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  </>
+                )}
 
                 <textarea
                   placeholder="Notas (opcional)"
@@ -249,12 +291,22 @@ export default function CobradorPage() {
                   />
                 )}
 
+                {confirmingSegundaOpinion && (
+                  <textarea
+                    placeholder="¿Qué te genera dudas? (obligatorio -- se lo manda a Alejandro)"
+                    value={motivoSegundaOpinion}
+                    onChange={(e) => setMotivoSegundaOpinion(e.target.value)}
+                    rows={2}
+                    className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm mb-3"
+                  />
+                )}
+
                 {message && <p className="text-sm text-red-600 mb-3">{message}</p>}
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-2">
                   <button
                     onClick={() => review('aprobar')}
-                    disabled={busy || !foto}
+                    disabled={busy || (selected.cliente_estado === 'nuevo' && !foto)}
                     className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 py-3 text-sm font-semibold text-white"
                   >
                     Aprobar
@@ -262,20 +314,37 @@ export default function CobradorPage() {
                   {confirmingRechazo ? (
                     <button
                       onClick={() => review('rechazar')}
-                      disabled={busy || !foto}
+                      disabled={busy || (selected.cliente_estado === 'nuevo' && !foto)}
                       className="flex-1 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 py-3 text-sm font-semibold text-white"
                     >
                       Confirmar rechazo
                     </button>
                   ) : (
                     <button
-                      onClick={() => setConfirmingRechazo(true)}
+                      onClick={() => { setConfirmingRechazo(true); setConfirmingSegundaOpinion(false); }}
                       className="flex-1 rounded-lg border border-red-600 text-red-600 hover:bg-red-50 py-3 text-sm font-semibold"
                     >
                       Rechazar
                     </button>
                   )}
                 </div>
+
+                {confirmingSegundaOpinion ? (
+                  <button
+                    onClick={() => review('segunda_opinion')}
+                    disabled={busy || (selected.cliente_estado === 'nuevo' && !foto)}
+                    className="w-full rounded-lg bg-warning-600 hover:opacity-90 disabled:opacity-50 py-3 text-sm font-semibold text-white"
+                  >
+                    Confirmar y avisarle a Alejandro
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setConfirmingSegundaOpinion(true); setConfirmingRechazo(false); }}
+                    className="w-full rounded-lg border border-steel-400 text-steel-700 hover:bg-steel-50 py-3 text-sm font-semibold"
+                  >
+                    🤔 Pedir segunda opinión a Alejandro
+                  </button>
+                )}
               </>
             ) : (
               <div className="text-sm text-steel-500">
@@ -285,7 +354,11 @@ export default function CobradorPage() {
                     Ver foto subida
                   </a>
                 )}
+                {selected.cobrador_segunda_opinion_motivo && (
+                  <p className="mt-2 text-warning-600">Le pediste a Alejandro: {selected.cobrador_segunda_opinion_motivo}</p>
+                )}
                 {selected.cobrador_motivo_rechazo && <p className="mt-2 text-red-600">Motivo: {selected.cobrador_motivo_rechazo}</p>}
+                {selected.supervisor_motivo_rechazo && <p className="mt-2 text-red-600">Motivo (Alejandro): {selected.supervisor_motivo_rechazo}</p>}
               </div>
             )}
           </div>
@@ -327,7 +400,7 @@ export default function CobradorPage() {
                         <p className="font-semibold text-steel-900">{p.cliente_nombre}</p>
                         <p className="text-xs text-steel-400">{p.cliente_ciudad}</p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${p.status === 'aprobada' ? 'bg-emerald-600' : 'bg-red-600'}`}>
+                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${STATUS_COLORS[p.status] || 'bg-steel-600'}`}>
                         {STATUS_LABELS[p.status]}
                       </span>
                     </button>
