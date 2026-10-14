@@ -33,7 +33,41 @@ export const cobradorAuthSchema = z.object({
 });
 
 export const clienteEstadoSchema = z.enum(['activo', 'nuevo', 'pasivo']);
-export const cuotasTipoSchema = z.enum(['diaria', 'semanal', 'mensual', 'tarjeta']);
+
+// Para mostrar "Contado efectivo" en vez de "contado_efectivo" en vendedor,
+// cobrador, supervisor y admin -- un solo lugar para no repetirlo 4 veces.
+export const CUOTAS_TIPO_LABELS: Record<string, string> = {
+  diaria: 'diaria',
+  semanal: 'semanal',
+  mensual: 'mensual',
+  tarjeta: 'tarjeta',
+  contado_efectivo: 'contado efectivo',
+  contado_tarjeta: 'contado tarjeta',
+};
+
+/** Línea legible de la forma de pago -- "Contado efectivo — $X" cuando es
+ * pago único (la cantidad de cuotas, siempre 1, no aporta nada), o
+ * "N cuotas {tipo} de $X" cuando es financiado. */
+export function formatCuotasLine(
+  cantidad: number,
+  tipo: string,
+  precio: number,
+  formatPrice: (n: number) => string
+): string {
+  if (tipo === 'contado_efectivo' || tipo === 'contado_tarjeta') {
+    return `${CUOTAS_TIPO_LABELS[tipo] ?? tipo} — $${formatPrice(precio)}`;
+  }
+  return `${cantidad} cuotas ${CUOTAS_TIPO_LABELS[tipo] ?? tipo} de $${formatPrice(precio)}`;
+}
+
+export const cuotasTipoSchema = z.enum([
+  'diaria',
+  'semanal',
+  'mensual',
+  'tarjeta',
+  'contado_efectivo',
+  'contado_tarjeta',
+]);
 
 export const preventaItemSchema = z.object({
   sku: z.string().trim().min(1).max(60),

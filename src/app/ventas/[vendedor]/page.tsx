@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
-import { COBRADORES } from '@/lib/preventas';
+import { COBRADORES, formatCuotasLine } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 import VendedorPushButton from '@/components/preventas/VendedorPushButton';
 
 type ProductoApi = { id: string; sku: string; name: string; stock: number; price: number };
 type CartItem = { sku: string; name: string; quantity: string; precioLista: string; precioOfrecido: string };
 type ClienteEstado = 'activo' | 'nuevo' | 'pasivo';
-type CuotasTipo = 'diaria' | 'semanal' | 'mensual' | 'tarjeta';
+type CuotasTipo = 'diaria' | 'semanal' | 'mensual' | 'tarjeta' | 'contado_efectivo' | 'contado_tarjeta';
 
 type Preventa = {
   id: string;
@@ -78,9 +78,10 @@ export default function VentasVendedorPage() {
   const [clienteEstado, setClienteEstado] = useState<ClienteEstado>('nuevo');
 
   const [cuotasCantidad, setCuotasCantidad] = useState('1');
-  const [cuotasTipo, setCuotasTipo] = useState<CuotasTipo>('mensual');
+  const [cuotasTipo, setCuotasTipo] = useState<CuotasTipo>('contado_efectivo');
   const [cuotaPrecio, setCuotaPrecio] = useState('');
   const [interesPorcentaje, setInteresPorcentaje] = useState('');
+  const esContado = cuotasTipo === 'contado_efectivo' || cuotasTipo === 'contado_tarjeta';
   const [observaciones, setObservaciones] = useState('');
   const [cobradorPin, setCobradorPin] = useState('');
 
@@ -385,29 +386,46 @@ export default function VentasVendedorPage() {
                 </select>
               </div>
 
-              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Financiación</p>
+              <p className="text-xs uppercase tracking-wide text-steel-400 mb-2">Forma de pago</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <div>
-                  <label className="block text-[10px] text-steel-500">Cantidad de cuotas</label>
-                  <input type="number" min={1} value={cuotasCantidad} onChange={(e) => setCuotasCantidad(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
-                </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block text-[10px] text-steel-500">Tipo</label>
-                  <select value={cuotasTipo} onChange={(e) => setCuotasTipo(e.target.value as CuotasTipo)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm">
-                    <option value="diaria">Diaria</option>
-                    <option value="semanal">Semanal</option>
-                    <option value="mensual">Mensual</option>
-                    <option value="tarjeta">Tarjeta</option>
+                  <select
+                    value={cuotasTipo}
+                    onChange={(e) => {
+                      const next = e.target.value as CuotasTipo;
+                      setCuotasTipo(next);
+                      if (next === 'contado_efectivo' || next === 'contado_tarjeta') {
+                        setCuotasCantidad('1');
+                        setInteresPorcentaje('');
+                      }
+                    }}
+                    className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm"
+                  >
+                    <option value="contado_efectivo">Contado efectivo</option>
+                    <option value="contado_tarjeta">Contado tarjeta</option>
+                    <option value="diaria">Cuotas diarias</option>
+                    <option value="semanal">Cuotas semanales</option>
+                    <option value="mensual">Cuotas mensuales</option>
+                    <option value="tarjeta">Cuotas con tarjeta</option>
                   </select>
                 </div>
+                {esContado ? null : (
+                  <div>
+                    <label className="block text-[10px] text-steel-500">Cantidad de cuotas</label>
+                    <input type="number" min={1} value={cuotasCantidad} onChange={(e) => setCuotasCantidad(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                  </div>
+                )}
                 <div>
-                  <label className="block text-[10px] text-steel-500">Precio de la cuota</label>
+                  <label className="block text-[10px] text-steel-500">{esContado ? 'Monto total' : 'Precio de la cuota'}</label>
                   <input type="number" min={0} value={cuotaPrecio} onChange={(e) => setCuotaPrecio(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
                 </div>
-                <div>
-                  <label className="block text-[10px] text-steel-500">Interés % (opcional)</label>
-                  <input type="number" min={0} value={interesPorcentaje} onChange={(e) => setInteresPorcentaje(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
-                </div>
+                {esContado ? null : (
+                  <div>
+                    <label className="block text-[10px] text-steel-500">Interés % (opcional)</label>
+                    <input type="number" min={0} value={interesPorcentaje} onChange={(e) => setInteresPorcentaje(e.target.value)} className="w-full rounded-lg border border-steel-200 px-3 py-2 text-steel-900 text-sm" />
+                  </div>
+                )}
               </div>
 
               <textarea
@@ -481,7 +499,7 @@ export default function VentasVendedorPage() {
                             </p>
                           ))}
                           <p className="text-steel-500">
-                            {p.cuotas_cantidad} cuotas {p.cuotas_tipo} de ${formatPrice(p.cuota_precio)}
+                            {formatCuotasLine(p.cuotas_cantidad, p.cuotas_tipo, p.cuota_precio, formatPrice)}
                           </p>
                           {p.gabriel_motivo_rechazo && (
                             <p className="text-red-600">Motivo (documentación): {p.gabriel_motivo_rechazo}</p>

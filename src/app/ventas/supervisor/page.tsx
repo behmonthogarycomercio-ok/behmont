@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import SupervisorPushButton from '@/components/preventas/SupervisorPushButton';
+import { formatCuotasLine } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 
 type Preventa = {
@@ -182,7 +183,7 @@ export default function VentasSupervisorPage() {
                 </p>
               ))}
               <p className="text-sm text-steel-500 mt-2">
-                {selected.cuotas_cantidad} cuotas {selected.cuotas_tipo} de ${formatPrice(selected.cuota_precio)}
+                {formatCuotasLine(selected.cuotas_cantidad, selected.cuotas_tipo, selected.cuota_precio, formatPrice)}
                 {selected.interes_porcentaje ? ` — ${selected.interes_porcentaje}% interés` : ''}
               </p>
             </div>

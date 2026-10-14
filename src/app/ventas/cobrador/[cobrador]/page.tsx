@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { COBRADORES, type CobradorPin } from '@/lib/preventas';
+import { COBRADORES, formatCuotasLine, type CobradorPin } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 import CobradorPushButton from '@/components/preventas/CobradorPushButton';
 
@@ -230,7 +230,7 @@ export default function CobradorPage() {
                 </p>
               ))}
               <p className="text-sm text-steel-500 mt-2">
-                {selected.cuotas_cantidad} cuotas {selected.cuotas_tipo} de ${formatPrice(selected.cuota_precio)}
+                {formatCuotasLine(selected.cuotas_cantidad, selected.cuotas_tipo, selected.cuota_precio, formatPrice)}
                 {selected.interes_porcentaje ? ` — ${selected.interes_porcentaje}% interés` : ''}
               </p>
             </div>

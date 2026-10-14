@@ -16,6 +16,7 @@ import {
 import { isRetrasado, getTrackingUrl, itemsSummary, STATUS_LABELS, PAYMENT_STATUS_LABELS, NEXT_DRIVER_STATUS, DRIVER_ACTION_LABELS, type ShipmentStatus, type PaymentStatus } from '@/lib/envios';
 import { DEPOSITO_STAFF, canVenderPreventa, type DepositoPin } from '@/lib/deposito';
 import { maybeNotifyOverdueCobradores } from '@/lib/preventas-sync';
+import { formatCuotasLine } from '@/lib/preventas';
 import { formatPrice } from '@/lib/price';
 import { Home, Package, Plus, FileText } from 'lucide-react';
 
@@ -276,7 +277,7 @@ async function EnviosTab({
                   ))}
                 </div>
                 <p className="mt-1 text-xs text-steel-400">
-                  {p.cuotas_cantidad} cuotas {p.cuotas_tipo} de ${formatPrice(p.cuota_precio)}
+                  {formatCuotasLine(p.cuotas_cantidad, p.cuotas_tipo, p.cuota_precio, formatPrice)}
                 </p>
                 {p.gabriel_motivo_rechazo && <p className="mt-1 text-xs text-red-600">Motivo (documentación): {p.gabriel_motivo_rechazo}</p>}
                 {p.cobrador_motivo_rechazo && <p className="mt-1 text-xs text-red-600">Motivo (cobrador): {p.cobrador_motivo_rechazo}</p>}
