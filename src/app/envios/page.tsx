@@ -370,7 +370,7 @@ export default function EnviosPage() {
             className="w-full mb-4 rounded-lg border border-steel-200 bg-white px-3 py-2.5 text-sm font-semibold text-steel-900"
           >
             <option value="ml">
-              Mercado Libre ({shipments.filter((s) => s.ml_order_id > 0).length})
+              Mercado Libre ({shipments.filter((s) => !s.ciudad).length})
             </option>
             {CIUDADES_ENVIO.map((c) => (
               <option key={c} value={c}>
@@ -382,7 +382,7 @@ export default function EnviosPage() {
 
         {(() => {
           const filtered = (shipments ?? []).filter((s) =>
-            origenFiltro === 'ml' ? s.ml_order_id > 0 : s.ciudad === origenFiltro
+            origenFiltro === 'ml' ? !s.ciudad : s.ciudad === origenFiltro
           );
           return shipments && filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16 text-steel-400">
@@ -394,7 +394,7 @@ export default function EnviosPage() {
 
         <div className="flex flex-col gap-5">
           {shipments
-            ?.filter((s) => (origenFiltro === 'ml' ? s.ml_order_id > 0 : s.ciudad === origenFiltro))
+            ?.filter((s) => (origenFiltro === 'ml' ? !s.ciudad : s.ciudad === origenFiltro))
             .map((s) => {
             const retrasado = isRetrasado({
               status: s.status,
