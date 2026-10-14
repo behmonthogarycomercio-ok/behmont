@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/price';
 import { getProductCode } from '@/lib/product-display';
 import { getBrandName, getSpecItems, getDescriptionFallback, type LabelProduct } from '@/lib/etiqueta-content';
 import { generateLabelsPdfFromDom } from '@/lib/generateLabelsPdf';
-import { updateProductSpecs } from '@/lib/actions';
+import { updateEtiquetaSpecs } from '@/lib/actions';
 
 type Spec = { label: string; value: string };
 
@@ -24,7 +24,8 @@ export default function EtiquetasClient({ products: initialProducts }: { product
 
   function startEdit(p: LabelProduct) {
     setEditingId(p.id);
-    setEditSpecs(p.specs.length > 0 ? p.specs.map((s) => ({ ...s })) : [{ label: '', value: '' }]);
+    const base = p.etiqueta_specs && p.etiqueta_specs.length > 0 ? p.etiqueta_specs : p.specs;
+    setEditSpecs(base.length > 0 ? base.map((s) => ({ ...s })) : [{ label: '', value: '' }]);
   }
 
   function cancelEdit() {
@@ -44,6 +45,8 @@ export default function EtiquetasClient({ products: initialProducts }: { product
     setEditSpecs((prev) => [...prev, { label: '', value: '' }]);
   }
 
+  // Guarda en etiqueta_specs (NUNCA en specs) -- esto solo cambia lo que se
+  // ve impreso, la ficha pública del producto queda intacta.
   async function saveSpecs(id: string) {
     const cleaned = editSpecs.map((s) => ({ label: s.label.trim(), value: s.value.trim() })).filter((s) => s.value);
     setSavingSpecs(true);
@@ -51,12 +54,32 @@ export default function EtiquetasClient({ products: initialProducts }: { product
       const formData = new FormData();
       formData.set('id', id);
       formData.set('specs', JSON.stringify(cleaned));
-      const result = await updateProductSpecs(formData);
+      const result = await updateEtiquetaSpecs(formData);
       if (result.error) {
         alert(result.error);
         return;
       }
-      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, specs: cleaned } : p)));
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, etiqueta_specs: cleaned.length > 0 ? cleaned : null } : p)));
+      cancelEdit();
+    } finally {
+      setSavingSpecs(false);
+    }
+  }
+
+  // Vuelve a usar las características reales del producto en la etiqueta
+  // (manda etiqueta_specs vacío -> el server lo guarda como null).
+  async function resetToWebSpecs(id: string) {
+    setSavingSpecs(true);
+    try {
+      const formData = new FormData();
+      formData.set('id', id);
+      formData.set('specs', '[]');
+      const result = await updateEtiquetaSpecs(formData);
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, etiqueta_specs: null } : p)));
       cancelEdit();
     } finally {
       setSavingSpecs(false);
@@ -249,7 +272,10 @@ export default function EtiquetasClient({ products: initialProducts }: { product
                   <div className="print:hidden mt-1.5">
                     {isEditing ? (
                       <div className="rounded-lg border border-plate-200 bg-white p-3 shadow-card">
-                        <p className="text-xs font-semibold text-steel-500 mb-2">Características de {p.name}</p>
+                        <p className="text-xs font-semibold text-steel-500 mb-0.5">Características en la etiqueta de {p.name}</p>
+                        <p className="text-[11px] text-steel-400 mb-2">
+                          Solo afecta lo impreso -- la ficha del producto en la web no cambia.
+                        </p>
                         <div className="flex flex-col gap-1.5">
                           {editSpecs.map((s, i) => (
                             <div key={i} className="flex items-center gap-1.5">
@@ -297,6 +323,15 @@ export default function EtiquetasClient({ products: initialProducts }: { product
                           >
                             Cancelar
                           </button>
+                          {p.etiqueta_specs && p.etiqueta_specs.length > 0 && (
+                            <button
+                              onClick={() => resetToWebSpecs(p.id)}
+                              disabled={savingSpecs}
+                              className="ml-auto text-xs font-semibold text-steel-400 hover:text-amber-700 disabled:opacity-50"
+                            >
+                              ↺ Usar las de la web
+                            </button>
+                          )}
                         </div>
                       </div>
                     ) : (

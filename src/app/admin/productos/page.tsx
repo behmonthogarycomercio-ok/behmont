@@ -315,7 +315,7 @@ async function EtiquetasTab() {
   for (let from = 0; ; from += ETIQUETAS_PAGE_SIZE) {
     const { data } = await supabase
       .from('products')
-      .select('id, sku, name, description, price, ml_item_id, specs, active, category:categories(name, cash_discount_pct), brand:brands(name)')
+      .select('id, sku, name, description, price, ml_item_id, specs, etiqueta_specs, active, category:categories(name, cash_discount_pct), brand:brands(name)')
       .eq('active', true)
       .order('name')
       .range(from, from + ETIQUETAS_PAGE_SIZE - 1);

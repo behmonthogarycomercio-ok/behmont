@@ -114,10 +114,13 @@ export async function upsertProduct(formData: FormData): Promise<ActionResult> {
   return {};
 }
 
-/** Edición rápida de specs desde /admin/etiquetas -- a diferencia de
- * upsertProduct, no toca nombre/precio/stock/slug, solo las características
- * que se imprimen en la etiqueta. */
-export async function updateProductSpecs(formData: FormData): Promise<ActionResult> {
+/** Edición rápida de las características que se imprimen en la etiqueta,
+ * desde /admin/productos > Etiquetas -- escribe en products.etiqueta_specs,
+ * NUNCA en products.specs (la ficha real que ve el público). Son
+ * independientes a propósito: editar/sacar una fila para que la etiqueta
+ * entre mejor no debe borrar esa característica de la web. Mandar un array
+ * vacío "resetea" la etiqueta para que vuelva a usar las specs reales. */
+export async function updateEtiquetaSpecs(formData: FormData): Promise<ActionResult> {
   const supabase = createServerSupabase();
   const id = formData.get('id') as string;
   const specsRaw = formData.get('specs') as string;
@@ -129,9 +132,8 @@ export async function updateProductSpecs(formData: FormData): Promise<ActionResu
     return { error: 'No se pudieron leer las características' };
   }
 
-  const result = await updateChecked(supabase, 'products', { specs }, 'id', id);
+  const result = await updateChecked(supabase, 'products', { etiqueta_specs: specs.length > 0 ? specs : null }, 'id', id);
   if (result.error) return result;
-  revalidatePath('/admin/productos');
   revalidatePath('/admin/productos');
   return {};
 }

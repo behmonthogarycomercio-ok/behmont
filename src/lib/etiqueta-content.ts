@@ -6,14 +6,24 @@ export type LabelProduct = {
   price: number;
   ml_item_id: string | null;
   specs: { label: string; value: string }[];
+  // Características editadas específicamente para la etiqueta impresa --
+  // null/vacío = usar las specs reales (p.specs). Independiente a propósito
+  // de la ficha pública: editar esto NUNCA toca products.specs.
+  etiqueta_specs: { label: string; value: string }[] | null;
   category: { name: string; cash_discount_pct: number | null } | null;
   brand: { name: string } | null;
 };
 
+/** Specs "efectivas" para la etiqueta: las editadas a mano para imprimir si
+ * existen, si no las reales del producto. */
+function effectiveSpecs(p: LabelProduct): { label: string; value: string }[] {
+  return p.etiqueta_specs && p.etiqueta_specs.length > 0 ? p.etiqueta_specs : p.specs;
+}
+
 /** Título grande de la etiqueta: marca real del producto, spec "Marca" si no está la relación, o la categoría como último respaldo. */
 export function getBrandName(p: LabelProduct): string | null {
   if (p.brand?.name) return p.brand.name;
-  const spec = p.specs.find((s) => s.label.trim().toLowerCase() === 'marca');
+  const spec = effectiveSpecs(p).find((s) => s.label.trim().toLowerCase() === 'marca');
   if (spec?.value) return spec.value;
   return p.category?.name || null;
 }
@@ -37,7 +47,7 @@ const LOW_PRIORITY_SPEC_LABELS = new Set(['condición del ítem']);
 
 /** Hasta 4 características, mostradas como texto plano en viñetas (sin "Label:" delante). */
 export function getSpecItems(p: LabelProduct): { label: string; value: string }[] {
-  const usable = p.specs.filter((s) => {
+  const usable = effectiveSpecs(p).filter((s) => {
     const label = s.label.trim().toLowerCase();
     return !EXCLUDED_SPEC_LABELS.has(label) && !NOISE_SPEC_PATTERNS.some((re) => re.test(label));
   });
@@ -47,7 +57,7 @@ export function getSpecItems(p: LabelProduct): { label: string; value: string }[
 }
 
 export function getDescriptionFallback(p: LabelProduct): string | null {
-  if (p.specs.length > 0 || !p.description) return null;
+  if (effectiveSpecs(p).length > 0 || !p.description) return null;
   const clean = p.description.replace(/\s+/g, ' ').trim();
   return clean.length > 160 ? clean.slice(0, 160) + '…' : clean;
 }
